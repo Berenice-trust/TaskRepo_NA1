@@ -11,6 +11,16 @@ app.use(express.static(path.join(__dirname, 'public'))); //где статиче
 
 const dataFilePath = path.join(__dirname, 'votes.json'); //данные с голосами
 
+//для чтения из файла
+function readDataFile() {
+    return JSON.parse(fs.readFileSync(dataFilePath));
+}
+
+//для записи в файл
+function writeDataFile(data) {
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+  }
+
 // Создаем файл, если его нет
 if (!fs.existsSync(dataFilePath)) {
   const initialData = {
@@ -77,12 +87,3 @@ app.listen(PORT, () => {
     console.log(`Server is running on http://5.187.3.57:${PORT}`);
 });
 
-//для чтения из файла
-function readDataFile() {
-    return JSON.parse(fs.readFileSync(dataFilePath));
-}
-
-//для записи в файл
-function writeDataFile(data) {
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
-  }
