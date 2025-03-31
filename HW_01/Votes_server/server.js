@@ -26,12 +26,13 @@ if (!fs.existsSync(dataFilePath)) {
     }
   };
     // Записываем в файл
-    fs.writeFileSync(dataFilePath, JSON.stringify(initialData, null, 2));
+    //fs.writeFileSync(dataFilePath, JSON.stringify(initialData, null, 2));
+    writeDataFile(initialData);
 }
 
 // GET /variants - варианты ответов
 app.get('/variants', (req, res) => {
-    const data = JSON.parse(fs.readFileSync(dataFilePath));
+    const data = readDataFile();
     res.json(data.variants);
 });
 
@@ -44,7 +45,7 @@ app.post('/vote', (req, res) => {
         return res.status(400).json({ error: 'No id specified' }); 
     }
 
-    const data = JSON.parse(fs.readFileSync(dataFilePath));
+    const data = readDataFile();
 
     //есть ли вариант ответа с id?
     if (!data.votes.hasOwnProperty(id)) {
@@ -54,7 +55,7 @@ app.post('/vote', (req, res) => {
     data.votes[id]++; //увеличиваем количество голосов
 
     //сохраняем изменения
-    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+    writeDataFile(data);
     res.json({success: true})
 
 
@@ -62,7 +63,7 @@ app.post('/vote', (req, res) => {
 
 // POST /stat - статистика
     app.post('/stat', (req, res) => {
-        const data = JSON.parse(fs.readFileSync(dataFilePath));
+        const data = readDataFile();
         res.json(data.votes);
 });
 
@@ -75,3 +76,13 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server is running on http://5.187.3.57:${PORT}`);
 });
+
+//для чтения из файла
+function readDataFile() {
+    return JSON.parse(fs.readFileSync(dataFilePath));
+}
+
+//для записи в файл
+function writeDataFile(data) {
+    fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+  }
