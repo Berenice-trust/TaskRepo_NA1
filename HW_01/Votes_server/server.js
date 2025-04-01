@@ -19,7 +19,7 @@ function readDataFile() {
 //для записи в файл
 function writeDataFile(data) {
     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
-  }
+}
 
 // Создаем файл, если его нет
 if (!fs.existsSync(dataFilePath)) {
