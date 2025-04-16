@@ -173,5 +173,5 @@ function validateForm(formData) {
 
 // старт на порте 3002
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Server running on http://5.187.3.57:${PORT}`);
 });
