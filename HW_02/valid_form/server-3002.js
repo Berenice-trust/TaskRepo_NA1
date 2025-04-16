@@ -2,30 +2,53 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
-const PORT = 3001;
+const PORT = 3002;
 
 app.use(express.static(__dirname));
 
-// GET / - пустая форма
+// Главная страница 
 app.get('/', (req, res) => {
-    sendForm(res);
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <meta charset="UTF-8">
+                <title>Главная страница</title>
+                <link rel="stylesheet" href="/styles.css">
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Добро пожаловать!</h1>
+                    <h2>Мы хотели бы узнать ваше мнение о котиках</h2>
+                    <a class="btn" href="/form" class="btn">Перейти к опросу</a>
+                </div>
+            </body>
+        </html>
+    `);
 });
 
-// GET /submit - отправка формы
-app.get('/submit', (req, res) => {
-    const formData = req.query; // или req.body
-    const errors = validateForm(formData); // вернет объект ошибок
+// Сама форма
+app.get('/form', (req, res) => {
+    const formData = req.query; // данные из URL
     
-    if (Object.keys(errors).length === 0) {
-        // если нет ошибок в массиве, то отправляем успешную карточку
-        sendSuccess(res, formData);
+    // Если параметров нет - первый вход 
+    if (Object.keys(formData).length === 0) {
+        sendForm(res);
     } else {
-        // если есть ошибки, то форму (с ошибками и старыми данными)
-        sendForm(res, formData, errors);
+        // Если есть параметры 
+        const errors = validateForm(formData); //ищем ошибки
+        
+        if (Object.keys(errors).length === 0) {
+            // если нет ошибок - успешная форма
+            sendSuccess(res, formData);
+        } else {
+            // если есть ошибки - форма с ошибками
+            sendForm(res, formData, errors);
+        }
     }
 });
 
-// Функция для отправки формы
+// функция отправки формы
 function sendForm(res, formData = {}, errors = {}) {
     res.send(`
         <!DOCTYPE html>
@@ -39,8 +62,10 @@ function sendForm(res, formData = {}, errors = {}) {
                 <div class="container">
                     <h1>Опрос: <h1>
                     <h2>что вы думаете о котиках?</h2>
+                    <h5>(для тех, кто старше 10 лет)</h5>
+
                     
-                    <form class="form" method="get" action="/submit">
+                    <form class="form" method="get" action="/form">
                         <div class="form-group">
                             <label for="name">Ваше имя:</label>
                             <input type="text" id="name" name="name" value="${formData.name || ''}">
@@ -61,13 +86,15 @@ function sendForm(res, formData = {}, errors = {}) {
                         
                         <button type="submit">Отправить</button>
                     </form>
+                    
+                    <p><a href="/">← Вернуться на главную</a></p>
                 </div>
             </body>
         </html>
     `);
 }
 
-// если форма успешно заполнена
+// функция успешной формы
 function sendSuccess(res, formData) {
     res.send(`
         <!DOCTYPE html>
@@ -98,18 +125,19 @@ function sendSuccess(res, formData) {
                         </div>
                     </div>
                     
-                    <a href="/">Отправить сообщение еще раз</a>
+                    <a class="btn" href="/form">Отправить сообщение еще раз</a>
+                    <p><a href="/">← Вернуться на главную</a></p>
                 </div>
             </body>
         </html>
     `);
 }
 
-// Валидация формы
+// Валидация
 function validateForm(formData) {
-    const errors = {};
+    const errors = {}; //сюда собираем ошибки
     
-    // Имя
+    // имя
     if (!formData.name || formData.name.trim() === '') {
         errors.name = "Пожалуйста, укажите ваше имя";
     } else {
@@ -121,7 +149,7 @@ function validateForm(formData) {
         }
     }
     
-    // Возраст
+    // возраст
     if (!formData.age || formData.age.trim() === '') {
         errors.age = "Укажите ваш возраст (число)";
     } else {
@@ -133,7 +161,7 @@ function validateForm(formData) {
         }
     }
     
-    // Проверка сообщения
+    // Сообщение
     if (!formData.message || formData.message.trim().length < 10) {
         errors.message = "Сообщение должно содержать минимум 10 символов";
     } else if (formData.message.length > 1000) {
@@ -143,7 +171,7 @@ function validateForm(formData) {
     return errors;
 }
 
-// Запускаем сервер на порту 3001
+// старт на порте 3002
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -22,9 +22,11 @@ h1 {
 }
 
 h2 {
+    display: block;  
     text-align: center;
-    color: #954485;
+    color: #6d295f;
     margin-bottom: 15px;
+    width: 100%;     
 }
 
 .form-group {
@@ -58,6 +60,7 @@ textarea {
 }
 
 button {
+    display: block;
     background-color: #954485;
     color: white;
     border: none;
@@ -68,8 +71,23 @@ button {
     width: 100%;
 }
 
-button:hover {
+.btn {
+    display: block;
+    background-color: #954485;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.2rem;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 90%;
+    text-decoration: none;
+}
+
+button:hover,
+.btn:hover {
     background-color: #5b2353;
+    text-decoration: none;
 }
 
 .error {
