@@ -1,6 +1,6 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f5f5;
+    background-color: rgb(174, 167, 167);
     margin: 0;
     padding: 20px;
     line-height: 1.6;
@@ -17,8 +17,14 @@ body {
 
 h1 {
     text-align: center;
-    color: #2c3e50;
+    color: #3a2636;
     margin-bottom: 25px;
+}
+
+h2 {
+    text-align: center;
+    color: #954485;
+    margin-bottom: 15px;
 }
 
 .form-group {
@@ -29,7 +35,7 @@ label {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #333;
+    color: #3a2636;
 }
 
 input, textarea {
@@ -37,8 +43,13 @@ input, textarea {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 16px;
+    font-size: 1.2rem;
     box-sizing: border-box;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #954485;
 }
 
 textarea {
@@ -47,18 +58,18 @@ textarea {
 }
 
 button {
-    background-color: #3498db;
+    background-color: #954485;
     color: white;
     border: none;
     padding: 12px 20px;
-    font-size: 16px;
+    font-size: 1.2rem;
     border-radius: 4px;
     cursor: pointer;
     width: 100%;
 }
 
 button:hover {
-    background-color: #2980b9;
+    background-color: #5b2353;
 }
 
 .error {
@@ -70,27 +81,18 @@ button:hover {
     border-left: 4px solid #c62828;
 }
 
-.error ul {
-    margin: 10px 0 0 20px;
-    padding: 0;
-}
-
-.error li {
-    margin-bottom: 5px;
-}
-
-.success {
-    background-color: #e8f5e9;
-    color: #2e7d32;
+.form-success {
+    background-color: #efd4ea;
+    color: #5b2353;
     padding: 20px;
     border-radius: 4px;
     margin-bottom: 20px;
-    border-left: 4px solid #2e7d32;
+    border-left: 4px solid #954485;
 }
 
 .data-item {
     padding: 12px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 2px solid #eee;
 }
 
 .data-item:last-child {
@@ -100,7 +102,7 @@ button:hover {
 .data-item strong {
     display: inline-block;
     width: 100px;
-    color: #34495e;
+    color: #2b3948;
 }
 
 .message-text {
@@ -109,7 +111,7 @@ button:hover {
     padding: 15px;
     background-color: #f9f9f9;
     border-radius: 4px;
-    border-left: 3px solid #ddd;
+    border-left: 3px solid #954485;
 }
 
 .field-error {
@@ -121,10 +123,13 @@ button:hover {
 }
 
 a {
-    display: inline-block;
-    margin-top: 20px;
-    color: #3498db;
+    display: block;
+    margin: 20px auto 0;
+    color: #2b3948;
     text-decoration: none;
+    font-size: 1.1rem;
+    text-align: center;
+    width: fit-content;
 }
 
 a:hover {

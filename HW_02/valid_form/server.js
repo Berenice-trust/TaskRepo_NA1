@@ -4,25 +4,23 @@ const path = require('path');
 const app = express();
 const PORT = 3001;
 
-// Статические файлы из текущей директории
 app.use(express.static(__dirname));
 
-// GET / - отправка формы
+// GET / - пустая форма
 app.get('/', (req, res) => {
-    // Отправляем пустую форму
     sendForm(res);
 });
 
-// GET /submit - обработка отправки формы
+// GET /submit - отправка формы
 app.get('/submit', (req, res) => {
-    const formData = req.query; // или req.body для POST
-    const errors = validateForm(formData);
+    const formData = req.query; // или req.body
+    const errors = validateForm(formData); // вернет объект ошибок
     
     if (Object.keys(errors).length === 0) {
-        // Если валидация успешна - показываем успешное сообщение
+        // если нет ошибок в массиве, то отправляем успешную карточку
         sendSuccess(res, formData);
     } else {
-        // Если есть ошибки - отправляем форму с ошибками
+        // если есть ошибки, то форму (с ошибками и старыми данными)
         sendForm(res, formData, errors);
     }
 });
@@ -32,99 +30,100 @@ function sendForm(res, formData = {}, errors = {}) {
     res.send(`
         <!DOCTYPE html>
         <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Опрос</title>
-            <link rel="stylesheet" href="/styles.css">
-        </head>
-        <body>
-            <div class="container">
-                <h1>Форма опроса</h1>
-                
-                <form method="get" action="/submit">
-                    <div class="form-group">
-                        <label for="name">Имя:</label>
-                        <input type="text" id="name" name="name" value="${formData.name || ''}">
-                        ${errors.name ? `<div class="field-error">${errors.name}</div>` : ''}
-                    </div>
+            <head>
+                <meta charset="UTF-8">
+                <title>Опрос для тех кто старше 10 лет:</title>
+                <link rel="stylesheet" href="/styles.css">
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Опрос: <h1>
+                    <h2>что вы думаете о котиках?</h2>
                     
-                    <div class="form-group">
-                        <label for="age">Возраст:</label>
-                        <input type="text" id="age" name="age" value="${formData.age || ''}">
-                        ${errors.age ? `<div class="field-error">${errors.age}</div>` : ''}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="message">Сообщение:</label>
-                        <textarea id="message" name="message">${formData.message || ''}</textarea>
-                        ${errors.message ? `<div class="field-error">${errors.message}</div>` : ''}
-                    </div>
-                    
-                    <button type="submit">Отправить</button>
-                </form>
-            </div>
-        </body>
+                    <form class="form" method="get" action="/submit">
+                        <div class="form-group">
+                            <label for="name">Ваше имя:</label>
+                            <input type="text" id="name" name="name" value="${formData.name || ''}">
+                            ${errors.name ? `<div class="field-error">${errors.name}</div>` : ''}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="age">Ваш возраст:</label>
+                            <input type="text" id="age" name="age" value="${formData.age || ''}">
+                            ${errors.age ? `<div class="field-error">${errors.age}</div>` : ''}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Мнение о котиках:</label>
+                            <textarea id="message" name="message">${formData.message || ''}</textarea>
+                            ${errors.message ? `<div class="field-error">${errors.message}</div>` : ''}
+                        </div>
+                        
+                        <button type="submit">Отправить</button>
+                    </form>
+                </div>
+            </body>
         </html>
     `);
 }
 
-// Функция для отправки успешного результата
+// если форма успешно заполнена
 function sendSuccess(res, formData) {
     res.send(`
         <!DOCTYPE html>
         <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>Ответ отправлен</title>
-            <link rel="stylesheet" href="/styles.css">
-        </head>
-        <body>
-            <div class="container">
-                <h1>Ваш ответ принят</h1>
-                
-                <div class="success">
-                    <h3>Данные формы:</h3>
+            <head>
+                <meta charset="UTF-8">
+                <title>Успешный ответ</title>
+                <link rel="stylesheet" href="/styles.css">
+            </head>
+            <body>
+                <div class="container">
+                    <h1>Спасибо за ваше мнение!</h1>
                     
-                    <div class="data-item">
-                        <strong>Имя:</strong> ${formData.name}
+                    <div class="form-success">
+                        <h3>Данные формы:</h3>
+                        
+                        <div class="data-item">
+                            <strong>Имя:</strong> ${formData.name}
+                        </div>
+                        
+                        <div class="data-item">
+                            <strong>Возраст:</strong> ${formData.age} лет
+                        </div>
+                        
+                        <div class="data-item message">
+                            <strong>Мнение:</strong> 
+                            <div class="message-text">${formData.message}</div>
+                        </div>
                     </div>
                     
-                    <div class="data-item">
-                        <strong>Возраст:</strong> ${formData.age} лет
-                    </div>
-                    
-                    <div class="data-item message">
-                        <strong>Сообщение:</strong> 
-                        <div class="message-text">${formData.message}</div>
-                    </div>
+                    <a href="/">Отправить сообщение еще раз</a>
                 </div>
-                
-                <a href="/">Отправить сообщение еще раз</a>
-            </div>
-        </body>
+            </body>
         </html>
     `);
 }
 
-// Проверка формы на корректность заполнения
+// Валидация формы
 function validateForm(formData) {
     const errors = {};
     
-    // Проверка имени
+    // Имя
     if (!formData.name || formData.name.trim() === '') {
         errors.name = "Пожалуйста, укажите ваше имя";
     } else {
         const name = formData.name.trim();
-        if (!/^[A-Za-zА-Яа-яЁё]+$/.test(name)) {
-            errors.name = "Имя должно содержать только буквы";
+        if (!/^[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё-]*[A-Za-zА-Яа-яЁё]$/.test(name)) {
+            errors.name = "Имя должно содержать только буквы и тире (-)";
         } else if (name.length < 3) {
-            errors.name = "Имя должно содержать минимум 3 буквы";
+            errors.name = "Имя должно содержать минимум 3 символа";
         }
     }
     
-    // Проверка возраста
+    // Возраст
     if (!formData.age || formData.age.trim() === '') {
-        errors.age = "Укажите ваш возраст";
+        errors.age = "Укажите ваш возраст (число)";
     } else {
         const age = parseInt(formData.age);
         if (isNaN(age)) {
@@ -144,7 +143,7 @@ function validateForm(formData) {
     return errors;
 }
 
-// Запускаем сервер
+// Запускаем сервер на порту 3001
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
