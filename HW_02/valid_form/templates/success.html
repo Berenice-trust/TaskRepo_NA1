@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Успешный ответ</title>
+        <link rel="stylesheet" href="/styles.css">
+    </head>
+    <body>
+        <div class="container">
+            <h1>Спасибо за ваше мнение!</h1>
+            
+            <div class="form-success">
+                <h3>Данные формы:</h3>
+                
+                <div class="data-item">
+                    <strong>Имя:</strong> $[name]
+                </div>
+                
+                <div class="data-item">
+                    <strong>Возраст:</strong> $[age] лет
+                </div>
+                
+                <div class="data-item message">
+                    <strong>Мнение:</strong> 
+                    <div class="message-text">$[message]</div>
+                </div>
+            </div>
+            
+            <a class="btn" href="/form">Отправить сообщение еще раз</a>
+            <p><a href="/">← Вернуться на главную</a></p>
+        </div>
+    </body>
+</html>

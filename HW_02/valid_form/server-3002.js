@@ -1,30 +1,22 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = 3002;
 
 app.use(express.static(__dirname));
 
+// Функция для загрузки файлов html
+function loadTemplate(templateName) {
+    const filePath = path.join(__dirname, 'templates', `${templateName}.html`);
+    return fs.readFileSync(filePath, 'utf8');
+}
+
 // Главная страница 
 app.get('/', (req, res) => {
-    res.send(`
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Главная страница</title>
-                <link rel="stylesheet" href="/styles.css">
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Добро пожаловать!</h1>
-                    <h2>Мы хотели бы узнать ваше мнение о котиках</h2>
-                    <a class="btn" href="/form" class="btn">Перейти к опросу</a>
-                </div>
-            </body>
-        </html>
-    `);
+    const template = loadTemplate('main');
+    res.send(template);
 });
 
 // Сама форма
@@ -50,87 +42,34 @@ app.get('/form', (req, res) => {
 
 // функция отправки формы
 function sendForm(res, formData = {}, errors = {}) {
-    res.send(`
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Опрос</title>
-                <link rel="stylesheet" href="/styles.css">
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Опрос: <h1>
-                    <h2>что вы думаете о котиках?</h2>
-                    <h5>(для тех, кто старше 10 лет)</h5>
-
-                    
-                    <form class="form" method="get" action="/form">
-                        <div class="form-group">
-                            <label for="name">Ваше имя:</label>
-                            <input type="text" id="name" name="name" value="${formData.name || ''}">
-                            ${errors.name ? `<div class="field-error">${errors.name}</div>` : ''}
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="age">Ваш возраст:</label>
-                            <input type="text" id="age" name="age" value="${formData.age || ''}">
-                            ${errors.age ? `<div class="field-error">${errors.age}</div>` : ''}
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="message">Мнение о котиках:</label>
-                            <textarea id="message" name="message">${formData.message || ''}</textarea>
-                            ${errors.message ? `<div class="field-error">${errors.message}</div>` : ''}
-                        </div>
-                        
-                        <button type="submit">Отправить</button>
-                    </form>
-                    
-                    <p><a href="/">← Вернуться на главную</a></p>
-                </div>
-            </body>
-        </html>
-    `);
+    let template = loadTemplate('form');
+    
+    // Значения полей с заменой
+    template = template.replace('$[name]', formData.name || '');
+    template = template.replace('$[age]', formData.age || '');
+    template = template.replace('$[message]', formData.message || '');
+    
+    // Ошибки с заменой
+    template = template.replace('$[nameError]', 
+        errors.name ? `<div class="field-error">${errors.name}</div>` : '');
+    template = template.replace('$[ageError]', 
+        errors.age ? `<div class="field-error">${errors.age}</div>` : '');
+    template = template.replace('$[messageError]', 
+        errors.message ? `<div class="field-error">${errors.message}</div>` : '');
+    
+    res.send(template);
 }
 
 // функция успешной формы
 function sendSuccess(res, formData) {
-    res.send(`
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <meta charset="UTF-8">
-                <title>Успешный ответ</title>
-                <link rel="stylesheet" href="/styles.css">
-            </head>
-            <body>
-                <div class="container">
-                    <h1>Спасибо за ваше мнение!</h1>
-                    
-                    <div class="form-success">
-                        <h3>Данные формы:</h3>
-                        
-                        <div class="data-item">
-                            <strong>Имя:</strong> ${formData.name}
-                        </div>
-                        
-                        <div class="data-item">
-                            <strong>Возраст:</strong> ${formData.age} лет
-                        </div>
-                        
-                        <div class="data-item message">
-                            <strong>Мнение:</strong> 
-                            <div class="message-text">${formData.message}</div>
-                        </div>
-                    </div>
-                    
-                    <a class="btn" href="/form">Отправить сообщение еще раз</a>
-                    <p><a href="/">← Вернуться на главную</a></p>
-                </div>
-            </body>
-        </html>
-    `);
+    let template = loadTemplate('success');
+    
+    // Значения полей
+    template = template.replace('$[name]', formData.name);
+    template = template.replace('$[age]', formData.age);
+    template = template.replace('$[message]', formData.message);
+    
+    res.send(template);
 }
 
 // Валидация
