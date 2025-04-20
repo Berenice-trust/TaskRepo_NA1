@@ -4,6 +4,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "dev": "nodemon server.js",
+    "update": "npm audit fix"
   },
   "keywords": [],
   "author": "",
@@ -11,5 +13,8 @@
   "description": "Voting system with data storage in a file",
   "dependencies": {
     "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
