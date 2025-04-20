@@ -44,3 +44,24 @@ button:hover {
     background: #f9f9f9;
     border-radius: 3px;
 }
+
+.download-btns {
+    /* margin-top: 20px; */
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.download-btns button {
+    margin: 5px;
+    background: white;
+    color: #45a049;
+}
+
+button:hover {
+    background: #28622b;
+    color: white;
+}

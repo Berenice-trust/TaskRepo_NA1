@@ -1,6 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
     loadVariants();
     loadResults();
+
+    //События нажатия на кнопки
+    document.getElementById("download-json-btn").addEventListener("click", 
+        () => downloadResults('json'));
+    
+    document.getElementById("download-html-btn").addEventListener("click", 
+        () => downloadResults('html'));
+    
+    document.getElementById("download-xml-btn").addEventListener("click", 
+        () => downloadResults('xml'));
 });
 
 //Варианты с сервера
@@ -78,5 +88,33 @@ async function loadResults() {
         });
     } catch (error) {
         console.error('Error with get stats:', error);
+    }
+}
+
+// Функция для скачивания файла
+function downloadBlob(data, fileName) {
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([data]));
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(link.href);
+}
+
+//функция для скачивания в разных форматах
+async function downloadResults(formatType) {
+    const format = {
+        json: { accept: "application/json", filename: "results.json" },
+        html: { accept: "text/html", filename: "results.html" },
+        xml: { accept: "application/xml", filename: "results.xml" },
+    };
+
+    try {
+        const response = await fetch("/download", {
+            headers: { 'Accept': format[formatType].accept }
+        });
+        const data = await response.text();
+        downloadBlob(data, format[formatType].filename);
+    } catch (error) {
+        console.error("Ошибка загрузки результатов:", error);
     }
 }
