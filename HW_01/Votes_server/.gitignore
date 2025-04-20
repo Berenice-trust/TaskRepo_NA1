@@ -4,3 +4,6 @@ node_modules/
 npm-debug.log*
 
 .DS_Store
+
+# Игнорируем файл с данными голосования
+votes.json
