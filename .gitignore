@@ -30,7 +30,6 @@ out
 .eslintcache
 .node_repl_history
 HW_01/Votes_server/votes.json
-HW_01/Votes_server/votes.json
-HW_01/Votes_server/votes.json
-HW_01/Votes_server/votes.json
-HW_01/Votes_server/votes.json
+
+# Ignore form submissions data
+form-submissions.json

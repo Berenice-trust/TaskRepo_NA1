@@ -32,7 +32,8 @@ const validationRules = [
         .trim()
         .notEmpty().withMessage('Пожалуйста, укажите ваше имя')
         .isLength({ min: 3 }).withMessage('Имя должно содержать минимум 3 символа')
-        .matches(/^[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё-]*[A-Za-zА-Яа-яЁё]$/).withMessage('Имя должно содержать только буквы и тире (-)'),
+        .matches(/^[A-Za-zА-Яа-яЁё][A-Za-zА-Яа-яЁё\s-]*[A-Za-zА-Яа-яЁё]$/)
+        .withMessage('Имя должно содержать только буквы, пробелы и тире (-)'),
     body('age')
         .trim()
         .notEmpty().withMessage('Укажите ваш возраст (число)')
@@ -75,6 +76,7 @@ app.post('/form', validationRules, (req, res) => {
         
         if (validationErrors.isEmpty()) {
             // если нет ошибок - успешная форма
+            saveFormDataToFile(formData); //сохраняем в файл
 
                                //редирект
             //формируем строку параметром для get
@@ -144,6 +146,38 @@ function sendSuccess(res, formData) {
     res.send(template);
 }
 
+
+// сохранение в файл
+function saveFormDataToFile(formData) {
+    const filePath = path.join(__dirname, 'form-submissions.json');
+    
+    let submissions = [];
+    
+    // Если файл существует
+    if (fs.existsSync(filePath)) {
+        try {
+            const fileContent = fs.readFileSync(filePath, 'utf8');
+            submissions = JSON.parse(fileContent);
+        } catch (error) {
+            console.error("Ошибка чтения файла:", error);
+        }
+    }
+    
+    // Добавляем новую запись с датой
+    submissions.push({
+        ...formData,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Записываем обновленные данные обратно в файл
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(submissions, null, 2), 'utf8');
+    } catch (error) {
+        console.error("Ошибка записи в файл:", error);
+    }
+}
+
+
 // Валидация через if
 // function validateForm(formData) {
 //     const errors = {}; //сюда собираем ошибки
@@ -183,6 +217,7 @@ function sendSuccess(res, formData) {
 // }
 
 // старт на порте 3001
+
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://5.187.3.57:${PORT}`);
 });
