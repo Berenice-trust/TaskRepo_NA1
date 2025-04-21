@@ -82,7 +82,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/download', (req, res) => {
+app.post('/download', (req, res) => {
     //читаем файл
     const data = readDataFile();
     const acceptHeader = req.headers.accept || '';
@@ -143,14 +143,14 @@ app.get('/download', (req, res) => {
         xml += '</votes>';
             
         res.setHeader('Content-Type', 'application/xml');
-        res.setHeader('Content-Disposition', 'attachment; filename=voting-results.xml');
+        res.setHeader('Content-Disposition', 'attachment; filename=results.xml');
         res.send(xml);
     } 
 
     else {
         // По умолчанию - JSON 
         res.setHeader('Content-Type', 'application/json');
-        res.setHeader('Content-Disposition', 'attachment; filename="votes.json"');
+        res.setHeader('Content-Disposition', 'attachment; filename="results.json"');
         res.send(JSON.stringify(data.votes, null, 2));
     }
 });

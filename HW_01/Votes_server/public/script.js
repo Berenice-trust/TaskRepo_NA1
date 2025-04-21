@@ -110,6 +110,7 @@ async function downloadResults(formatType) {
 
     try {
         const response = await fetch("/download", {
+            method: "POST",
             headers: { 'Accept': format[formatType].accept }
         });
         const data = await response.text();
