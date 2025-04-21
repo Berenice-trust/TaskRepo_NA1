@@ -42,7 +42,7 @@ const validationRules = [
         .isLength({ min: 10, max: 1000 }).withMessage('Сообщение должно содержать минимум 10 символов и не превышать 1000 символов')
 ];
 
-// Сама форма заполненная
+// Сама форма заполненная когда валидация через if
 // app.post('/form', (req, res) => {
 //     const formData = req.body; // данные из body
     
@@ -75,7 +75,18 @@ app.post('/form', validationRules, (req, res) => {
         
         if (validationErrors.isEmpty()) {
             // если нет ошибок - успешная форма
-            sendSuccess(res, formData);
+
+                               //редирект
+            //формируем строку параметром для get
+            const params = new URLSearchParams({
+                name: formData.name,
+                age: formData.age,
+                message: formData.message
+            }).toString();
+
+            res.redirect(302, `/success?${params}`); //перенаправление
+
+            //sendSuccess(res, formData);
         } else {
             // если есть ошибки - форма с ошибками
             const errors = {};
@@ -86,6 +97,20 @@ app.post('/form', validationRules, (req, res) => {
         }
     }
 });
+
+//для успешной формы
+app.get('/success', (req, res) => {
+
+    //получаем параметры из строки из запроса
+    const formData = {
+        name: req.query.name || '',
+        age: req.query.age || '',
+        message: req.query.message || ''
+    };
+
+    sendSuccess(res, formData); //отображаем успешную форму
+});
+
 
 // функция отправки формы
 function sendForm(res, formData = {}, errors = {}) {
@@ -119,7 +144,7 @@ function sendSuccess(res, formData) {
     res.send(template);
 }
 
-// Валидация
+// Валидация через if
 // function validateForm(formData) {
 //     const errors = {}; //сюда собираем ошибки
     
