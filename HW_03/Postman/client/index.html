@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Упрощенный Postman</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Сохраненные запросы -->
+        <div class="history-panel">
+            <h3>История запросов</h3>
+            <div class="history-list">
+                <div class="history-item get">
+                    <div>GET</div>
+                    <div>https://ad.tam.by/api/banner</div>
+                </div>
+                <div class="history-item post">
+                    <div>POST</div>
+                    <div>https://ib.adnxs.com/ut/v3/prebid</div>
+                </div>
+                <div class="history-item get">
+                    <div>GET</div>
+                    <div>https://cdn.onthe.io/io.js/c3cmgY3sDL59</div>
+                </div>
+                <div class="history-item get">
+                    <div>GET</div>
+                    <div>https://yandex.by/messenger/api/unread_count</div>
+                </div>
+                <div class="history-item post">
+                    <div>POST</div>
+                    <div>https://ps.ntvk1.ru/nv/?top_href=http%3A%2F%2Fnhl.ru%2F</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основная форма -->
+        <div class="main-panel">
+            <h2>Упрощенный Postman</h2>
+            
+            
+            <div class="request-form">
+               
+                <div class="method-url-row">
+                    <div class="method-container">
+                        <label for="method">Метод</label>
+                        <select id="method" class="method-select">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                            <option value="PATCH">PATCH</option>
+                        </select>
+                    </div>
+                    <div class="url-container">
+                        <label for="url">URL</label>
+                        <input type="text" id="url" class="url-input" value="https://petstore.swagger.io/v2/pet/1">
+                    </div>
+                </div>
+
+                <!-- Параметры -->
+                <div class="section">
+                    <h3>Параметры</h3>
+                    <div class="params-container">
+                        <div class="param-row">
+                            <input type="text" class="param-key" placeholder="Ключ">
+                            <input type="text" class="param-value" placeholder="Значение">
+                            <button type="button" class="remove-btn">Удалить</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-button add-param">Добавить параметр</button>
+                </div>
+
+                <!-- Заголовки -->
+                <div class="section">
+                    <h3>Заголовки</h3>
+                    <div class="headers-container">
+                        <!-- Будет добавляться динамически -->
+                    </div>
+                    <button type="button" class="add-button add-header">Добавить заголовок</button>
+                </div>
+
+                <!-- Тело запроса для POST/PUT -->
+                <div class="section body-section">
+                    <h3>Тело запроса</h3>
+                    <div class="content-type-row">
+                        <label for="contentType">Content-Type:</label>
+                        <select id="contentType" class="content-type-select">
+                            <option value="application/json">application/json</option>
+                            <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                            <option value="text/plain">text/plain</option>
+                        </select>
+                    </div>
+                    <textarea class="request-body" rows="6" placeholder="Введите тело запроса"></textarea>
+                </div>
+
+                <!-- Кнопки действий -->
+                <div class="buttons">
+                    <button type="button" class="btn save-btn">Сохранить запрос</button>
+                    <button type="button" class="btn send-btn">Отправить запрос</button>
+                    <button type="button" class="btn clear-btn">Очистить форму</button>
+                </div>
+            </div>
+
+            <!-- Секция ответа -->
+            <div class="response">
+                <h2>Ответ на запрос:</h2>
+                <div class="status-code">Статус ответа: <span>200</span></div>
+                
+                <div class="response-container">
+                    <div class="response-section">
+                        <h3>Заголовки ответа:</h3>
+                        <div class="response-content">
+                            <ul class="response-headers">
+                                <li>server: nginx/1.14.2</li>
+                                <li>date: Fri, 01 May 2024 07:11:47 GMT</li>
+                                <li>content-type: application/json; charset=utf-8</li>
+                                <li>content-length: 0</li>
+                                <li>connection: close</li>
+                                <li>access-control-allow-origin: *</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="response-section">
+                        <h3>Тело ответа:</h3>
+                        <div class="response-content">
+                            <pre class="response-body">{"id": 1, "name": "doggie", "status": "available"}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

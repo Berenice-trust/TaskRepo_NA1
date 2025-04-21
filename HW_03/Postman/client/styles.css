@@ -1,0 +1,324 @@
+:root {
+    /* Космические цвета */
+    --color-background: #0b0c1e;
+    --color-white: #ffffff;
+    --color-text: #e0e7ff;
+    --color-text-light: #a3aed0;
+    --color-border: #2b304d;
+    --color-panel: #171a33;
+    --color-panel-hover: #262a47;
+    
+    /* Космические цвета методов */
+    --color-get: #3f9abd;
+    --color-post: #7558f3;
+    --color-put: #753a6f;
+    --color-delete: #f36e6e;
+    
+    /* Кнопки */
+    --color-save: #7558f3;
+    --color-send: #3f9abd;
+    --color-clear: #753a6f;
+    --color-add: #3f9abd;
+    --color-remove: #f85c88;
+    
+    /* Размеры */
+    --size-base-padding: 10px;
+    --size-large-padding: 20px;
+    --size-border-radius: 4px;
+    --size-left-panel-width: 350px;
+    --size-form-gap: 8px;
+    --size-font: 14px;
+    --size-heading: 16px;
+    --size-max-height: 400px;
+    --size-form-max-width: 800px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-background);
+    line-height: 1.5;
+    font-size: var(--size-font);
+    color: var(--color-text);
+}
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Панель истории (слева) */
+.history-panel {
+    width: var(--size-left-panel-width);
+    background-color: var(--color-panel);
+    padding: var(--size-base-padding);
+    overflow-y: auto;
+}
+
+.history-panel h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.history-item {
+    padding: var(--size-base-padding);
+    margin-bottom: var(--size-form-gap);
+    border-radius: var(--size-border-radius);
+    color: var(--color-white);
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.history-item:hover {
+    opacity: 0.9;
+}
+
+.history-item div:first-child {
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.get {
+    background-color: var(--color-get);
+}
+
+.post {
+    background-color: var(--color-post);
+}
+
+/* Основная панель (справа) */
+.main-panel {
+    flex: 1;
+    padding: var(--size-large-padding);
+    overflow-y: auto;
+}
+
+/* Ограничение ширины форм */
+.request-form, .response {
+    max-width: var(--size-form-max-width);
+    width: 100%;
+  
+} 
+
+h2, h3 {
+    color: var(--color-text);
+    margin-top: 0;
+}
+
+h2 {
+    margin-bottom: var(--size-large-padding);
+    font-size: calc(var(--size-heading) + 4px);
+}
+
+h3 {
+    margin-bottom: 10px;
+    font-size: var(--size-heading);
+}
+
+/* Строка с методом и URL */
+.method-url-row {
+    display: flex;
+    margin-bottom: var(--size-large-padding);
+    gap: 15px;
+}
+
+.method-container {
+    width: 120px;
+}
+
+.url-container {
+    flex: 1;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--color-text-light);
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: var(--size-form-gap);
+    border: 1px solid var(--color-border);
+    border-radius: var(--size-border-radius);
+    font-size: var(--size-font);
+}
+
+/* Увеличение высоты селектов */
+select {
+    height: 34px; /* Увеличиваем высоту */
+}
+
+/* Дополнительно можно добавить стили для иконки выпадающего списка */
+select {
+    appearance: none; /* Убирает стандартную стрелку */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a3aed0' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+}
+
+textarea {
+    font-family: monospace;
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Content Type выбор */
+.content-type-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    max-width: 80%;
+}
+
+.content-type-row label {
+    margin: 0 10px 0 0;
+    min-width: 100px;
+}
+
+.content-type-row select {
+    flex: 1;
+}
+
+/* Секции параметров и заголовков */
+.section {
+    margin-bottom: var(--size-large-padding);
+}
+
+.param-row, .header-row {
+    display: flex;
+    margin-bottom: var(--size-form-gap);
+    gap: var(--size-base-padding);
+}
+
+.param-key, .param-value, .header-key, .header-value {
+    flex: 1;
+}
+
+.remove-btn {
+    background-color: transparent;
+    color: var(--color-remove);
+    border: none;
+    cursor: pointer;
+    padding: 0 var(--size-base-padding);
+}
+
+.add-button {
+    color: var(--color-add);
+    background: transparent;
+    border: none;
+    padding: var(--size-base-padding) 0;
+    cursor: pointer;
+    text-align: left;
+}
+
+/* Кнопки действий */
+.buttons {
+    display: flex;
+    gap: var(--size-base-padding);
+    margin-top: var(--size-large-padding);
+}
+
+.btn {
+    padding: var(--size-base-padding) calc(var(--size-base-padding) * 1.6);
+    color: white;
+    border: none;
+    border-radius: var(--size-border-radius);
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.save-btn { background-color: var(--color-save); }
+.send-btn { background-color: var(--color-send); }
+.clear-btn {
+    background-color: var(--color-clear);
+    color: var(--color-white);
+}
+
+/* Секция ответа */
+.response {
+    margin-top: 30px;
+    padding-top: var(--size-large-padding);
+    border-top: 1px solid var(--color-border);
+}
+
+.response h2 {
+    margin-bottom: 15px;
+}
+
+/* Контейнер для всего содержимого ответа */
+.response-container {
+    border: 1px solid var(--color-border);
+    border-radius: var(--size-border-radius);
+    overflow: hidden;
+}
+
+/* Секции заголовков и тела ответа */
+.response-section {
+    padding: 15px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.response-section:last-child {
+    border-bottom: none;
+}
+
+/* Контейнер для содержимого ответа */
+.response-content {
+    background-color: var(--color-panel);
+    border-radius: var(--size-border-radius);
+    max-height: var(--size-max-height);
+    overflow: auto;
+}
+
+/* Стиль для статус-кода */
+.status-code {
+    padding: var(--size-base-padding);
+    background-color: var(--color-panel);
+    border-radius: var(--size-border-radius);
+    margin-bottom: 15px;
+    border-left: 4px solid var(--color-send); 
+}
+
+.status-code span {
+    font-weight: bold;
+}
+
+/* Стили для заголовков ответа */
+.response-headers {
+    list-style-type: none;
+    padding: var(--size-base-padding);
+    margin: 0;
+    font-family: monospace;
+}
+
+.response-headers li {
+    margin-bottom: 5px;
+    font-family: monospace;
+}
+
+/* Стили для тела ответа */
+pre {
+    background-color: var(--color-panel);
+    padding: var(--size-base-padding);
+    border-radius: var(--size-border-radius);
+    overflow: auto;
+    font-family: monospace;
+    font-size: var(--size-font);
+    max-height: var(--size-max-height);
+    margin: 0;
+    white-space: pre-wrap;
+}
+
+.response-body {
+    padding: var(--size-base-padding);
+    margin: 0;
+}
