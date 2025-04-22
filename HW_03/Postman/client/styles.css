@@ -322,3 +322,7 @@ pre {
     padding: var(--size-base-padding);
     margin: 0;
 }
+
+.hidden {
+    display: none;
+}
