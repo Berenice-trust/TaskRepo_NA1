@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
         paramsContainer.appendChild(paramRow);
     }
 
+
     // добавление заголовка с подсказками
     function addHeader() {
         const headerRow = document.createElement('div');
@@ -88,51 +89,99 @@ document.addEventListener('DOMContentLoaded', function() {
         <input type="text" class="header-key" placeholder="Имя заголовка" list="common-headers">
         <input type="text" class="header-value" placeholder="Значение заголовка">
         <button type="button" class="remove-btn">Удалить</button>
-    `;
-        
-    const keyInput = headerRow.querySelector('.header-key');
-    const valueInput = headerRow.querySelector('.header-value');
-        
+        `;
+        const keyInput = headerRow.querySelector('.header-key');
+        const valueInput = headerRow.querySelector('.header-value');
 
-
-
-
-    
-    keyInput.addEventListener('change', function() {
-        const selectedFullHeader = this.value;
-        const options = headerRow.querySelectorAll('#common-headers option');
-        
-        for (const option of options) {
-            if (option.value === selectedFullHeader) {
-                // Разделяем заголовок и значение
-                if (option.dataset.key && option.dataset.value) {
-                    // Устанавливаем только имя заголовка без описания
-                    this.value = option.dataset.key;
-                    // Устанавливаем значение
-                    valueInput.value = option.dataset.value;
+        keyInput.addEventListener('change', function() {
+            const selectedFullHeader = this.value;
+            const options = headerRow.querySelectorAll('#common-headers option');
+            
+            for (const option of options) {
+                if (option.value === selectedFullHeader) {
+                    // отдельно ключ и значение
+                    if (option.dataset.key && option.dataset.value) {
+                        // устанавливаем имя заголовка
+                        this.value = option.dataset.key;
+                        // Устанавливаем значение
+                        valueInput.value = option.dataset.value;
+                    }
+                    break;
                 }
-                break;
             }
-        }
-    });
+        });
         
         // Добавляем обработчик удаления
         headerRow.querySelector('.remove-btn').addEventListener('click', function() {
             headerRow.remove();
         });
-        
+            
         headersContainer.appendChild(headerRow);
     }
 
-    // обработчик событий для кнопок
+    // обработчики для кнопок
     addParamBtn.addEventListener('click', addParam);
     addHeaderBtn.addEventListener('click', addHeader);
 
-    // Добавляем обработчики удаления для уже существующих строк
+    // удаления строк
     document.querySelectorAll('.param-row .remove-btn, .header-row .remove-btn').forEach(button => {
         button.addEventListener('click', function() {
             this.closest('.param-row, .header-row').remove();
         });
     });
-    
+
+
+                                          // ВАЛИДАЦИЯ
+    // отображаем ошибку
+    function showError(element, message) {
+        clearError(element);
+        element.classList.add('error-field');
+        
+        // Создаем сообщение об ошибке
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'error-message';
+        errorMessage.textContent = message;
+        
+        element.parentNode.insertBefore(errorMessage, element.nextSibling);
+    }
+
+    // очищаем ошибку
+    function clearError(element) {
+        element.classList.remove('error-field');
+        
+        const next = element.nextElementSibling;
+        if (next && next.classList.contains('error-message')) {
+            next.remove();
+        }
+    }
+
+    // Валидация при вводе URL
+    urlInput.addEventListener('input', function() {
+        if (this.value.trim() !== '') {
+            // Используем валидатор из глобального объекта
+            const result = validators.validateUrl(this.value);
+            if (!result.valid) {
+                showError(this, result.message);
+            } else {
+                clearError(this);
+            }
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Валидация при отправке запроса
+    sendBtn.addEventListener('click', function(e) {
+        // Проверяем URL перед отправкой
+        const result = validators.validateUrl(urlInput.value);
+        if (!result.valid) {
+            e.preventDefault(); // Останавливаем отправку
+            showError(urlInput, result.message);
+            return;
+        }
+        
+        // Продолжаем с отправкой запроса
+        console.log('URL валиден, отправка запроса');
+    });
+        
 });

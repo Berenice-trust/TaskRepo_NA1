@@ -20,6 +20,8 @@
     --color-clear: #753a6f;
     --color-add: #3f9abd;
     --color-remove: #f85c88;
+
+    --color-error: #e74c3c;
     
     /* Размеры */
     --size-base-padding: 10px;
@@ -325,4 +327,15 @@ pre {
 
 .hidden {
     display: none;
+}
+
+/* ошибки */
+.error-message {
+    color: var(--color-error);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.error-field {
+    border-color: var(--color-error);
 }

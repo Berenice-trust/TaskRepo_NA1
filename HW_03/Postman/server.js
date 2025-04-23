@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // для статических файлов
 app.use(express.static(path.join(__dirname, 'client')));
+app.use('/shared', express.static(path.join(__dirname, 'shared')));
 
 // Тест
 app.get('/api/test', (req, res) => {
@@ -24,3 +25,23 @@ app.get('/api/test', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Сервер запущен на http://5.187.3.57:${PORT}`);
 });
+
+
+
+
+// В начало файла добавить:
+// const { validateUrl } = require('./shared/validators');
+
+// Пример использования в обработчике:
+// app.post('/api/send-request', (req, res) => {
+//   const { url } = req.body;
+  
+//   // Валидация URL на сервере
+  // const validation = validateUrl(url);
+  // if (!validation.valid) {
+  //   return res.status(400).json({ error: validation.message });
+  // }
+  
+  // Если URL валиден, продолжаем обработку
+  // ...дальнейший код...
+// });
