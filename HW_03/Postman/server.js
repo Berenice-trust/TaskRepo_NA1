@@ -2,7 +2,12 @@ const express = require('express');
 const path = require('path');
 const fetch = require('node-fetch');
 const fs = require('fs');
-const { validateUrl } = require('./shared/validators');  // валидация полей
+const { 
+  validateUrl, 
+  validateKeyField, 
+  validateValueField, 
+  validateRequestBody 
+} = require('./shared/validators'); // модуль валидации
 
 // создаем сервер
 const cors = require('cors');
@@ -17,7 +22,58 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'client')));
 app.use('/shared', express.static(path.join(__dirname, 'shared'))); //общие файлы
 
-// прокси-сервер для обхода CORS
+
+                          
+
+
+                        // сохранение запроса
+                        function saveRequest(requestData) {
+                          const savedRequestsPath = path.join(__dirname, 'data', 'saved_requests.json');
+                        
+                          // Создаем папку data, если она не существует
+                          if (!fs.existsSync(path.join(__dirname, 'data'))) {
+                            fs.mkdirSync(path.join(__dirname, 'data'));
+                          }
+                        
+                          let savedRequests = [];
+                          try {
+                            if (fs.existsSync(savedRequestsPath)) {
+                              const data = fs.readFileSync(savedRequestsPath, 'utf8');
+                              savedRequests = JSON.parse(data);
+                            }
+                          } catch (error) {
+                            console.error('Ошибка чтения сохраненных запросов:', error);
+                          }
+                        
+                          // Добавляем запрос с уникальным ID
+                          const newRequest = {
+                            id: Date.now(),
+                            ...requestData,
+                            timestamp: new Date().toISOString()
+                          };
+                          
+                          // Добавляем в начало массива
+                          savedRequests.unshift(newRequest);
+                          
+                          // Записываем обновленный список
+                          try {
+                            fs.writeFileSync(savedRequestsPath, JSON.stringify(savedRequests, null, 2));
+                          } catch (error) {
+                            console.error('Ошибка записи сохраненных запросов:', error);
+                          }
+                        }
+
+
+
+
+
+
+
+
+
+
+
+                      // прокси для обхода CORS
 
 // .all - все запросы с точным ключом, с любыми методами
 // .use - запросы которые начинаются с ключа
@@ -32,6 +88,29 @@ app.all('/proxy', async (req, res) => {
       return res.status(400).json({ error: urlValidation.message });
     }
 
+
+
+
+// Валидация параметров запроса (???? может и не нужна)
+try {
+  const urlObj = new URL(targetUrl);
+  for (const [key, value] of urlObj.searchParams.entries()) {
+    const keyValidation = validateKeyField(key, 'param');
+    if (!keyValidation.valid) {
+      return res.status(400).json({ error: keyValidation.message });
+    }
+
+    const valueValidation = validateValueField(value, 'param');
+    if (!valueValidation.valid) {
+      return res.status(400).json({ error: valueValidation.message });
+    }
+  }
+} catch (error) {
+  // URL уже валидирован выше
+}
+
+
+
     console.log (`Запрос к ${targetUrl}`);
 
     //опции для запроса
@@ -40,20 +119,200 @@ app.all('/proxy', async (req, res) => {
       headers: {}
     };
 
+ // Валидация пользовательских заголовков (??? возможно не надо)
+ for (const [key, value] of Object.entries(req.headers)) {
+  // Проверяем только пользовательские заголовки
+  if (key.toLowerCase().startsWith('x-')) {
+    const keyValidation = validateKeyField(key, 'header');
+    if (!keyValidation.valid) {
+      return res.status(400).json({ error: keyValidation.message });
+    }
+
+    const valueValidation = validateValueField(value, 'header');
+    if (!valueValidation.valid) {
+      return res.status(400).json({ error: valueValidation.message });
+    }
+  }
+}
+
+
+
+
+    // Копируем заголовки из оригинального запроса
+    for (const [key, value] of Object.entries(req.headers)) {
+      // Исключаем специальные заголовки
+      if (!['host', 'origin', 'referer', 'content-length'].includes(key.toLowerCase())) {
+        options.headers[key] = value;
+      }
+    }
+    
+    // Добавляем тело для POST, PUT, PATCH
+    if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
+
+
+ // Валидация тела запроса (??? возможно не надо)
+ 
+ const contentType = req.headers['content-type'] || '';
+let bodyToValidate = '';
+ 
+if (typeof req.body === 'object') {
+  if (contentType.includes('application/x-www-form-urlencoded')) {
+    // Для данных формы конвертируем в правильный формат для валидации
+    bodyToValidate = new URLSearchParams(req.body).toString();
+  } else {
+    bodyToValidate = JSON.stringify(req.body);
+  }
+} else {
+  bodyToValidate = req.body.toString();
+}
+ 
+const bodyValidation = validateRequestBody(bodyToValidate, contentType);
+
+
+
+
+
+ if (!bodyValidation.valid) {
+   return res.status(400).json({ error: bodyValidation.message });
+ }
+
+
+
+ if (typeof req.body === 'object') {
+  // Для application/x-www-form-urlencoded
+  if (req.headers['content-type'] && 
+      req.headers['content-type'].includes('application/x-www-form-urlencoded')) {
+    // НЕ преобразуем в JSON, оставляем как строку
+    options.body = new URLSearchParams(req.body).toString();
+    console.log("Form data:", options.body);
+  } else {
+    // Для JSON и других форматов
+    options.body = JSON.stringify(req.body);
+  }
+  
+  // Сохраняем Content-Type из исходного запроса
+  if (req.headers['content-type']) {
+    options.headers['content-type'] = req.headers['content-type'];
+  }
+} else {
+  // Для других типов данных
+  options.body = req.body;
+}
+    }
+    
+    // Отправляем запрос к целевому API
+    const response = await fetch(targetUrl, options);
+    
+    // Копируем статус ответа
+    res.status(response.status);
+    
+    // Копируем заголовки ответа
+    for (const [key, value] of Object.entries(response.headers.raw())) {
+      if (key.toLowerCase() !== 'content-length') {
+        res.set(key, Array.isArray(value) ? value[0] : value);
+        // потому что швагер возвращает массив заголовков.
+      }
+    }
+    
+    // Разрешаем CORS для всех 
+    res.set('Access-Control-Allow-Origin', '*');
+    
+
+
+        // Получаем Content-Type из оригинального ответа
+    //const contentType = response.headers.get('content-type');
+
+    // Явно устанавливаем тот же Content-Type для ответа нашего сервера
+    // if (contentType) {
+    //   res.setHeader('Content-Type', contentType);
+    // }
+
+
+    
+// Попробуем обработать как текст для лучшей совместимости
+let responseBody;
+try {
+  responseBody = await response.text();
+} catch (err) {
+  // Если не получилось как текст, используем буфер
+  responseBody = await response.buffer();
+}
+
+// Явно устанавливаем Content-Type
+const contentType = response.headers.get('content-type');
+if (contentType) {
+  res.setHeader('Content-Type', contentType);
+}
+
+
+
+// Отправляем ответ клиенту
+res.send(responseBody);
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+  } catch (error) {
+    console.error('Ошибка прокси-сервера:', error);
+    res.status(500).json({ 
+      error: 'Ошибка прокси-сервера', 
+      message: error.message 
+    });
+
+
+
+
+
+
+
   }
 
 
 
 
 
-}
+});
 
 
 
+// API для получения сохраненных запросов
+app.get('/api/saved-requests', (req, res) => {
+  const savedRequestsPath = path.join(__dirname, 'data', 'saved_requests.json');
+  
+  try {
+    if (fs.existsSync(savedRequestsPath)) {
+      const data = fs.readFileSync(savedRequestsPath, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.json([]);
+    }
+  } catch (error) {
+    console.error('Ошибка чтения сохраненных запросов:', error);
+    res.status(500).json({ error: 'Не удалось получить сохраненные запросы' });
+  }
+});
 
 
-
-
+// API для сохранения запроса по кнопке
+app.post('/api/save-request', (req, res) => {
+  try {
+    saveRequest(req.body);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Ошибка сохранения запроса:', error);
+    res.status(500).json({ error: 'Не удалось сохранить запрос' });
+  }
+});
 
 
 
@@ -71,21 +330,3 @@ app.listen(PORT, () => {
 });
 
 
-
-
-// В начало файла добавить:
-// const { validateUrl } = require('./shared/validators');
-
-// Пример использования в обработчике:
-// app.post('/api/send-request', (req, res) => {
-//   const { url } = req.body;
-  
-//   // Валидация URL на сервере
-  // const validation = validateUrl(url);
-  // if (!validation.valid) {
-  //   return res.status(400).json({ error: validation.message });
-  // }
-  
-  // Если URL валиден, продолжаем обработку
-  // ...дальнейший код...
-// });

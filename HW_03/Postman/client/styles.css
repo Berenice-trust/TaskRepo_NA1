@@ -95,6 +95,18 @@ body {
     background-color: var(--color-post);
 }
 
+.put {
+    background-color: var(--color-put);
+}
+
+.patch {
+    background-color: var(--color-post);
+}
+
+.delete {
+    background-color: var(--color-delete);
+}
+
 /* Основная панель (справа) */
 .main-panel {
     flex: 1;

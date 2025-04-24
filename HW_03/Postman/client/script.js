@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <option value="User-Agent" data-key="User-Agent" data-value="PostmanClone/1.0">
             <option value="Cache-Control: no-cache" data-key="Cache-Control" data-value="no-cache">
             <option value="Cache-Control: max-age=0" data-key="Cache-Control" data-value="max-age=0">
+            <option value="api-key: special-key" data-key="api-key" data-value="special-key">
             <option value="Origin: http://5.187.3.57:3003" data-key="Origin" data-value="http://5.187.3.57:3003">
         </datalist>
         `;
@@ -231,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // Валидация тела запроса при изменении
-requestBody.addEventListener('input', function() {
+    requestBody.addEventListener('input', function() {
     if (bodySection.classList.contains('hidden')) {
       return; // Не валидируем, если тело скрыто
     }
@@ -244,10 +245,10 @@ requestBody.addEventListener('input', function() {
     } else {
       clearError(this);
     }
-  });
+    });
   
   // Обновляем валидацию при смене Content-Type
-  contentTypeSelect.addEventListener('change', function() {
+    contentTypeSelect.addEventListener('change', function() {
     // Только если есть текст в поле тела запроса
     if (requestBody.value.trim() !== '') {
       const result = validators.validateRequestBody(requestBody.value, this.value);
@@ -257,74 +258,74 @@ requestBody.addEventListener('input', function() {
         clearError(requestBody);
       }
     }
-  });
+    });
 
-    // Валидация при отправке запроса
-    sendBtn.addEventListener('click', function(e) {
-        //проверяем url
-        const result = validators.validateUrl(urlInput.value);
-        if (!result.valid) {
-            e.preventDefault(); // Останавливаем отправку
-            showError(urlInput, result.message);
-            return;
-        }
+    // Нажатие кнопки отправить
+    sendBtn.addEventListener('click', async function(e) {
+            //проверяем url
+            const result = validators.validateUrl(urlInput.value);
+            if (!result.valid) {
+                e.preventDefault(); // Останавливаем отправку
+                showError(urlInput, result.message);
+                return;
+            }
 
-         // Проверка параметров
-    let allValid = true;
-    
-    // Проверяем ключи параметров
-    document.querySelectorAll('.param-row .param-key').forEach(input => {
-        if (input.value.trim() !== '') {
-            const result = validators.validateKeyField(input.value, 'param');
+            // Проверка параметров
+        let allValid = true;
+        
+        // Проверяем ключи параметров
+        document.querySelectorAll('.param-row .param-key').forEach(input => {
+            if (input.value.trim() !== '') {
+                const result = validators.validateKeyField(input.value, 'param');
+                if (!result.valid) {
+                    showError(input, result.message);
+                    allValid = false;
+                }
+            }
+        });
+        
+        // Проверяем ключи заголовков
+        document.querySelectorAll('.header-row .header-key').forEach(input => {
+            if (input.value.trim() !== '') {
+                const result = validators.validateKeyField(input.value, 'header');
+                if (!result.valid) {
+                    showError(input, result.message);
+                    allValid = false;
+                }
+            }
+        });
+
+        // Проверяем значения параметров
+        document.querySelectorAll('.param-row .param-value').forEach(input => {
+            const result = validators.validateValueField(input.value, 'param');
             if (!result.valid) {
                 showError(input, result.message);
                 allValid = false;
             }
-        }
-    });
-    
-    // Проверяем ключи заголовков
-    document.querySelectorAll('.header-row .header-key').forEach(input => {
-        if (input.value.trim() !== '') {
-            const result = validators.validateKeyField(input.value, 'header');
+        });
+
+        // Проверяем значения заголовков
+        document.querySelectorAll('.header-row .header-value').forEach(input => {
+            const result = validators.validateValueField(input.value, 'header');
             if (!result.valid) {
                 showError(input, result.message);
                 allValid = false;
             }
+        });
+
+
+
+    // Проверка тела запроса
+    if (!bodySection.classList.contains('hidden')) {
+        const contentType = contentTypeSelect.value;
+        const bodyResult = validators.validateRequestBody(requestBody.value, contentType);
+        
+        if (!bodyResult.valid) {
+        e.preventDefault();
+        showError(requestBody, bodyResult.message);
+        allValid = false;
         }
-    });
-
-    // Проверяем значения параметров
-    document.querySelectorAll('.param-row .param-value').forEach(input => {
-        const result = validators.validateValueField(input.value, 'param');
-        if (!result.valid) {
-            showError(input, result.message);
-            allValid = false;
-        }
-    });
-
-    // Проверяем значения заголовков
-    document.querySelectorAll('.header-row .header-value').forEach(input => {
-        const result = validators.validateValueField(input.value, 'header');
-        if (!result.valid) {
-            showError(input, result.message);
-            allValid = false;
-        }
-    });
-
-
-
- // Проверка тела запроса
- if (!bodySection.classList.contains('hidden')) {
-    const contentType = contentTypeSelect.value;
-    const bodyResult = validators.validateRequestBody(requestBody.value, contentType);
-    
-    if (!bodyResult.valid) {
-      e.preventDefault();
-      showError(requestBody, bodyResult.message);
-      allValid = false;
     }
-  }
 
 
 
@@ -335,15 +336,290 @@ requestBody.addEventListener('input', function() {
         e.preventDefault();
         return;
     }
-
-
-
-
+    
+    // Реальная отправка запроса
+    try {
+        // Показываем индикатор загрузки
+        sendBtn.textContent = 'Отправляем...';
+        sendBtn.disabled = true;
         
-        // запрос отправлен
-        console.log('Все поля валидны, отправка запроса');
+        // 1. Получаем URL и добавляем параметры
+        let url = urlInput.value;
+        const method = methodSelect.value;
+        
+        // Собираем параметры из формы
+        const urlObj = new URL(url);
+        document.querySelectorAll('.param-row').forEach(row => {
+            const key = row.querySelector('.param-key').value.trim();
+            const value = row.querySelector('.param-value').value.trim();
+            if (key) {
+                urlObj.searchParams.set(key, value);
+            }
+        });
+        
+        // 2. Собираем заголовки
+        const headers = {};
+        document.querySelectorAll('.header-row').forEach(row => {
+            const key = row.querySelector('.header-key').value.trim();
+            const value = row.querySelector('.header-value').value.trim();
+            if (key) {
+                headers[key] = value;
+            }
+        });
+        
+        // 3. Готовим тело запроса (если применимо)
+        let body = null;
+        if (!bodySection.classList.contains('hidden') && requestBody.value.trim()) {
+            body = requestBody.value;
+            
+            // Если это JSON, проверяем и форматируем
+            if (contentTypeSelect.value === 'application/json') {
+                try {
+                    body = JSON.stringify(JSON.parse(body));
+                } catch (e) {
+                    // Уже проверено валидацией, оставляем как есть
+                }
+            } else if (contentTypeSelect.value === 'application/x-www-form-urlencoded') {
+                // Проверка формата и преобразование
+                if (!body.includes('=')) {
+                    try {
+                        // Если это JSON, преобразуем в формат формы
+                        const jsonData = JSON.parse(body);
+                        const params = new URLSearchParams();
+                        for (const key in jsonData) {
+                            params.append(key, jsonData[key]);
+                        }
+                        body = params.toString();
+                    } catch (e) {
+                        // Если не JSON, просто оставляем как есть
+                        
+                    
+                    }
+                }
+    
+}
+
+
+
+            
+            // Добавляем Content-Type, если его не установили вручную
+            if (!headers['Content-Type']) {
+                headers['Content-Type'] = contentTypeSelect.value;
+            }
+        }
+        
+        // 4. Отправляем запрос через наш прокси-сервер
+        const proxyUrl = `/proxy?url=${encodeURIComponent(urlObj.toString())}`;
+        
+        const options = {
+            method: method,
+            headers: headers,
+            body: body && ['GET', 'HEAD'].includes(method) ? null : body
+        };
+        
+        // 5. Отправляем запрос
+        const response = await fetch(proxyUrl, options);
+        
+        // 6. Получаем текст ответа
+        const responseData = await response.text();
+        
+        // 7. Отображаем результат
+        responseSection.classList.remove('hidden');
+        
+        // Статус код
+        statusCodeElement.textContent = response.status;
+        statusCodeElement.className = '';
+        statusCodeElement.classList.add(`status-${Math.floor(response.status/100)}xx`);
+        
+        // Заголовки
+        responseHeadersList.innerHTML = '';
+        for (const [key, value] of response.headers.entries()) {
+            const li = document.createElement('li');
+            li.textContent = `${key}: ${value}`;
+            responseHeadersList.appendChild(li);
+        }
+        
+        // Тело ответа
+        responseBodyElement.textContent = responseData;
+        
+        // Пытаемся отформатировать JSON
+        try {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const jsonData = JSON.parse(responseData);
+                responseBodyElement.textContent = JSON.stringify(jsonData, null, 2);
+            }
+        } catch (e) {
+            // Если не JSON, оставляем как есть
+        }
+        
+        
+        
+    } catch (error) {
+        console.error('Ошибка отправки запроса:', error);
+        // Показываем ошибку пользователю
+        responseSection.classList.remove('hidden');
+        statusCodeElement.textContent = 'Error';
+        statusCodeElement.className = 'error';
+        responseBodyElement.textContent = `Ошибка: ${error.message}`;
+    } finally {
+        // В любом случае восстанавливаем кнопку
+        sendBtn.textContent = 'Отправить запрос';
+        sendBtn.disabled = false;
+    }
     });
         
+
+// Добавить обработчик для кнопки сохранения
+saveBtn.addEventListener('click', async function() {
+    // Собираем данные запроса
+    const requestData = {
+        method: methodSelect.value,
+        url: urlInput.value,
+        params: [],
+        headers: [],
+        body: bodySection.classList.contains('hidden') ? '' : requestBody.value,
+        contentType: contentTypeSelect.value
+    };
+    
+    // Собираем параметры
+    document.querySelectorAll('.param-row').forEach(row => {
+        const key = row.querySelector('.param-key').value.trim();
+        const value = row.querySelector('.param-value').value.trim();
+        if (key) {
+            requestData.params.push({ key, value });
+        }
+    });
+    
+    // Собираем заголовки
+    document.querySelectorAll('.header-row').forEach(row => {
+        const key = row.querySelector('.header-key').value.trim();
+        const value = row.querySelector('.header-value').value.trim();
+        if (key) {
+            requestData.headers.push({ key, value });
+        }
+    });
+    
+    try {
+        const response = await fetch('/api/save-request', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        if (response.ok) {
+            alert('Запрос сохранен');
+            // Обновляем список сохраненных запросов
+           
+        } else {
+            alert('Ошибка при сохранении запроса');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        alert('Ошибка при сохранении запроса');
+    }
+});
+
+// Заменить функцию loadRequestHistory на loadSavedRequests
+async function loadSavedRequests() {
+    try {
+        const response = await fetch('/api/saved-requests');
+        if (response.ok) {
+            const savedRequests = await response.json();
+            const historyContainer = document.querySelector('.history-list');
+            
+            // Очищаем существующие элементы
+            historyContainer.innerHTML = '';
+            
+            // Добавляем новые
+            savedRequests.forEach(request => {
+                const historyItem = document.createElement('div');
+                historyItem.className = `history-item ${request.method.toLowerCase()}`;
+                
+                historyItem.innerHTML = `
+                    <div>${request.method}</div>
+                    <div>${request.url}</div>
+                `;
+                
+                // Добавляем обработчик клика для загрузки запроса
+                historyItem.addEventListener('click', function() {
+                    loadSavedRequest(request);
+                });
+                
+                historyContainer.appendChild(historyItem);
+            });
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки сохраненных запросов:', error);
+    }
+}
+
+// Заменить функцию loadRequestFromHistory на loadSavedRequest
+function loadSavedRequest(request) {
+    // Заполняем метод и URL
+    methodSelect.value = request.method;
+    urlInput.value = request.url;
+    
+    // Очищаем существующие параметры
+    document.querySelectorAll('.param-row').forEach(row => {
+        if (row !== paramsContainer.firstElementChild) {
+            row.remove();
+        } else {
+            row.querySelector('.param-key').value = '';
+            row.querySelector('.param-value').value = '';
+        }
+    });
+    
+    // Добавляем параметры из сохраненного запроса
+    if (request.params && request.params.length > 0) {
+        const firstParam = request.params[0];
+        const firstRow = paramsContainer.querySelector('.param-row');
+        firstRow.querySelector('.param-key').value = firstParam.key;
+        firstRow.querySelector('.param-value').value = firstParam.value;
+        
+        // Добавляем остальные параметры
+        for (let i = 1; i < request.params.length; i++) {
+            addParam();
+            const rows = paramsContainer.querySelectorAll('.param-row');
+            const lastRow = rows[rows.length - 1];
+            lastRow.querySelector('.param-key').value = request.params[i].key;
+            lastRow.querySelector('.param-value').value = request.params[i].value;
+        }
+    }
+    
+    // Очищаем существующие заголовки
+    document.querySelectorAll('.header-row').forEach(row => {
+        row.remove();
+    });
+    
+    // Добавляем заголовки из сохраненного запроса
+    if (request.headers && request.headers.length > 0) {
+        request.headers.forEach(header => {
+            addHeader();
+            const rows = headersContainer.querySelectorAll('.header-row');
+            const lastRow = rows[rows.length - 1];
+            lastRow.querySelector('.header-key').value = header.key;
+            lastRow.querySelector('.header-value').value = header.value;
+        });
+    }
+    
+    // Устанавливаем тело запроса
+    requestBody.value = request.body || '';
+    
+    // Устанавливаем Content-Type
+    if (request.contentType) {
+        contentTypeSelect.value = request.contentType;
+    }
+    
+    // Обновляем видимость тела запроса
+    toggleRequestBodyVisibility();
+}
+
+
+
+
 
 
     // инициализация для существующего в дом параметра
@@ -364,4 +640,52 @@ requestBody.addEventListener('input', function() {
             });
         }
     });
+
+
+
+
+
+
+// Загружаем сохраненные запросы при загрузке страницы
+loadSavedRequests();
+
+// Добавьте обработчик для кнопки очистки формы
+clearBtn.addEventListener('click', function() {
+    // Сбрасываем URL и метод
+    urlInput.value = '';
+    methodSelect.value = 'GET';
+    
+    // Удаляем все параметры
+    document.querySelectorAll('.param-row').forEach(row => {
+        if (row !== paramsContainer.firstElementChild) {
+            row.remove();
+        } else {
+            row.querySelector('.param-key').value = '';
+            row.querySelector('.param-value').value = '';
+        }
+    });
+    
+    // Удаляем все заголовки
+    document.querySelectorAll('.header-row').forEach(row => {
+        row.remove();
+    });
+    
+    // Очищаем тело запроса
+    requestBody.value = '';
+    
+    // Сбрасываем Content-Type
+    contentTypeSelect.value = 'application/json';
+    
+    // Скрываем секцию ответа
+    responseSection.classList.add('hidden');
+    
+    // Обновляем видимость тела запроса
+    toggleRequestBodyVisibility();
+    
+    // Очищаем все ошибки
+    document.querySelectorAll('.error-field').forEach(field => {
+        clearError(field);
+    });
+});
+
 });

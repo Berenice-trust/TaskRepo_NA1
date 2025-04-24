@@ -32,6 +32,14 @@ function validateKeyField(key, fieldType = 'param') {
           'Имя заголовка не может быть пустым'
       };
     }
+
+     // Для заголовков: преобразуем ключ перед проверкой
+     if (fieldType === 'header') {
+        // Если содержит двоеточие, берём только часть до первого двоеточия
+        if (key.includes(':')) {
+          key = key.split(':')[0].trim();
+        }
+      }
     
     const keyPattern = /^[a-zA-Z0-9_-]+$/;
     if (!keyPattern.test(key)) {
@@ -66,7 +74,7 @@ function validateRequestBody(body, contentType) {
       return { valid: true };
     }
     
-    // Валидация JSON
+   // Валидация JSON
     if (contentType.includes('application/json')) {
       try {
         JSON.parse(body);
@@ -78,27 +86,23 @@ function validateRequestBody(body, contentType) {
         };
       }
     }
+
+
+    
     
     // Валидация x-www-form-urlencoded
-    if (contentType.includes('application/x-www-form-urlencoded')) {
-      try {
-        const pairs = body.split('&');
-        for (let pair of pairs) {
-          if (!pair.includes('=')) {
-            return {
-              valid: false,
-              message: 'Формат должен быть key=value&key2=value2'
-            };
-          }
-        }
-        return { valid: true };
-      } catch (e) {
-        return {
-          valid: false,
-          message: 'Некорректный формат данных формы'
-        };
-      }
+     // Специальная обработка для формы
+  if (contentType.includes('application/x-www-form-urlencoded')) {
+    // Базовая проверка формата key=value&key2=value2
+    if (body.includes('=')) {
+      return { valid: true };
+    } else {
+      return {
+        valid: false,
+        message: 'Формат должен быть key=value&key2=value2'
+      };
     }
+  }
     
     // Для других типов контента пока не делаем специальной валидации
     return { valid: true };
@@ -116,7 +120,7 @@ function validateRequestBody(body, contentType) {
         };
     }
   
-    // Для Node.js
+    // Для сервера
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = { 
             validateUrl, 
