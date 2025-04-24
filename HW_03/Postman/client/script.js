@@ -55,7 +55,34 @@ document.addEventListener('DOMContentLoaded', function() {
         paramRow.querySelector('.remove-btn').addEventListener('click', function() {
             paramRow.remove();
         });
-        
+
+         // Валидация ключа параметра
+        const keyInput = paramRow.querySelector('.param-key');
+        keyInput.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                const result = validators.validateKeyField(this.value, 'param');
+                if (!result.valid) {
+                    showError(this, result.message);
+                } else {
+                    clearError(this);
+                }
+            } else {
+                clearError(this);
+            }
+        });
+
+         // Валидация значения параметра (хоть там особо ничего не валидируется,
+         // проверяется на null и undefined)    
+        const valueInput = paramRow.querySelector('.param-value');
+        valueInput.addEventListener('input', function() {
+            const result = validators.validateValueField(this.value, 'param');
+            if (!result.valid) {
+                showError(this, result.message);
+            } else {
+                clearError(this);
+            }
+        });
+
         paramsContainer.appendChild(paramRow);
     }
 
@@ -110,6 +137,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+
+        keyInput.addEventListener('input', function() {
+            if (this.value.trim() !== '') {
+                const result = validators.validateKeyField(this.value, 'header');
+                if (!result.valid) {
+                    showError(this, result.message);
+                } else {
+                    clearError(this);
+                }
+            } else {
+                clearError(this);
+            }
+        });
+
+         // Добавляем валидацию значения заголовка
+    valueInput.addEventListener('input', function() {
+        const result = validators.validateValueField(this.value, 'header');
+        if (!result.valid) {
+            showError(this, result.message);
+        } else {
+            clearError(this);
+        }
+    });
         
         // Добавляем обработчик удаления
         headerRow.querySelector('.remove-btn').addEventListener('click', function() {
@@ -137,28 +187,37 @@ document.addEventListener('DOMContentLoaded', function() {
         clearError(element);
         element.classList.add('error-field');
         
+        // Создаем контейнер для ошибки
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'input-error-container';
+        
         // Создаем сообщение об ошибке
         const errorMessage = document.createElement('div');
         errorMessage.className = 'error-message';
         errorMessage.textContent = message;
         
-        element.parentNode.insertBefore(errorMessage, element.nextSibling);
+        // Вкладываем сообщение в контейнер
+        errorContainer.appendChild(errorMessage);
+        
+        // Вставляем после всей строки параметра/заголовка
+        const row = element.closest('.param-row, .header-row') || element.parentNode;
+        row.appendChild(errorContainer);
     }
 
     // очищаем ошибку
     function clearError(element) {
         element.classList.remove('error-field');
-        
-        const next = element.nextElementSibling;
-        if (next && next.classList.contains('error-message')) {
-            next.remove();
-        }
+    
+    const row = element.closest('.param-row, .header-row') || element.parentNode;
+    const errorContainer = row.querySelector('.input-error-container');
+    if (errorContainer) {
+        errorContainer.remove();
+    }
     }
 
     // Валидация при вводе URL
     urlInput.addEventListener('input', function() {
         if (this.value.trim() !== '') {
-            // Используем валидатор из глобального объекта
             const result = validators.validateUrl(this.value);
             if (!result.valid) {
                 showError(this, result.message);
@@ -170,18 +229,139 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+
+// Валидация тела запроса при изменении
+requestBody.addEventListener('input', function() {
+    if (bodySection.classList.contains('hidden')) {
+      return; // Не валидируем, если тело скрыто
+    }
+    
+    const contentType = contentTypeSelect.value;
+    const result = validators.validateRequestBody(this.value, contentType);
+    
+    if (!result.valid) {
+      showError(this, result.message);
+    } else {
+      clearError(this);
+    }
+  });
+  
+  // Обновляем валидацию при смене Content-Type
+  contentTypeSelect.addEventListener('change', function() {
+    // Только если есть текст в поле тела запроса
+    if (requestBody.value.trim() !== '') {
+      const result = validators.validateRequestBody(requestBody.value, this.value);
+      if (!result.valid) {
+        showError(requestBody, result.message);
+      } else {
+        clearError(requestBody);
+      }
+    }
+  });
+
     // Валидация при отправке запроса
     sendBtn.addEventListener('click', function(e) {
-        // Проверяем URL перед отправкой
+        //проверяем url
         const result = validators.validateUrl(urlInput.value);
         if (!result.valid) {
             e.preventDefault(); // Останавливаем отправку
             showError(urlInput, result.message);
             return;
         }
+
+         // Проверка параметров
+    let allValid = true;
+    
+    // Проверяем ключи параметров
+    document.querySelectorAll('.param-row .param-key').forEach(input => {
+        if (input.value.trim() !== '') {
+            const result = validators.validateKeyField(input.value, 'param');
+            if (!result.valid) {
+                showError(input, result.message);
+                allValid = false;
+            }
+        }
+    });
+    
+    // Проверяем ключи заголовков
+    document.querySelectorAll('.header-row .header-key').forEach(input => {
+        if (input.value.trim() !== '') {
+            const result = validators.validateKeyField(input.value, 'header');
+            if (!result.valid) {
+                showError(input, result.message);
+                allValid = false;
+            }
+        }
+    });
+
+    // Проверяем значения параметров
+    document.querySelectorAll('.param-row .param-value').forEach(input => {
+        const result = validators.validateValueField(input.value, 'param');
+        if (!result.valid) {
+            showError(input, result.message);
+            allValid = false;
+        }
+    });
+
+    // Проверяем значения заголовков
+    document.querySelectorAll('.header-row .header-value').forEach(input => {
+        const result = validators.validateValueField(input.value, 'header');
+        if (!result.valid) {
+            showError(input, result.message);
+            allValid = false;
+        }
+    });
+
+
+
+ // Проверка тела запроса
+ if (!bodySection.classList.contains('hidden')) {
+    const contentType = contentTypeSelect.value;
+    const bodyResult = validators.validateRequestBody(requestBody.value, contentType);
+    
+    if (!bodyResult.valid) {
+      e.preventDefault();
+      showError(requestBody, bodyResult.message);
+      allValid = false;
+    }
+  }
+
+
+
+
+
+
+    if (!allValid) {
+        e.preventDefault();
+        return;
+    }
+
+
+
+
         
-        // Продолжаем с отправкой запроса
-        console.log('URL валиден, отправка запроса');
+        // запрос отправлен
+        console.log('Все поля валидны, отправка запроса');
     });
         
+
+
+    // инициализация для существующего в дом параметра
+    document.querySelectorAll('.param-row').forEach(paramRow => {
+        const keyInput = paramRow.querySelector('.param-key');
+        if (keyInput) {
+            keyInput.addEventListener('input', function() {
+                if (this.value.trim() !== '') {
+                    const result = validators.validateKeyField(this.value, 'param');
+                    if (!result.valid) {
+                        showError(this, result.message);
+                    } else {
+                        clearError(this);
+                    }
+                } else {
+                    clearError(this);
+                }
+            });
+        }
+    });
 });

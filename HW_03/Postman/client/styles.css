@@ -330,7 +330,7 @@ pre {
 }
 
 /* ошибки */
-.error-message {
+/* .error-message {
     color: var(--color-error);
     font-size: 12px;
     margin-top: 4px;
@@ -338,4 +338,35 @@ pre {
 
 .error-field {
     border-color: var(--color-error);
+} */
+ 
+.error-message {
+    color: var(--color-error);
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+    width: 100%;
+}
+
+.param-row, .header-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.param-row input, .header-row input {
+    flex: 1;
+    margin-right: 5px;
+}
+
+.remove-btn {
+    flex: 0 0 auto;
+}
+
+.input-error-container {
+    width: 100%;
+    order: 3;
+    margin-top: 4px;
 }
