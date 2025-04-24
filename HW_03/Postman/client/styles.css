@@ -1,5 +1,4 @@
 :root {
-    /* Космические цвета */
     --color-background: #0b0c1e;
     --color-white: #ffffff;
     --color-text: #e0e7ff;
@@ -8,13 +7,11 @@
     --color-panel: #171a33;
     --color-panel-hover: #262a47;
     
-    /* Космические цвета методов */
     --color-get: #3f9abd;
     --color-post: #7558f3;
     --color-put: #753a6f;
     --color-delete: #f36e6e;
     
-    /* Кнопки */
     --color-save: #7558f3;
     --color-send: #3f9abd;
     --color-clear: #753a6f;
@@ -23,7 +20,6 @@
 
     --color-error: #e74c3c;
     
-    /* Размеры */
     --size-base-padding: 10px;
     --size-large-padding: 20px;
     --size-border-radius: 4px;
@@ -56,7 +52,7 @@ body {
     margin: 0 auto;
 }
 
-/* Панель истории (слева) */
+/* переделала в панель сохранений */
 .history-panel {
     width: var(--size-left-panel-width);
     background-color: var(--color-panel);
@@ -107,14 +103,12 @@ body {
     background-color: var(--color-delete);
 }
 
-/* Основная панель (справа) */
 .main-panel {
     flex: 1;
     padding: var(--size-large-padding);
     overflow-y: auto;
 }
 
-/* Ограничение ширины форм */
 .request-form, .response {
     max-width: var(--size-form-max-width);
     width: 100%;
@@ -136,7 +130,6 @@ h3 {
     font-size: var(--size-heading);
 }
 
-/* Строка с методом и URL */
 .method-url-row {
     display: flex;
     margin-bottom: var(--size-large-padding);
@@ -165,14 +158,12 @@ input, select, textarea {
     font-size: var(--size-font);
 }
 
-/* Увеличение высоты селектов */
 select {
-    height: 34px; /* Увеличиваем высоту */
+    height: 34px; 
 }
 
-/* Дополнительно можно добавить стили для иконки выпадающего списка */
 select {
-    appearance: none; /* Убирает стандартную стрелку */
+    appearance: none; /* меняем стрелку */
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a3aed0' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 10px center;
@@ -185,7 +176,6 @@ textarea {
     min-height: 100px;
 }
 
-/* Content Type выбор */
 .content-type-row {
     display: flex;
     align-items: center;
@@ -202,7 +192,6 @@ textarea {
     flex: 1;
 }
 
-/* Секции параметров и заголовков */
 .section {
     margin-bottom: var(--size-large-padding);
 }
@@ -234,7 +223,6 @@ textarea {
     text-align: left;
 }
 
-/* Кнопки действий */
 .buttons {
     display: flex;
     gap: var(--size-base-padding);
@@ -257,7 +245,6 @@ textarea {
     color: var(--color-white);
 }
 
-/* Секция ответа */
 .response {
     margin-top: 30px;
     padding-top: var(--size-large-padding);
@@ -268,14 +255,12 @@ textarea {
     margin-bottom: 15px;
 }
 
-/* Контейнер для всего содержимого ответа */
 .response-container {
     border: 1px solid var(--color-border);
     border-radius: var(--size-border-radius);
     overflow: hidden;
 }
 
-/* Секции заголовков и тела ответа */
 .response-section {
     padding: 15px;
     border-bottom: 1px solid var(--color-border);
@@ -285,7 +270,6 @@ textarea {
     border-bottom: none;
 }
 
-/* Контейнер для содержимого ответа */
 .response-content {
     background-color: var(--color-panel);
     border-radius: var(--size-border-radius);
@@ -293,7 +277,6 @@ textarea {
     overflow: auto;
 }
 
-/* Стиль для статус-кода */
 .status-code {
     padding: var(--size-base-padding);
     background-color: var(--color-panel);
@@ -306,7 +289,6 @@ textarea {
     font-weight: bold;
 }
 
-/* Стили для заголовков ответа */
 .response-headers {
     list-style-type: none;
     padding: var(--size-base-padding);
@@ -319,7 +301,6 @@ textarea {
     font-family: monospace;
 }
 
-/* Стили для тела ответа */
 pre {
     background-color: var(--color-panel);
     padding: var(--size-base-padding);
@@ -340,17 +321,6 @@ pre {
 .hidden {
     display: none;
 }
-
-/* ошибки */
-/* .error-message {
-    color: var(--color-error);
-    font-size: 12px;
-    margin-top: 4px;
-}
-
-.error-field {
-    border-color: var(--color-error);
-} */
  
 .error-message {
     color: var(--color-error);

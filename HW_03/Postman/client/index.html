@@ -8,7 +8,6 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Сохраненные запросы -->
         <div class="history-panel">
             <h3>Сохраненные запросы</h3>
             <div class="history-list">
@@ -36,7 +35,7 @@
             </div>
         </div>
 
-        <!-- Основная форма -->
+
         <div class="main-panel">
             <h2>Упрощенный Postman</h2>
             
@@ -96,7 +95,7 @@
                     <textarea class="request-body" rows="6" placeholder="Введите тело запроса"></textarea>
                 </div>
 
-                <!-- Кнопки действий -->
+                <!-- Кнопки -->
                 <div class="buttons">
                     <button type="button" class="btn save-btn">Сохранить запрос</button>
                     <button type="button" class="btn send-btn">Отправить запрос</button>
@@ -107,7 +106,7 @@
             <!-- Секция ответа -->
             <div class="response">
                 <h2>Ответ на запрос:</h2>
-                <div class="status-code">Статус ответа: <span>200</span></div>
+                <div class="status-code">Статус ответа: <span></span></div>
                 
                 <div class="response-container">
                     <div class="response-section">
@@ -128,7 +127,9 @@
                     <div class="response-section">
                         <h3>Тело ответа:</h3>
                         <div class="response-content">
-                            <pre class="response-body">{"id": 1, "name": "doggie", "status": "available"}</pre>
+                            <!-- для дизайна -->
+                            <!-- <pre class="response-body">{"id": 1, "name": "doggie", "status": "available"}</pre> -->
+                            <pre class="response-body"></pre>
                         </div>
                     </div>
                 </div>
@@ -136,7 +137,7 @@
         </div>
     </div>
 
-    <!-- валидация -->
+    <!-- валидация общая в отдельном файле -->
     <script src="/shared/validators.js"></script>
     <script src="script.js"></script>
 </body>
