@@ -1,5 +1,15 @@
 [
   {
+    "id": 1745535996995,
+    "method": "GET",
+    "url": "https://petstore.swagger.io/v2/pet/1",
+    "params": [],
+    "headers": [],
+    "body": "",
+    "contentType": "application/json",
+    "timestamp": "2025-04-24T23:06:36.995Z"
+  },
+  {
     "id": 1745513274919,
     "method": "POST",
     "url": "http://5.187.3.57:3001/form",

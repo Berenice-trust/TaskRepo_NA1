@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // элементы из html
     const methodSelect = document.getElementById('method');
     const urlInput = document.getElementById('url');
     const paramsContainer = document.querySelector('.params-container');
@@ -18,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const responseHeadersList = document.querySelector('.response-headers');
     const responseBodyElement = document.querySelector('.response-body');
 
-    // скрываем пока секцию ответа
+    // скрываю секцию ответа
     responseSection.classList.add('hidden');
     
     // Скрытие тела запроса для get и delete    
@@ -36,22 +35,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // инициализация функции
     toggleRequestBodyVisibility();
     
-    // при выборе другого метода опять проверяем показывать или нет тело запроса
+    // при выборе другого метода проверяем показывать ли тело запроса
     methodSelect.addEventListener('change', toggleRequestBodyVisibility);
 
 
-    // Добавление параметра
+    // Добавление строки параметров
     function addParam() {
         const paramRow = document.createElement('div');
         paramRow.className = 'param-row';
-        
         paramRow.innerHTML = `
-            <input type="text" class="param-key" placeholder="Ключ">
-            <input type="text" class="param-value" placeholder="Значение">
+            <input type="text" class="param-key" placeholder="Имя параметра">
+            <input type="text" class="param-value" placeholder="Значение параметра">
             <button type="button" class="remove-btn">Удалить</button>
         `;
         
-        // Добавляем обработчик удаления
+        // удаление по кнопке удалить
         paramRow.querySelector('.remove-btn').addEventListener('click', function() {
             paramRow.remove();
         });
@@ -86,12 +84,10 @@ document.addEventListener('DOMContentLoaded', function() {
         paramsContainer.appendChild(paramRow);
     }
 
-
-    // добавление заголовка с подсказками
+    // добавление строки заголовка с подсказками
     function addHeader() {
         const headerRow = document.createElement('div');
         headerRow.className = 'header-row';
-        
         // Ходовые заголовки со значениями (datalist для подсказок)
         const headersDatalist = `
         <datalist id="common-headers">
@@ -110,8 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <option value="Origin: http://5.187.3.57:3003" data-key="Origin" data-value="http://5.187.3.57:3003">
         </datalist>
         `;
-        
-        // привязываем поля к списку заголовков
+        // привязываем поля к списку заголовков (через list)
         headerRow.innerHTML = `
         ${headersDatalist}
         <input type="text" class="header-key" placeholder="Имя заголовка" list="common-headers">
@@ -123,15 +118,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
         keyInput.addEventListener('change', function() {
             const selectedFullHeader = this.value;
-            const options = headerRow.querySelectorAll('#common-headers option');
+            const datalist = headerRow.querySelector('datalist');
+            const options = datalist.querySelectorAll('option');
             
             for (const option of options) {
                 if (option.value === selectedFullHeader) {
                     // отдельно ключ и значение
                     if (option.dataset.key && option.dataset.value) {
-                        // устанавливаем имя заголовка
+                        
                         this.value = option.dataset.key;
-                        // Устанавливаем значение
                         valueInput.value = option.dataset.value;
                     }
                     break;
@@ -152,17 +147,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-         // Добавляем валидацию значения заголовка
-    valueInput.addEventListener('input', function() {
-        const result = validators.validateValueField(this.value, 'header');
-        if (!result.valid) {
-            showError(this, result.message);
-        } else {
-            clearError(this);
-        }
-    });
+         // Валидируем значение заголовка
+        valueInput.addEventListener('input', function() {
+            const result = validators.validateValueField(this.value, 'header');
+            if (!result.valid) {
+                showError(this, result.message);
+            } else {
+                clearError(this);
+            }
+        });
         
-        // Добавляем обработчик удаления
+        // удаление строки заголовка
         headerRow.querySelector('.remove-btn').addEventListener('click', function() {
             headerRow.remove();
         });
@@ -182,7 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-                                          // ВАЛИДАЦИЯ
+
+
+                                          // ВАЛИДАЦИЯ (логика в shared/validators.js)
     // отображаем ошибку
     function showError(element, message) {
         clearError(element);
@@ -260,17 +257,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     });
 
-    // Нажатие кнопки отправить
+
+
+
+
+
+
+                                        // нажатие кнопки ОТПРАВИТЬ
+
     sendBtn.addEventListener('click', async function(e) {
             //проверяем url
-            const result = validators.validateUrl(urlInput.value);
-            if (!result.valid) {
-                e.preventDefault(); // Останавливаем отправку
-                showError(urlInput, result.message);
-                return;
-            }
+        const result = validators.validateUrl(urlInput.value);
+        if (!result.valid) {
+            e.preventDefault(); // Останавливаем отправку
+            showError(urlInput, result.message);
+            return;
+        }
 
-            // Проверка параметров
         let allValid = true;
         
         // Проверяем ключи параметров
@@ -313,319 +316,322 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-
-
-    // Проверка тела запроса
-    if (!bodySection.classList.contains('hidden')) {
-        const contentType = contentTypeSelect.value;
-        const bodyResult = validators.validateRequestBody(requestBody.value, contentType);
-        
-        if (!bodyResult.valid) {
-        e.preventDefault();
-        showError(requestBody, bodyResult.message);
-        allValid = false;
+        // Проверка тела запроса
+        if (!bodySection.classList.contains('hidden')) {
+            const contentType = contentTypeSelect.value;
+            const bodyResult = validators.validateRequestBody(requestBody.value, contentType);
+            
+            if (!bodyResult.valid) {
+            e.preventDefault();
+            showError(requestBody, bodyResult.message);
+            allValid = false;
+            }
         }
-    }
 
-
-
-
-
-
-    if (!allValid) {
-        e.preventDefault();
-        return;
-    }
+        // Если есть ошибки, останавливаем отправку
+        if (!allValid) {
+            e.preventDefault();
+            return;
+        }
     
-    // Реальная отправка запроса
-    try {
-        // Показываем индикатор загрузки
-        sendBtn.textContent = 'Отправляем...';
-        sendBtn.disabled = true;
+        // Реальная отправка запроса
+        try {
+            // меняем текст кнопки
+            sendBtn.textContent = 'Отправляем...';
+            sendBtn.disabled = true;
+            
+            //получаем из формы URL и метод
+            let url = urlInput.value;
+            const method = methodSelect.value;
+            
+            // Собираем параметры из формы
+            const urlObj = new URL(url);
+            document.querySelectorAll('.param-row').forEach(row => {
+                const key = row.querySelector('.param-key').value.trim();
+                const value = row.querySelector('.param-value').value.trim();
+                if (key) {
+                    urlObj.searchParams.set(key, value);
+                }
+            });
         
-        // 1. Получаем URL и добавляем параметры
-        let url = urlInput.value;
-        const method = methodSelect.value;
+            // Собираем заголовки
+            const headers = {};
+            document.querySelectorAll('.header-row').forEach(row => {
+                const key = row.querySelector('.header-key').value.trim();
+                const value = row.querySelector('.header-value').value.trim();
+                if (key) {
+                    headers[key] = value;
+                }
+            });
         
-        // Собираем параметры из формы
-        const urlObj = new URL(url);
+            // собираем тело запроса (если нужно)
+            let body = null;
+            if (!bodySection.classList.contains('hidden') && requestBody.value.trim()) {
+                body = requestBody.value;
+                
+                // Если это JSON, проверяем и форматируем
+                if (contentTypeSelect.value === 'application/json') {
+                    try {
+                        body = JSON.stringify(JSON.parse(body));
+                    } catch (e) {
+                        // проверяется валидацией
+                    }
+                } else if (contentTypeSelect.value === 'application/x-www-form-urlencoded') {
+                    
+                    if (!body.includes('=')) {
+                        try {
+                            // Если это JSON, преобразуем в формат формы
+                            const jsonData = JSON.parse(body);
+                            //URLSearchParams - автоматически преобразует JSON-данные в формат формы
+                            const params = new URLSearchParams();
+                            for (const key in jsonData) {
+                                params.append(key, jsonData[key]);
+                            }
+                            body = params.toString();
+                        } catch (e) {
+                            // Если не JSON, просто оставляем как есть
+                        }
+                    }
+    
+                }
+
+                // Добавляем Content-Type, если его не установили вручную
+                if (!headers['Content-Type']) {
+                    headers['Content-Type'] = contentTypeSelect.value; //по умолчанию 'application/json' (сброс 680)
+                }
+            }
+
+            // формируем строку запроса через наш прокси-сервер
+            const proxyUrl = `/proxy?url=${encodeURIComponent(urlObj.toString())}`;
+            //encodeURIComponent - безопасно кодирует
+
+            const options = {
+                method: method,
+                headers: headers,
+                body: body && ['GET', 'HEAD', 'DELETE'].includes(method) ? null : body
+                //методы без тела: GET, HEAD (про запас), DELETE
+            };
+        
+            // Отправляем запрос, вернет статус и заголовки
+            const response = await fetch(proxyUrl, options);
+            
+            // Получаем текст ответа, получаем тело ответа
+            const responseData = await response.text();
+            
+            // включаем видимость ответа
+            responseSection.classList.remove('hidden');
+        
+            // Статус код ответа
+            statusCodeElement.textContent = response.status;
+            statusCodeElement.className = '';
+            statusCodeElement.classList.add(`status-${Math.floor(response.status/100)}xx`); //неудачные будут красными
+            
+            // Заголовки
+            responseHeadersList.innerHTML = '';
+            for (const [key, value] of response.headers.entries()) {
+                const li = document.createElement('li');
+                li.textContent = `${key}: ${value}`;
+                responseHeadersList.appendChild(li);
+            }
+        
+            // Тело ответа
+            responseBodyElement.textContent = responseData; //тело
+        
+            // пытаемся форматировать JSON
+            try {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const jsonData = JSON.parse(responseData);
+                    responseBodyElement.textContent = JSON.stringify(jsonData, null, 2);
+                }
+            } catch (e) {
+                // Если не JSON, показываем как текст
+            }
+        
+        
+        
+        } catch (error) {
+            console.error('Ошибка отправки запроса:', error);
+            responseSection.classList.remove('hidden');
+            statusCodeElement.textContent = 'Error';
+            statusCodeElement.className = 'error';
+            responseBodyElement.textContent = `Ошибка: ${error.message}`;
+        } finally {
+            // восстанавливаем кнопку
+            sendBtn.textContent = 'Отправить запрос';
+            sendBtn.disabled = false;
+        }
+        });
+        
+
+                                        // нажатие кнопки СОХРАНИТЬ
+
+    saveBtn.addEventListener('click', async function() {
+        // данные запроса
+        const requestData = {
+            method: methodSelect.value,
+            url: urlInput.value,
+            params: [],
+            headers: [],
+            body: bodySection.classList.contains('hidden') ? '' : requestBody.value,
+            contentType: contentTypeSelect.value
+        };
+        
+        // Собираем параметры
         document.querySelectorAll('.param-row').forEach(row => {
             const key = row.querySelector('.param-key').value.trim();
             const value = row.querySelector('.param-value').value.trim();
             if (key) {
-                urlObj.searchParams.set(key, value);
+                requestData.params.push({ key, value });
             }
         });
         
-        // 2. Собираем заголовки
-        const headers = {};
+        // Собираем заголовки
         document.querySelectorAll('.header-row').forEach(row => {
             const key = row.querySelector('.header-key').value.trim();
             const value = row.querySelector('.header-value').value.trim();
             if (key) {
-                headers[key] = value;
+                requestData.headers.push({ key, value });
             }
         });
         
-        // 3. Готовим тело запроса (если применимо)
-        let body = null;
-        if (!bodySection.classList.contains('hidden') && requestBody.value.trim()) {
-            body = requestBody.value;
-            
-            // Если это JSON, проверяем и форматируем
-            if (contentTypeSelect.value === 'application/json') {
-                try {
-                    body = JSON.stringify(JSON.parse(body));
-                } catch (e) {
-                    // Уже проверено валидацией, оставляем как есть
-                }
-            } else if (contentTypeSelect.value === 'application/x-www-form-urlencoded') {
-                // Проверка формата и преобразование
-                if (!body.includes('=')) {
-                    try {
-                        // Если это JSON, преобразуем в формат формы
-                        const jsonData = JSON.parse(body);
-                        const params = new URLSearchParams();
-                        for (const key in jsonData) {
-                            params.append(key, jsonData[key]);
-                        }
-                        body = params.toString();
-                    } catch (e) {
-                        // Если не JSON, просто оставляем как есть
-                        
-                    
-                    }
-                }
-    
-}
-
-
-
-            
-            // Добавляем Content-Type, если его не установили вручную
-            if (!headers['Content-Type']) {
-                headers['Content-Type'] = contentTypeSelect.value;
-            }
-        }
-        
-        // 4. Отправляем запрос через наш прокси-сервер
-        const proxyUrl = `/proxy?url=${encodeURIComponent(urlObj.toString())}`;
-        
-        const options = {
-            method: method,
-            headers: headers,
-            body: body && ['GET', 'HEAD'].includes(method) ? null : body
-        };
-        
-        // 5. Отправляем запрос
-        const response = await fetch(proxyUrl, options);
-        
-        // 6. Получаем текст ответа
-        const responseData = await response.text();
-        
-        // 7. Отображаем результат
-        responseSection.classList.remove('hidden');
-        
-        // Статус код
-        statusCodeElement.textContent = response.status;
-        statusCodeElement.className = '';
-        statusCodeElement.classList.add(`status-${Math.floor(response.status/100)}xx`);
-        
-        // Заголовки
-        responseHeadersList.innerHTML = '';
-        for (const [key, value] of response.headers.entries()) {
-            const li = document.createElement('li');
-            li.textContent = `${key}: ${value}`;
-            responseHeadersList.appendChild(li);
-        }
-        
-        // Тело ответа
-        responseBodyElement.textContent = responseData;
-        
-        // Пытаемся отформатировать JSON
         try {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const jsonData = JSON.parse(responseData);
-                responseBodyElement.textContent = JSON.stringify(jsonData, null, 2);
+            const response = await fetch('/api/save-request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+            
+            if (response.ok) {
+                showToast('Запрос сохранен', 'success');
+            } else {
+                showToast('Ошибка при сохранении запроса', 'error');
             }
-        } catch (e) {
-            // Если не JSON, оставляем как есть
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showToast('Ошибка при сохранении запроса', 'error');
         }
-        
-        
-        
-    } catch (error) {
-        console.error('Ошибка отправки запроса:', error);
-        // Показываем ошибку пользователю
-        responseSection.classList.remove('hidden');
-        statusCodeElement.textContent = 'Error';
-        statusCodeElement.className = 'error';
-        responseBodyElement.textContent = `Ошибка: ${error.message}`;
-    } finally {
-        // В любом случае восстанавливаем кнопку
-        sendBtn.textContent = 'Отправить запрос';
-        sendBtn.disabled = false;
-    }
     });
-        
 
-// Добавить обработчик для кнопки сохранения
-saveBtn.addEventListener('click', async function() {
-    // Собираем данные запроса
-    const requestData = {
-        method: methodSelect.value,
-        url: urlInput.value,
-        params: [],
-        headers: [],
-        body: bodySection.classList.contains('hidden') ? '' : requestBody.value,
-        contentType: contentTypeSelect.value
-    };
-    
-    // Собираем параметры
-    document.querySelectorAll('.param-row').forEach(row => {
-        const key = row.querySelector('.param-key').value.trim();
-        const value = row.querySelector('.param-value').value.trim();
-        if (key) {
-            requestData.params.push({ key, value });
+    // Функция для toast-уведомлений (всплывает справа внизу)
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`; // info, success, error
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // появляется плавно
+        setTimeout(() => toast.classList.add('visible'), 10);
+        
+        // пропадает через 3 секунды
+        setTimeout(() => {
+            toast.classList.remove('visible');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // Загрузка сохраненных запросов и отображение в списке
+    async function loadSavedRequests() {
+        try {
+            const response = await fetch('/api/saved-requests');
+            if (response.ok) {
+                const savedRequests = await response.json();
+                const historyContainer = document.querySelector('.history-list');
+                
+                // Очищаем существующие элементы
+                historyContainer.innerHTML = '';
+                
+                // Добавляем новые
+                savedRequests.forEach(request => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = `history-item ${request.method.toLowerCase()}`;
+                    
+                    historyItem.innerHTML = `
+                        <div>${request.method}</div>
+                        <div>${request.url}</div>
+                    `;
+                    
+                    // Добавляем обработчик клика для загрузки запроса
+                    historyItem.addEventListener('click', function() {
+                        loadSavedRequest(request);
+                    });
+                    
+                    historyContainer.appendChild(historyItem);
+                });
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки сохраненных запросов:', error);
         }
-    });
-    
-    // Собираем заголовки
-    document.querySelectorAll('.header-row').forEach(row => {
-        const key = row.querySelector('.header-key').value.trim();
-        const value = row.querySelector('.header-value').value.trim();
-        if (key) {
-            requestData.headers.push({ key, value });
-        }
-    });
-    
-    try {
-        const response = await fetch('/api/save-request', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
+    }
+
+    // заполняет данными форму сохраненного запроса
+    function loadSavedRequest(request) {
+        methodSelect.value = request.method;
+        urlInput.value = request.url;
+        
+        // Очищаем параметры
+        document.querySelectorAll('.param-row').forEach(row => {
+            if (row !== paramsContainer.firstElementChild) {
+                row.remove();
+            } else {
+                row.querySelector('.param-key').value = '';
+                row.querySelector('.param-value').value = '';
+            }
         });
         
-        if (response.ok) {
-            alert('Запрос сохранен');
-            // Обновляем список сохраненных запросов
-           
-        } else {
-            alert('Ошибка при сохранении запроса');
+        // Добавляем параметры сохраненного запроса
+        if (request.params && request.params.length > 0) {
+            const firstParam = request.params[0];
+            const firstRow = paramsContainer.querySelector('.param-row');
+            firstRow.querySelector('.param-key').value = firstParam.key;
+            firstRow.querySelector('.param-value').value = firstParam.value;
+            
+            // Добавляем остальные параметры
+            for (let i = 1; i < request.params.length; i++) {
+                addParam();
+                const rows = paramsContainer.querySelectorAll('.param-row');
+                const lastRow = rows[rows.length - 1];
+                lastRow.querySelector('.param-key').value = request.params[i].key;
+                lastRow.querySelector('.param-value').value = request.params[i].value;
+            }
         }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        alert('Ошибка при сохранении запроса');
-    }
-});
-
-// Заменить функцию loadRequestHistory на loadSavedRequests
-async function loadSavedRequests() {
-    try {
-        const response = await fetch('/api/saved-requests');
-        if (response.ok) {
-            const savedRequests = await response.json();
-            const historyContainer = document.querySelector('.history-list');
-            
-            // Очищаем существующие элементы
-            historyContainer.innerHTML = '';
-            
-            // Добавляем новые
-            savedRequests.forEach(request => {
-                const historyItem = document.createElement('div');
-                historyItem.className = `history-item ${request.method.toLowerCase()}`;
-                
-                historyItem.innerHTML = `
-                    <div>${request.method}</div>
-                    <div>${request.url}</div>
-                `;
-                
-                // Добавляем обработчик клика для загрузки запроса
-                historyItem.addEventListener('click', function() {
-                    loadSavedRequest(request);
-                });
-                
-                historyContainer.appendChild(historyItem);
+        
+        // Очищаем заголовки
+        document.querySelectorAll('.header-row').forEach(row => {
+            row.remove();
+        });
+        
+        // Добавляем заголовки из сохраненного запроса
+        if (request.headers && request.headers.length > 0) {
+            request.headers.forEach(header => {
+                addHeader();
+                const rows = headersContainer.querySelectorAll('.header-row');
+                const lastRow = rows[rows.length - 1];
+                lastRow.querySelector('.header-key').value = header.key;
+                lastRow.querySelector('.header-value').value = header.value;
             });
         }
-    } catch (error) {
-        console.error('Ошибка загрузки сохраненных запросов:', error);
-    }
-}
-
-// Заменить функцию loadRequestFromHistory на loadSavedRequest
-function loadSavedRequest(request) {
-    // Заполняем метод и URL
-    methodSelect.value = request.method;
-    urlInput.value = request.url;
-    
-    // Очищаем существующие параметры
-    document.querySelectorAll('.param-row').forEach(row => {
-        if (row !== paramsContainer.firstElementChild) {
-            row.remove();
-        } else {
-            row.querySelector('.param-key').value = '';
-            row.querySelector('.param-value').value = '';
-        }
-    });
-    
-    // Добавляем параметры из сохраненного запроса
-    if (request.params && request.params.length > 0) {
-        const firstParam = request.params[0];
-        const firstRow = paramsContainer.querySelector('.param-row');
-        firstRow.querySelector('.param-key').value = firstParam.key;
-        firstRow.querySelector('.param-value').value = firstParam.value;
         
-        // Добавляем остальные параметры
-        for (let i = 1; i < request.params.length; i++) {
-            addParam();
-            const rows = paramsContainer.querySelectorAll('.param-row');
-            const lastRow = rows[rows.length - 1];
-            lastRow.querySelector('.param-key').value = request.params[i].key;
-            lastRow.querySelector('.param-value').value = request.params[i].value;
+        // Устанавливаем тело запроса
+        requestBody.value = request.body || '';
+        
+        // Устанавливаем Content-Type
+        if (request.contentType) {
+            contentTypeSelect.value = request.contentType;
         }
+        
+        // Обновляем видимость тела запроса
+        toggleRequestBodyVisibility();
     }
-    
-    // Очищаем существующие заголовки
-    document.querySelectorAll('.header-row').forEach(row => {
-        row.remove();
-    });
-    
-    // Добавляем заголовки из сохраненного запроса
-    if (request.headers && request.headers.length > 0) {
-        request.headers.forEach(header => {
-            addHeader();
-            const rows = headersContainer.querySelectorAll('.header-row');
-            const lastRow = rows[rows.length - 1];
-            lastRow.querySelector('.header-key').value = header.key;
-            lastRow.querySelector('.header-value').value = header.value;
-        });
-    }
-    
-    // Устанавливаем тело запроса
-    requestBody.value = request.body || '';
-    
-    // Устанавливаем Content-Type
-    if (request.contentType) {
-        contentTypeSelect.value = request.contentType;
-    }
-    
-    // Обновляем видимость тела запроса
-    toggleRequestBodyVisibility();
-}
 
-
-
-
-
-
-    // инициализация для существующего в дом параметра
+    // инициализация для существующего в html параметра (чтобы срабатывала валидация)
     document.querySelectorAll('.param-row').forEach(paramRow => {
         const keyInput = paramRow.querySelector('.param-key');
         if (keyInput) {
+            // при вводе
             keyInput.addEventListener('input', function() {
                 if (this.value.trim() !== '') {
                     const result = validators.validateKeyField(this.value, 'param');
@@ -641,51 +647,43 @@ function loadSavedRequest(request) {
         }
     });
 
+    // Загружаем сохраненные запросы при загрузке страницы
+    loadSavedRequests();
 
 
+                                    // нажатие кнопки ОЧИСТИТЬ
 
-
-
-// Загружаем сохраненные запросы при загрузке страницы
-loadSavedRequests();
-
-// Добавьте обработчик для кнопки очистки формы
-clearBtn.addEventListener('click', function() {
-    // Сбрасываем URL и метод
-    urlInput.value = '';
-    methodSelect.value = 'GET';
-    
-    // Удаляем все параметры
-    document.querySelectorAll('.param-row').forEach(row => {
-        if (row !== paramsContainer.firstElementChild) {
+    clearBtn.addEventListener('click', function() {
+        urlInput.value = '';
+        methodSelect.value = 'GET';
+        
+        document.querySelectorAll('.param-row').forEach(row => {
+            if (row !== paramsContainer.firstElementChild) {
+                // что бы одна строка для параметров оставалась
+                row.remove();
+            } else {
+                row.querySelector('.param-key').value = '';
+                row.querySelector('.param-value').value = '';
+            }
+        });
+        
+        // Удаляем все заголовки
+        document.querySelectorAll('.header-row').forEach(row => {
             row.remove();
-        } else {
-            row.querySelector('.param-key').value = '';
-            row.querySelector('.param-value').value = '';
-        }
+        });
+        
+        // Очищаем все что есть или возвращаем значения по умолчанию
+        requestBody.value = '';
+        contentTypeSelect.value = 'application/json';
+        responseSection.classList.add('hidden');
+
+        // обновляем видимость тела запроса
+        toggleRequestBodyVisibility();
+        
+        // Очищаем ошибки
+        document.querySelectorAll('.error-field').forEach(field => {
+            clearError(field);
+        });
     });
-    
-    // Удаляем все заголовки
-    document.querySelectorAll('.header-row').forEach(row => {
-        row.remove();
-    });
-    
-    // Очищаем тело запроса
-    requestBody.value = '';
-    
-    // Сбрасываем Content-Type
-    contentTypeSelect.value = 'application/json';
-    
-    // Скрываем секцию ответа
-    responseSection.classList.add('hidden');
-    
-    // Обновляем видимость тела запроса
-    toggleRequestBodyVisibility();
-    
-    // Очищаем все ошибки
-    document.querySelectorAll('.error-field').forEach(field => {
-        clearError(field);
-    });
-});
 
 });
