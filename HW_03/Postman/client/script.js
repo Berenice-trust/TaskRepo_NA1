@@ -259,10 +259,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
-
-
-
                                         // нажатие кнопки ОТПРАВИТЬ
 
     sendBtn.addEventListener('click', async function(e) {
