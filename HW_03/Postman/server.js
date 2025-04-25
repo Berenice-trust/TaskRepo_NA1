@@ -59,17 +59,21 @@ function saveRequest(requestData) {
 }
 
 
-                      // прокси-сервер для обхода CORS
+                      // прокси-сервер для обхода CORS   ИСПРАВЛЕНО
 
 // .all - все запросы с точным ключом, с любыми методами
 // .use - запросы которые начинаются с ключа
-app.all('/proxy', async (req, res) => {
+// поменяла на post
+app.post('/proxy', async (req, res) => {
   try {
-    const targetUrl = req.query.url;
+    const proxyRequest = req.body;
+    const targetUrl = proxyRequest.url;
+    const method = proxyRequest.method; // вместо req.method
+    const requestHeaders = proxyRequest.headers || {};
+    const requestBody = proxyRequest.body;
 
     // валидация URL
     const urlValidation = validateUrl(targetUrl); //из shared/validators.js
-
     if (!urlValidation.valid) {
       return res.status(400).json({ error: urlValidation.message });
     }
@@ -96,7 +100,7 @@ app.all('/proxy', async (req, res) => {
     }
 
     // Валидация пользовательских заголовков (??? возможно не надо?)
-    for (const [key, value] of Object.entries(req.headers)) {
+    for (const [key, value] of Object.entries(requestHeaders)) {
       if (key.toLowerCase().startsWith('x-')) {
         // пользовательские и нестандартные заголовки
         const keyValidation = validateKeyField(key, 'header');
@@ -115,32 +119,25 @@ app.all('/proxy', async (req, res) => {
 
     //опции для запроса (пока пустой)
     const options = {
-      method: req.method,
-      headers: {}
+      method: method, // метод из тела запроса
+      headers: requestHeaders   // заголовки из тела запроса
     };
-
-    for (const [key, value] of Object.entries(req.headers)) {
-      // Исключаем специальные заголовки, которые не нужно проксировать
-      if (!['host', 'origin', 'referer', 'content-length'].includes(key.toLowerCase())) {
-        options.headers[key] = value;
-      }
-    }
     
       // PATCH про запас
-    if (['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
+    if (['POST', 'PUT', 'PATCH'].includes(method) && requestBody) {
 
       // Валидация тела запроса (??? возможно не надо?)
-      const contentType = req.headers['content-type'] || '';
+      const contentType = requestHeaders['content-type'] || '';
       let bodyToValidate = '';
       
-      if (typeof req.body === 'object') {
+      if (typeof requestBody === 'object') {
         if (contentType.includes('application/x-www-form-urlencoded')) {
-          bodyToValidate = new URLSearchParams(req.body).toString();
+          bodyToValidate = new URLSearchParams(requestBody).toString();
         } else {
-          bodyToValidate = JSON.stringify(req.body);
+          bodyToValidate = JSON.stringify(requestBody); 
         }
       } else {
-        bodyToValidate = req.body.toString();
+        bodyToValidate = requestBody.toString(); 
       }
       
       const bodyValidation = validateRequestBody(bodyToValidate, contentType);
@@ -149,62 +146,76 @@ app.all('/proxy', async (req, res) => {
         return res.status(400).json({ error: bodyValidation.message });
       }
 
-      if (typeof req.body === 'object') {
+      if (typeof requestBody === 'object') {
         // Для application/x-www-form-urlencoded
-        if (req.headers['content-type'] && 
-            req.headers['content-type'].includes('application/x-www-form-urlencoded')) {
+        if (requestHeaders['content-type'] && 
+          requestHeaders['content-type'].includes('application/x-www-form-urlencoded')) {
           // НЕ преобразуем в JSON, оставляем как строку
-          options.body = new URLSearchParams(req.body).toString();
+          options.body = new URLSearchParams(requestBody).toString();
           console.log("Form data:", options.body);
         } else {
           // Для JSON и других форматов
-          options.body = JSON.stringify(req.body);
+          options.body = JSON.stringify(requestBody);
         }
       
         // Сохраняем Content-Type из исходного запроса
-        if (req.headers['content-type']) {
-          options.headers['content-type'] = req.headers['content-type'];
+        if (requestHeaders['content-type']) {
+          options.headers['content-type'] = requestHeaders['content-type'];
         }
       } else {
       // Для других типов данных
-      options.body = req.body;
+      options.body = requestBody;
       }
     }
     
+    
+    options.redirect = 'manual'; // Отключаем автоматическое следование по редиректам, чтобы обработать их вручную
     // Отправляем запрос к API
     const response = await fetch(targetUrl, options);
       
-    // Копируем статус ответа
-    res.status(response.status);
+
+
+
+
+
+                // ИЗМЕНЕНИЯ
+    
       
-      // Копируем заголовки ответа
-    for (const [key, value] of Object.entries(response.headers.raw())) {
-      if (key.toLowerCase() !== 'content-length') {
-        res.set(key, Array.isArray(value) ? value[0] : value);
-        // потому что швагер возвращает массив заголовков.
-      }
+    // Получаем тело ответа
+    let responseBody;
+    // Проверяем Content-Type для определения типа ответа
+    const contentType = response.headers.get('content-type') || '';
+
+    // Если это изображение или бинарные данные, используем Buffer
+    if (contentType.includes('image/') || contentType.includes('application/octet-stream')) {
+      const buffer = await response.buffer();
+      responseBody = buffer.toString('base64');
+      console.log("Обработан бинарный контент:", contentType);
+    } else {
+      // Для текстовых данных используем text()
+      responseBody = await response.text();
+      console.log("Обработан текстовый контент:", contentType);
     }
+    
+      const proxyResponse = {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers.raw(),
+        body: responseBody
+      }
     
     // Разрешаем CORS для всех 
     res.set('Access-Control-Allow-Origin', '*');
+    res.json(proxyResponse);
       
-    // Попробуем обработать как текст для лучшей совместимости
-    let responseBody;
-    try {
-      responseBody = await response.text();
-    } catch (err) {
-      // Если не получилось как текст, используем буфер (бинарные данные)
-      responseBody = await response.buffer();
-    }
+ 
+    
 
-    // Явно устанавливаем Content-Type
-    const contentType = response.headers.get('content-type');
-    if (contentType) {
-      res.setHeader('Content-Type', contentType);
-    }
 
-    // Отправляем ответ клиенту
-    res.send(responseBody);
+
+
+
+
 
   } catch (error) {
     console.error('Ошибка прокси-сервера:', error);

@@ -384,3 +384,14 @@ pre {
 .toast.info {
     background-color: var(--color-post);
 }
+
+.img-preview {
+    padding:0px; 
+    margin: 0px;
+}
+
+h4 {
+    margin: 0;
+    font-size: 14px;
+    color: var(--color-text-light);
+}

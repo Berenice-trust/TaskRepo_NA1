@@ -397,54 +397,156 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // формируем строку запроса через наш прокси-сервер
-            const proxyUrl = `/proxy?url=${encodeURIComponent(urlObj.toString())}`;
-            //encodeURIComponent - безопасно кодирует
 
-            const options = {
-                method: method,
-                headers: headers,
-                body: body && ['GET', 'HEAD', 'DELETE'].includes(method) ? null : body
-                //методы без тела: GET, HEAD (про запас), DELETE
+
+
+
+
+           
+            
+                                                    // ИСПРАВЛЕНИЕ
+            // объект для отправки на прокси-сервер
+            const proxyRequest = {
+                method: method,           
+                url: urlObj.toString(),   
+                headers: headers,         
+                body: ['GET', 'HEAD', 'DELETE'].includes(method) ? null : body,  // Тело для API
+                params: []             
             };
-        
-            // Отправляем запрос, вернет статус и заголовки
-            const response = await fetch(proxyUrl, options);
-            
-            // Получаем текст ответа, получаем тело ответа
-            const responseData = await response.text();
-            
+
+            document.querySelectorAll('.param-row').forEach(row => {
+                const key = row.querySelector('.param-key').value.trim();
+                const value = row.querySelector('.param-value').value.trim();
+                if (key) {
+                    proxyRequest.params.push({ key, value });
+                }
+            });
+
+            // отправляем POST запрос к /proxy
+            const response = await fetch('/proxy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(proxyRequest)
+            });
+
+            // Получаем  ответ от прокси-сервера
+            const responseData = await response.json();
+
+
+
+
+
+
+
+
+
+
+
+
+                                                    // ИСПРАВЛЕНИЕ               
             // включаем видимость ответа
             responseSection.classList.remove('hidden');
         
-            // Статус код ответа
-            statusCodeElement.textContent = response.status;
+            // Статус код ответа берем из responseData 
+            statusCodeElement.textContent = responseData.status;
             statusCodeElement.className = '';
-            statusCodeElement.classList.add(`status-${Math.floor(response.status/100)}xx`); //неудачные будут красными
+            statusCodeElement.classList.add(`status-${Math.floor(responseData.status/100)}xx`); //неудачные будут красными
             
-            // Заголовки
+            // Заголовки responseData.headers
             responseHeadersList.innerHTML = '';
-            for (const [key, value] of response.headers.entries()) {
-                const li = document.createElement('li');
-                li.textContent = `${key}: ${value}`;
-                responseHeadersList.appendChild(li);
+            if (responseData.headers) {
+                for (const [key, value] of Object.entries(responseData.headers)) {
+                    const li = document.createElement('li');
+                    li.textContent = `${key}: ${Array.isArray(value) ? value.join(', ') : value}`;
+                    responseHeadersList.appendChild(li);
+                }
             }
         
-            // Тело ответа
-            responseBodyElement.textContent = responseData; //тело
+            // Тело ответа из responseData.body
+            responseBodyElement.textContent = responseData.body || ''; //тело
         
             // пытаемся форматировать JSON
             try {
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    const jsonData = JSON.parse(responseData);
+                const contentType = responseData.headers && 
+                       (responseData.headers['Content-Type'] || 
+                        responseData.headers['content-type']);
+
+            // Преобразуем в строку, если это массив
+            const contentTypeStr = Array.isArray(contentType) ? contentType[0] : contentType;
+    
+                
+                if (contentTypeStr && contentTypeStr.includes('application/json') && responseData.body) {
+                    // для JSON
+                    const jsonData = JSON.parse(responseData.body);
                     responseBodyElement.textContent = JSON.stringify(jsonData, null, 2);
-                }
+
+
+
+
+
+                                            //для картинки НОВОЕ
+                } else if (contentTypeStr && contentTypeStr.includes('image/')) {
+                    // отладка
+                    // console.log("ОТЛАДКА: изображение");
+                    // console.log("Тип контента:", contentTypeStr);
+                    // console.log("Длина base64:", responseData.body.length);
+                    // console.log("Начало base64:", responseData.body.substring(0, 20) + "...");
+                    
+                   // Создаем контейнер
+                    const imageContainer = document.createElement('div');
+                
+                    // Hex представление (первые 100 байт)
+                    try {
+                        const binary = atob(responseData.body);
+                        let hexString = '';
+                        
+                        // преобразуем бинарные данные в hex (16-тиричный формат)
+                        for (let i = 0; i < Math.min(binary.length, 100); i++) {
+                            const hex = binary.charCodeAt(i).toString(16).padStart(2, '0');
+                            hexString += hex + ' ';
+                            if ((i + 1) % 16 === 0) hexString += '\n';
+                        }
+                        
+                        const hexView = document.createElement('div');
+                        hexView.innerHTML = `
+                            <h4>Шестнадцатеричное представление (первые 100 байт):</h4>
+                            <pre class="img-preview">${hexString}</pre>
+                        `;
+                        imageContainer.appendChild(hexView);
+                    } catch (e) {
+                        console.error("Ошибка преобразования в hex:", e);
+                    }
+    
+                    // Сама картинка
+                    const imgView = document.createElement('div');
+                    imgView.innerHTML = '<h4>Изображение:</h4>';
+                    
+                    const img = document.createElement('img');
+                    img.src = `data:${contentTypeStr};base64,${responseData.body}`;
+                    img.style.maxWidth = '100%';
+                    img.style.marginTop = '10px';
+                    img.onerror = () => console.error("Ошибка загрузки изображения");
+                    
+                    imgView.appendChild(img);
+                    imageContainer.appendChild(imgView);
+                    
+                    // Очищаем и вставляем
+                    responseBodyElement.textContent = '';
+                    responseBodyElement.appendChild(imageContainer);
+}
             } catch (e) {
                 // Если не JSON, показываем как текст
             }
         
         
+
+
+
+
+
+
         
         } catch (error) {
             console.error('Ошибка отправки запроса:', error);
@@ -457,7 +559,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sendBtn.textContent = 'Отправить запрос';
             sendBtn.disabled = false;
         }
-        });
+    });
         
 
                                         // нажатие кнопки СОХРАНИТЬ
