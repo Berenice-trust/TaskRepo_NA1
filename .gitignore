@@ -36,3 +36,6 @@ form-submissions.json
 
 # Сохраненные запросы
 /data/
+# Игнорировать папку data и её содержимое
+/HW_03/Postman/data/
+/HW_03/Postman/data/saved_requests.json
