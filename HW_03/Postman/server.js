@@ -72,6 +72,17 @@ app.post('/proxy', async (req, res) => {
     const requestHeaders = proxyRequest.headers || {};
     const requestBody = proxyRequest.body;
 
+    // проверка методов запросов
+    const validMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
+    if (!validMethods.includes(method)) {
+      return res.status(400).json({ 
+        error: 'Invalid request method', 
+        message: `Метод ${method} не поддерживается. Допустимые методы: ${validMethods.join(', ')}`
+      });
+    }
+
+
+
     // валидация URL
     const urlValidation = validateUrl(targetUrl); //из shared/validators.js
     if (!urlValidation.valid) {
@@ -186,16 +197,55 @@ app.post('/proxy', async (req, res) => {
     // Проверяем Content-Type для определения типа ответа
     const contentType = response.headers.get('content-type') || '';
 
+
+
+
+
+
+
     // Если это изображение или бинарные данные, используем Buffer
-    if (contentType.includes('image/') || contentType.includes('application/octet-stream')) {
-      const buffer = await response.buffer();
-      responseBody = buffer.toString('base64');
-      console.log("Обработан бинарный контент:", contentType);
-    } else {
+    // if (contentType.includes('image/') || contentType.includes('application/octet-stream')) {
+    //   const buffer = await response.buffer();
+    //   responseBody = buffer.toString('base64');
+    //   console.log("Обработан бинарный контент:", contentType);
+    // } else {
+    //   // Для текстовых данных используем text()
+    //   responseBody = await response.text();
+    //   console.log("Обработан текстовый контент:", contentType);
+    // }
+
+    // массив текстовых форматов
+    const textContentTypes = [
+      'text/', 
+      'application/json', 
+      'application/javascript', 
+      'application/xml',
+      'application/xhtml+xml',
+      'application/x-www-form-urlencoded'
+    ];
+
+    const isTextContent = textContentTypes.some(type => contentType.includes(type));
+    //some - хотя бы одно включение из массива
+
+    if (isTextContent) {
       // Для текстовых данных используем text()
       responseBody = await response.text();
       console.log("Обработан текстовый контент:", contentType);
+    } else {
+      // Все остальное через Buffer
+      const buffer = await response.buffer();
+      responseBody = buffer.toString('base64');
+      console.log("Обработан бинарный контент:", contentType);
     }
+
+
+
+
+
+
+
+
+
     
       const proxyResponse = {
         status: response.status,
