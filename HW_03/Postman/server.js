@@ -361,7 +361,7 @@ app.get('/api/test', (req, res) => {
 });
 
 // Запуск сервера 3003
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Сервер запущен на http://5.187.3.57:${PORT}`);
 });
 
