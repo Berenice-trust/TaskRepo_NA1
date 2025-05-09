@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 describe('/proxy endpoint', () => {
   
     // Асинхронный тест для прокси-запроса к несуществующему URL
-    test('should return 404 when request not existing', async () => {
+    test('should return 404 when request not existing', async function()  { 
         // URL, который гарантированно вернет 404
         const nonExistentUrl = 'https://api.github.com/not-exist-resource';
 
@@ -45,7 +45,9 @@ describe('/proxy endpoint', () => {
         expect(parsedBody).toHaveProperty('message', 'Not Found');
         expect(parsedBody).toHaveProperty('documentation_url');
   
+         // Сигнализируем о завершении всех проверок
+        // done();
 
-    }, 10000); // на всякий уыеличиваем до 10 секунд (по умолчанию 5)
+    }, 10000); // на всякий увеличиваем до 10 секунд (по умолчанию 5)
     
   });

@@ -137,6 +137,22 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="confirmModalOverlay">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Подтверждение</h4>
+            </div>
+            <div class="modal-body">
+              <p id="confirmMessage">Вы уверены, что хотите выполнить это действие?</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="cancelBtn">Отмена</button>
+              <button type="button" class="btn btn-danger" id="confirmBtn">Удалить</button>
+            </div>
+          </div>
+        </div>
+      </div>
     <!-- валидация общая в отдельном файле -->
     <script src="/shared/validators.js"></script>
     <script src="script.js"></script>

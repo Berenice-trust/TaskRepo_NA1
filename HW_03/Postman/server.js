@@ -314,7 +314,7 @@ app.get('/api/request-list-html', (req, res) => {
     // заголовки для кеширования
     res.set({
       'ETag': etag, // иднтификатор версии
-      'Cache-Control': 'max-age=600', // кешируем на минуту
+      'Cache-Control': 'max-age=1', // кешируем на минуту
     }); 
     
     // Рендерим шаблон для handlebars
@@ -358,7 +358,40 @@ app.post('/api/save-request', (req, res) => {
 });
 
 
-
+// API для удаления запроса
+app.delete('/api/delete-request/:id', (req, res) => {
+  const requestId = parseInt(req.params.id);
+  const savedRequestsPath = path.join(__dirname, 'data', 'saved_requests.json');
+  
+  try {
+    // Проверяем существование файла
+    if (!fs.existsSync(savedRequestsPath)) {
+      return res.status(404).json({ error: 'Файл с запросами не найден' });
+    }
+    
+    // Читаем текущий список запросов
+    const data = fs.readFileSync(savedRequestsPath, 'utf8');
+    let requests = JSON.parse(data);
+    
+    // Ищем запрос с указанным ID
+    const requestIndex = requests.findIndex(request => request.id === requestId);
+    
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'Запрос не найден' });
+    }
+    
+    // Удаляем запрос из массива
+    requests.splice(requestIndex, 1);
+    
+    // Записываем обновленный список обратно в файл
+    fs.writeFileSync(savedRequestsPath, JSON.stringify(requests, null, 2));
+    
+    res.json({ success: true, message: 'Запрос успешно удален' });
+  } catch (error) {
+    console.error('Ошибка при удалении запроса:', error);
+    res.status(500).json({ error: 'Не удалось удалить запрос', message: error.message });
+  }
+});
 
 
 

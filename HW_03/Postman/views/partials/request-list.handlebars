@@ -2,7 +2,10 @@
 <!-- requests - массив, содержимое повторится для всех элементов -->
 <div class="history-item {{toLowerCase method}}" data-id="{{id}}">
     <!-- toLowerCase все к нижнему регистру -->
-    <div>{{method}}</div>
-    <div>{{url}}</div>
+    <div class="request-info">
+        <div>{{method}}</div>
+        <div>{{url}}</div>
+    </div>
+    <button class="delete-btn" data-id="{{id}}" title="Удалить запрос">×</button>
 </div>
 {{/each}}

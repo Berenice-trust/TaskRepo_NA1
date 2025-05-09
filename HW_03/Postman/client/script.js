@@ -20,6 +20,45 @@ document.addEventListener('DOMContentLoaded', function() {
     // скрываю секцию ответа
     responseSection.classList.add('hidden');
     
+
+    // Функция для отображения модального окна подтверждения (вместо confirm)
+    function showConfirmModal(message) {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('confirmModalOverlay');
+            const messageElement = document.getElementById('confirmMessage');
+            const confirmBtn = document.getElementById('confirmBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            
+            messageElement.textContent = message;
+            
+            // Показываем модальное окно
+            modal.classList.add('visible');
+            
+            // Обработчики для кнопок
+            const handleConfirm = () => {
+                modal.classList.remove('visible');
+                cleanupListeners();
+                setTimeout(() => resolve(true), 300); // Ждем завершения анимации
+            };
+            
+            const handleCancel = () => {
+                modal.classList.remove('visible');
+                cleanupListeners();
+                setTimeout(() => resolve(false), 300); // Ждем завершения анимации
+            };
+            
+            // Очистка обработчиков событий
+            const cleanupListeners = () => {
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
+            
+            // Назначаем обработчики
+            confirmBtn.addEventListener('click', handleConfirm);
+            cancelBtn.addEventListener('click', handleCancel);
+        });
+    }
+
     // Скрытие тела запроса для get и delete    
     function toggleRequestBodyVisibility() {
         // GET и DELETE без тела
@@ -605,7 +644,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 showToast('Запрос сохранен', 'success');
                 // Обновляем список запросов
-                loadSavedRequests();
+                loadSavedRequests(true);
             } else {
                 showToast('Ошибка при сохранении запроса', 'error');
             }
@@ -634,11 +673,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Загрузка сохраненных запросов и отображение в списке
-    async function loadSavedRequests() {
+    async function loadSavedRequests(forceRefresh = false) {
         try {
+             // временная метка для обхода кеша, если надо (????? спорное решение)
+             // ??? в последствии стоит обход кэширования прибрать, но пока оставлю
+            const url = forceRefresh 
+            ? `/api/request-list-html?_t=${Date.now()}`
+            : '/api/request-list-html';
 
-            //запрашиваем готовый HTML с запросами
-            const response = await fetch('/api/request-list-html'); // новый эндпоинт
+            // Запрашиваем HTML (с новым URL если forceRefresh=true)
+             const response = await fetch(url);
 
             if (!response.ok) {
                 throw new Error(`Error! status: ${response.status}`);
@@ -653,25 +697,56 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.history-item').forEach(item => {
                 item.addEventListener('click', async function() {
                   
-                // Получаем ID запроса из атрибута data-id
-                const requestId = parseInt(this.getAttribute('data-id'));
-                
-                // Загружаем полный список запросов
-                const response = await fetch('/api/saved-requests');
-                if (response.ok) {
-                    const requests = await response.json();
-                    // Находим нужный запрос по ID
-                    const request = requests.find(r => r.id === requestId);
-                    if (request) {
-                    // Загружаем запрос в форму
-                    loadSavedRequest(request);
+                        // Игнорируем клики по кнопке удаления
+                    if (e.target.classList.contains('delete-btn')) {
+                        return;
                     }
-                }
+
+                    // Получаем ID запроса из атрибута data-id
+                    const requestId = parseInt(this.getAttribute('data-id'));
+                    
+                    // Загружаем полный список запросов
+                    const response = await fetch('/api/saved-requests');
+                    if (response.ok) {
+                        const requests = await response.json();
+                        // Находим нужный запрос по ID
+                        const request = requests.find(r => r.id === requestId);
+                        if (request) {
+                            // Загружаем запрос в форму
+                            loadSavedRequest(request);
+                        }
+                    }
                 });
             });
 
-
-
+            // обработчик для кнопок удаления
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', async function(e) {
+                    e.stopPropagation(); // Останавливаем всплытие, чтобы не срабатывал клик по элементу истории
+                    
+                    const requestId = this.getAttribute('data-id');
+                    const confirmed = await showConfirmModal('Вы уверены, что хотите удалить этот запрос?');
+        
+                    if (confirmed) {
+                        try {
+                            const response = await fetch(`/api/delete-request/${requestId}`, {
+                                method: 'DELETE'
+                            });
+                            
+                            if (response.ok) {
+                                // Если удаление прошло успешно, обновляем список
+                                loadSavedRequests(true);
+                                showToast('Запрос удален', 'success');
+                            } else {
+                                showToast('Ошибка при удалении запроса', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Ошибка при удалении запроса:', error);
+                            showToast('Ошибка при удалении запроса', 'error');
+                        }
+                    }
+                });
+            });
 
                
         } catch (error) {
