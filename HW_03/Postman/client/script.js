@@ -604,6 +604,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (response.ok) {
                 showToast('Запрос сохранен', 'success');
+                // Обновляем список запросов
+                loadSavedRequests();
             } else {
                 showToast('Ошибка при сохранении запроса', 'error');
             }
@@ -634,32 +636,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Загрузка сохраненных запросов и отображение в списке
     async function loadSavedRequests() {
         try {
-            const response = await fetch('/api/saved-requests');
-            if (response.ok) {
-                const savedRequests = await response.json();
-                const historyContainer = document.querySelector('.history-list');
-                
-                // Очищаем существующие элементы
-                historyContainer.innerHTML = '';
-                
-                // Добавляем новые
-                savedRequests.forEach(request => {
-                    const historyItem = document.createElement('div');
-                    historyItem.className = `history-item ${request.method.toLowerCase()}`;
-                    
-                    historyItem.innerHTML = `
-                        <div>${request.method}</div>
-                        <div>${request.url}</div>
-                    `;
-                    
-                    // Добавляем обработчик клика для загрузки запроса
-                    historyItem.addEventListener('click', function() {
-                        loadSavedRequest(request);
-                    });
-                    
-                    historyContainer.appendChild(historyItem);
-                });
+
+            //запрашиваем готовый HTML с запросами
+            const response = await fetch('/api/request-list-html'); // новый эндпоинт
+
+            if (!response.ok) {
+                throw new Error(`Error! status: ${response.status}`);
             }
+
+             // Получаем HTML и вставляем его в контейнер
+            const html = await response.text();
+            const historyList = document.querySelector('.history-list');
+            historyList.innerHTML = html;
+
+            // Добавляем обработчики событий для элементов списка
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.addEventListener('click', async function() {
+                  
+                // Получаем ID запроса из атрибута data-id
+                const requestId = parseInt(this.getAttribute('data-id'));
+                
+                // Загружаем полный список запросов
+                const response = await fetch('/api/saved-requests');
+                if (response.ok) {
+                    const requests = await response.json();
+                    // Находим нужный запрос по ID
+                    const request = requests.find(r => r.id === requestId);
+                    if (request) {
+                    // Загружаем запрос в форму
+                    loadSavedRequest(request);
+                    }
+                }
+                });
+            });
+
+
+
+
+               
         } catch (error) {
             console.error('Ошибка загрузки сохраненных запросов:', error);
         }

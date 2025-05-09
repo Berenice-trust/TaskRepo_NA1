@@ -9,8 +9,28 @@ const {
   validateRequestBody 
 } = require('./shared/validators'); // модуль валидации
 
+const exphbs = require('express-handlebars'); // шаблонизатор
+
 const app = express();
 const PORT = process.env.PORT || 3003;
+
+
+// Настройка Handlebars
+const hbs = exphbs.create({
+  extname: '.handlebars',   // расширение файлов шаблонов, можно .hbs
+  defaultLayout: false, // без layout
+  helpers: { // для toLowerCase
+    toLowerCase: function(str) {
+      return str.toLowerCase();
+    }
+  }
+});
+
+// для использования Handlebars
+app.engine('handlebars', hbs.engine); //движок
+app.set('view engine', 'handlebars');
+app.set('views', path.join(__dirname, 'views'));
+
 
 // Middleware для JSON и URL-encoded
 app.use(express.json());
@@ -278,6 +298,28 @@ app.post('/proxy', async (req, res) => {
 
 });
 
+// новый эендпоинт для списка сохраненных запросов, вернет HTML
+// Используем Handlebars 
+app.get('/api/request-list-html', (req, res) => {
+  const savedRequestsPath = path.join(__dirname, 'data', 'saved_requests.json');
+  
+  try {
+    let requests = [];
+    if (fs.existsSync(savedRequestsPath)) {
+      const data = fs.readFileSync(savedRequestsPath, 'utf8');
+      requests = JSON.parse(data);
+    }
+    
+    // Рендерим шаблон для handlebars
+    res.render('partials/request-list', { 
+      requests: requests,
+      layout: false
+    });
+  } catch (error) {
+    console.error('Ошибка получения списка запросов:', error);
+    res.status(500).send('<div class="error">Ошибка загрузки списка запросов</div>');
+  }
+});
 
 // API для получения сохраненных запросов
 app.get('/api/saved-requests', (req, res) => {

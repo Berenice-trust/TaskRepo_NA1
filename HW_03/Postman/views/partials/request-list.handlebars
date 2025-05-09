@@ -1,0 +1,8 @@
+{{#each requests}}
+<!-- requests - массив, содержимое повторится для всех элементов -->
+<div class="history-item {{toLowerCase method}}" data-id="{{id}}">
+    <!-- toLowerCase все к нижнему регистру -->
+    <div>{{method}}</div>
+    <div>{{url}}</div>
+</div>
+{{/each}}
