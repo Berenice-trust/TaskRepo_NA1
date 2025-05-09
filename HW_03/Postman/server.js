@@ -259,13 +259,6 @@ app.post('/proxy', async (req, res) => {
     }
 
 
-
-
-
-
-
-
-
     
       const proxyResponse = {
         status: response.status,
@@ -280,11 +273,6 @@ app.post('/proxy', async (req, res) => {
       
  
     
-
-
-
-
-
 
 
   } catch (error) {
@@ -304,11 +292,30 @@ app.get('/api/request-list-html', (req, res) => {
   const savedRequestsPath = path.join(__dirname, 'data', 'saved_requests.json');
   
   try {
+    // получаем информацию из файла (размер и дату модификации) для кеширования
+    const stats = fs.statSync(savedRequestsPath);
+    const lastModified = stats.mtime.toUTCString(); // дата модификации
+    
+    //Создаем Etag для кеширования (из размера и времени модификации)
+    const etag = `"${stats.size}-${Date.parse(lastModified)}"`; 
+    
+     // Проверяем, тот же ETag у клиента
+     if (req.headers['if-none-match'] === etag) {
+      // Если контент не изменился, возвращаем 304 Not Modified
+      return res.status(304).end();
+    }
+  // загрузка данных из файла
     let requests = [];
     if (fs.existsSync(savedRequestsPath)) {
       const data = fs.readFileSync(savedRequestsPath, 'utf8');
       requests = JSON.parse(data);
     }
+
+    // заголовки для кеширования
+    res.set({
+      'ETag': etag, // иднтификатор версии
+      'Cache-Control': 'max-age=600', // кешируем на минуту
+    }); 
     
     // Рендерим шаблон для handlebars
     res.render('partials/request-list', { 

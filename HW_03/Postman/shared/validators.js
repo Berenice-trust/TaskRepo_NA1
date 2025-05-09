@@ -9,8 +9,25 @@ function validateUrl(url) {
         message: 'URL не может быть пустым'
       };
     }
+
+    // проверка на знак ? в параметрах
+    if (/\?.*\?/.test(url)) {
+      return {
+        valid: false,
+        message: 'Недопустимый символ "?" в параметрах URL'
+      };
+    }
+
+    // Проверка на кириллицу в URL
+    if (/[а-яА-ЯёЁ]/.test(url)) {
+      return {
+        valid: false,
+        message: 'URL не может содержать кириллические символы'
+      };
+    }
+
     try {
-      new URL(url);
+      const urlObj = new URL(url);
       return {
         valid: true
       };
