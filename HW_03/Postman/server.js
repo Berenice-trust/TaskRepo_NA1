@@ -393,7 +393,42 @@ app.delete('/api/delete-request/:id', (req, res) => {
   }
 });
 
-
+// для обновления существующего запроса
+app.put('/api/update-request/:id', (req, res) => {
+  const requestId = parseInt(req.params.id);
+  const updatedRequest = req.body;
+  const savedRequestsPath = path.join(__dirname, 'data', 'saved_requests.json');
+  
+  try {
+    // Проверяем существование файла
+    if (!fs.existsSync(savedRequestsPath)) {
+      return res.status(404).json({ error: 'Файл с запросами не найден' });
+    }
+    
+    // Читаем текущий список запросов
+    const data = fs.readFileSync(savedRequestsPath, 'utf8');
+    let requests = JSON.parse(data);
+    
+    // Ищем запрос с указанным ID
+    const requestIndex = requests.findIndex(request => request.id === requestId);
+    
+    if (requestIndex === -1) {
+      return res.status(404).json({ error: 'Запрос не найден' });
+    }
+    
+    // Обновляем запрос, сохраняя timestamp создания
+    updatedRequest.timestamp = requests[requestIndex].timestamp;
+    requests[requestIndex] = updatedRequest;
+    
+    // Записываем обновленный список обратно в файл
+    fs.writeFileSync(savedRequestsPath, JSON.stringify(requests, null, 2));
+    
+    res.json({ success: true, message: 'Запрос успешно обновлен' });
+  } catch (error) {
+    console.error('Ошибка при обновлении запроса:', error);
+    res.status(500).json({ error: 'Не удалось обновить запрос', message: error.message });
+  }
+});
 
 // Тест
 app.get('/api/test', (req, res) => {

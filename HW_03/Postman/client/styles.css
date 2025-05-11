@@ -14,8 +14,10 @@
     
     --color-save: #7558f3;
     --color-send: #3f9abd;
-    --color-clear: #753a6f;
+    --color-clear: #f36e6e;
     --color-add: #3f9abd;
+    --color-update: #753a6f;      /* Светло-пурпурный */
+    --color-update-hover: #8e3883; 
     --color-remove: #f85c88;
 
     --color-error: #e74c3c;
@@ -272,6 +274,22 @@ textarea {
 
 .save-btn { background-color: var(--color-save); }
 .send-btn { background-color: var(--color-send); }
+.update-btn { background-color: var(--color-update); }
+.btn.update-btn {
+    transition: background-color 0.3s, opacity 0.3s;
+}
+.btn.update-btn[disabled] {
+    background-color: #6c757d; /* Серый цвет */
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+.btn.update-btn:not([disabled]) {
+    cursor: pointer;
+}
+.btn.update-btn:not([disabled]):hover {
+    background-color: var(--color-update-hover);
+}
+
 .clear-btn {
     background-color: var(--color-clear);
     color: var(--color-white);

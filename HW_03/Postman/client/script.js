@@ -17,6 +17,40 @@ document.addEventListener('DOMContentLoaded', function() {
     const responseHeadersList = document.querySelector('.response-headers');
     const responseBodyElement = document.querySelector('.response-body');
 
+    let currentRequestId = null; 
+    let formChanged = false; // Флаг для отслеживания изменений в форме
+    const updateBtn = document.querySelector('.update-btn');
+
+        // Функция для управления состоянием кнопки "Обновить"
+    function updateButtonState() {
+        // Активируем кнопку только если есть ID запроса И форма была изменена
+        updateBtn.disabled = !(currentRequestId && formChanged);
+    }
+
+    // Функция для добавления отслеживания изменений к элементу
+    function addChangeTracker(element) {
+        element.addEventListener('input', function() {
+            formChanged = true;
+            updateButtonState();
+        });
+        
+        // Для селектов нужно использовать 'change' вместо 'input'
+        if (element.tagName === 'SELECT') {
+            element.addEventListener('change', function() {
+                formChanged = true;
+                updateButtonState();
+            });
+        }
+    }
+
+    // Добавляем отслеживание для основных полей
+    addChangeTracker(methodSelect);
+    addChangeTracker(urlInput);
+    addChangeTracker(requestBody);
+    addChangeTracker(contentTypeSelect);
+
+
+
     // скрываю секцию ответа
     responseSection.classList.add('hidden');
     
@@ -120,6 +154,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        addChangeTracker(paramRow.querySelector('.param-key'));
+        addChangeTracker(paramRow.querySelector('.param-value'));
+
         paramsContainer.appendChild(paramRow);
     }
 
@@ -200,9 +237,15 @@ document.addEventListener('DOMContentLoaded', function() {
         headerRow.querySelector('.remove-btn').addEventListener('click', function() {
             headerRow.remove();
         });
+
+        addChangeTracker(headerRow.querySelector('.header-key'));
+        addChangeTracker(headerRow.querySelector('.header-value'));
             
         headersContainer.appendChild(headerRow);
     }
+
+
+
 
     // обработчики для кнопок
     addParamBtn.addEventListener('click', addParam);
@@ -654,6 +697,70 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+
+    // обработчики кнопки "Обновить"
+updateBtn.addEventListener('click', async function() {
+    // Проверяем, что у нас есть ID запроса для обновления
+    if (!currentRequestId) {
+        showToast('Сначала загрузите запрос для обновления', 'info');
+        return;
+    }
+    
+    // Собираем данные запроса (так же как при сохранении)
+    const requestData = {
+        id: currentRequestId, // добавляем ID для идентификации запроса
+        method: methodSelect.value,
+        url: urlInput.value,
+        params: [],
+        headers: [],
+        body: bodySection.classList.contains('hidden') ? '' : requestBody.value,
+        contentType: contentTypeSelect.value
+    };
+    
+    // Собираем параметры
+    document.querySelectorAll('.param-row').forEach(row => {
+        const key = row.querySelector('.param-key').value.trim();
+        const value = row.querySelector('.param-value').value.trim();
+        if (key) {
+            requestData.params.push({ key, value });
+        }
+    });
+    
+    // Собираем заголовки
+    document.querySelectorAll('.header-row').forEach(row => {
+        const key = row.querySelector('.header-key').value.trim();
+        const value = row.querySelector('.header-value').value.trim();
+        if (key) {
+            requestData.headers.push({ key, value });
+        }
+    });
+    
+    try {
+        const response = await fetch(`/api/update-request/${currentRequestId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        if (response.ok) {
+            formChanged = false; // Сбрасываем флаг изменений после успешного обновления
+            updateBtn.disabled = true; // Деактивируем кнопку
+            showToast('Запрос обновлен', 'success');
+            // Обновляем список с принудительным обновлением
+            loadSavedRequests(true);
+        } else {
+            showToast('Ошибка при обновлении запроса', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка при обновлении запроса', 'error');
+    }
+});
+
+
+
     // Функция для toast-уведомлений (всплывает справа внизу)
     function showToast(message, type = 'info') {
         const toast = document.createElement('div');
@@ -695,7 +802,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Добавляем обработчики событий для элементов списка
             document.querySelectorAll('.history-item').forEach(item => {
-                item.addEventListener('click', async function() {
+                item.addEventListener('click', async function(e) {
                   
                         // Игнорируем клики по кнопке удаления
                     if (e.target.classList.contains('delete-btn')) {
@@ -756,6 +863,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // заполняет данными форму сохраненного запроса
     function loadSavedRequest(request) {
+         // Сохраняем ID загруженного запроса и активируем кнопку обновления
+        currentRequestId = request.id;
+        // updateBtn.disabled = false;
+        formChanged = false; // Сбрасываем флаг изменений при загрузке
+        updateBtn.disabled = true; // Кнопка неактивна, пока нет изменений
         methodSelect.value = request.method;
         urlInput.value = request.url;
         
@@ -841,6 +953,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                     // нажатие кнопки ОЧИСТИТЬ
 
     clearBtn.addEventListener('click', function() {
+
+          // Сбрасываем ID текущего запроса и деактивируем кнопку
+        currentRequestId = null;
+        updateBtn.disabled = true;
+
         urlInput.value = '';
         methodSelect.value = 'GET';
         
