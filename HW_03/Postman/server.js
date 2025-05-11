@@ -9,6 +9,17 @@ const {
   validateRequestBody 
 } = require('./shared/validators'); // модуль валидации
 
+
+// Обработка необработанных исключений
+process.on('uncaughtException', (err) => {
+  console.error('Необработанное исключение:', err);
+  // Не завершаем процесс, чтобы PM2 мог корректно перезапустить
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Необработанное отклонение Promise:', reason);
+});
+
 const exphbs = require('express-handlebars'); // шаблонизатор
 
 const app = express();
@@ -53,40 +64,50 @@ app.use('/shared', express.static(path.join(__dirname, 'shared'))); //общие
 // });
 
                   // сохранение запроса в saved_requests.json
-function saveRequest(requestData) {
-  const savedRequestsPath = path.join(__dirname, 'data', 'saved_requests.json');
-                        
-  // Создаем папку data, если она не существует
-  if (!fs.existsSync(path.join(__dirname, 'data'))) {
-    fs.mkdirSync(path.join(__dirname, 'data'));
-  }
-                        
-  let savedRequests = [];
-  try {
-    if (fs.existsSync(savedRequestsPath)) {
-      const data = fs.readFileSync(savedRequestsPath, 'utf8');
-      savedRequests = JSON.parse(data); //JSON в массив объектов
-    }
-  } catch (error) {
-      console.error('Ошибка чтения файла сохраненных запросов:', error);
-    }
-                        
-  // Добавляем запрос
-  const newRequest = {
-    id: Date.now(),   // уникальный Id, соответствует времени создания
-    ...requestData,   // копирует все свойства из requestData
-    timestamp: new Date().toISOString()
-  };
-                          
-  // в начало массива
-  savedRequests.unshift(newRequest);
+// Заменить функцию saveRequest на:
 
-  // Записываем обновленный список
-  try {
-    fs.writeFileSync(savedRequestsPath, JSON.stringify(savedRequests, null, 2));
-  } catch (error) {
-    console.error('Ошибка записи сохраненных запросов:', error);
-  }
+function saveRequest(requestData) {
+  return new Promise((resolve, reject) => {
+    const savedRequestsPath = path.join(__dirname, 'data', 'saved_requests.json');
+    
+    // Создаем папку data, если она не существует (асинхронно)
+    fs.mkdir(path.join(__dirname, 'data'), { recursive: true }, (err) => {
+      if (err && err.code !== 'EEXIST') {
+        console.error('Ошибка создания директории:', err);
+        return reject(err);
+      }
+      
+      // Чтение файла асинхронно
+      fs.readFile(savedRequestsPath, 'utf8', (err, data) => {
+        let savedRequests = [];
+        
+        if (!err) {
+          try {
+            savedRequests = JSON.parse(data);
+          } catch (parseErr) {
+            console.error('Ошибка парсинга JSON:', parseErr);
+          }
+        }
+        
+        const newRequest = {
+          id: Date.now(),
+          ...requestData,
+          timestamp: new Date().toISOString()
+        };
+        
+        savedRequests.unshift(newRequest);
+        
+        // Запись в файл асинхронно
+        fs.writeFile(savedRequestsPath, JSON.stringify(savedRequests, null, 2), (err) => {
+          if (err) {
+            console.error('Ошибка записи сохраненных запросов:', err);
+            return reject(err);
+          }
+          resolve();
+        });
+      });
+    });
+  });
 }
 
 
@@ -359,9 +380,9 @@ app.get('/api/saved-requests', (req, res) => {
 
 
 // API для сохранения запроса по кнопке
-app.post('/api/save-request', (req, res) => {
+app.post('/api/save-request', async (req, res) => {
   try {
-    saveRequest(req.body);
+    await saveRequest(req.body);
     res.json({ success: true });
   } catch (error) {
     console.error('Ошибка сохранения запроса:', error);
