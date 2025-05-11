@@ -42,6 +42,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'client')));
 app.use('/shared', express.static(path.join(__dirname, 'shared'))); //общие, там файл с валидацией
 
+// Отключение кеширования для всех ответов
+// app.use((req, res, next) => {
+//   res.set({
+//     'Cache-Control': 'no-cache, no-store, must-revalidate',
+//     'Pragma': 'no-cache',
+//     'Expires': '0'
+//   });
+//   next();
+// });
 
                   // сохранение запроса в saved_requests.json
 function saveRequest(requestData) {
@@ -295,35 +304,36 @@ app.get('/api/request-list-html', (req, res) => {
   
   try {
     // получаем информацию из файла (размер и дату модификации) для кеширования
-    const stats = fs.statSync(savedRequestsPath);
-    const lastModified = stats.mtime.toUTCString(); // дата модификации
+    //const stats = fs.statSync(savedRequestsPath);
+    //const lastModified = stats.mtime.toUTCString(); // дата модификации
     
     //Создаем Etag для кеширования (из размера и времени модификации)
-    const etag = `"${stats.size}-${Date.parse(lastModified)}"`; 
+    //const etag = `"${stats.size}-${Date.parse(lastModified)}"`; 
     
      // Проверяем, тот же ETag у клиента
-     if (req.headers['if-none-match'] === etag) {
+     //if (req.headers['if-none-match'] === etag) {
       // Если контент не изменился, возвращаем 304 Not Modified
-      return res.status(304).end();
-    }
-  // загрузка данных из файла
-    let requests = [];
-    if (fs.existsSync(savedRequestsPath)) {
-      const data = fs.readFileSync(savedRequestsPath, 'utf8');
-      requests = JSON.parse(data);
-    }
+      //return res.status(304).end();
 
-    // заголовки для кеширования
-    res.set({
-      'ETag': etag, // иднтификатор версии
-      'Cache-Control': 'max-age=1', // кешируем на минуту
-    }); 
-    
-    // Рендерим шаблон для handlebars
-    res.render('partials/request-list', { 
-      requests: requests,
-      layout: false
-    });
+      // загрузка данных из файла
+      let requests = [];
+      if (fs.existsSync(savedRequestsPath)) {
+        const data = fs.readFileSync(savedRequestsPath, 'utf8');
+        requests = JSON.parse(data);
+      }
+
+       // заголовки для кеширования
+    // res.set({
+    //   'Cache-Control': 'no-cache, no-store, must-revalidate',
+    //   'Pragma': 'no-cache',
+    //   'Expires': '0'
+    // }); 
+      
+      // Рендерим шаблон для handlebars
+      res.render('partials/request-list', { 
+        requests: requests,
+        layout: false
+      });
   } catch (error) {
     console.error('Ошибка получения списка запросов:', error);
     res.status(500).send('<div class="error">Ошибка загрузки списка запросов</div>');
@@ -438,8 +448,25 @@ app.get('/api/test', (req, res) => {
 });
 
 // Запуск сервера 3003
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Сервер запущен на http://5.187.3.57:${PORT}`);
 });
 
+// Обработка сигналов завершения для корректного освобождения порта
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
 
+// Функция корректного завершения работы
+function gracefulShutdown() {
+  console.log('Получен сигнал завершения, закрываем сервер...');
+  server.close(() => {
+    console.log('Сервер успешно закрыт');
+    process.exit(0);
+  });
+  
+  // Если сервер зависнет, принудительное завершение через 5 секунд
+  setTimeout(() => {
+    console.error('Не удалось закрыть сервер корректно, принудительное завершение');
+    process.exit(1);
+  }, 5000);
+}
