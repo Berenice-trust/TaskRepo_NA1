@@ -10,15 +10,15 @@ const {
 } = require('./shared/validators'); // модуль валидации
 
 
-// Обработка необработанных исключений
-process.on('uncaughtException', (err) => {
-  console.error('Необработанное исключение:', err);
-  // Не завершаем процесс, чтобы PM2 мог корректно перезапустить
-});
+// // Обработка необработанных исключений
+// process.on('uncaughtException', (err) => {
+//   console.error('Необработанное исключение:', err);
+//   // Не завершаем процесс, чтобы PM2 мог корректно перезапустить
+// });
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Необработанное отклонение Promise:', reason);
-});
+// process.on('unhandledRejection', (reason, promise) => {
+//   console.error('Необработанное отклонение Promise:', reason);
+// });
 
 const exphbs = require('express-handlebars'); // шаблонизатор
 
