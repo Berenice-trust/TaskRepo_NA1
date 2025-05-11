@@ -30,6 +30,8 @@ const hbs = exphbs.create({
 app.engine('handlebars', hbs.engine); //движок
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
+// Умное кеширование: только в production режиме
+//app.set('view cache', process.env.NODE_ENV === 'production');
 
 
 // Middleware для JSON и URL-encoded
