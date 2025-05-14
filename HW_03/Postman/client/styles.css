@@ -78,6 +78,16 @@ body {
     position: relative;
 }
 
+.history-item .request-info div:nth-child(2) {
+    overflow: hidden;
+    
+    /* Запрет переноса строки */
+    white-space: nowrap;
+    
+    /* Добавление многоточия в конце */
+    text-overflow: ellipsis;
+}
+
 .history-item:hover {
     opacity: 0.9;
 }
