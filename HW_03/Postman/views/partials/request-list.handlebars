@@ -1,6 +1,7 @@
 {{#each requests}}
 <!-- requests - массив, содержимое повторится для всех элементов -->
-<div class="history-item {{toLowerCase method}}" data-id="{{id}}">
+{{!-- <div class="history-item {{toLowerCase method}}" data-id="{{id}}"> --}}
+<div class="history-item {{toLowerCase method}} {{#if (isEqual id ../currentId)}}active-request{{/if}}" data-id="{{id}}">
     <!-- toLowerCase все к нижнему регистру -->
     <div class="request-info">
         <div>{{method}}</div>

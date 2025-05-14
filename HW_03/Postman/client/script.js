@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const responseHeadersList = document.querySelector('.response-headers');
     const responseBodyElement = document.querySelector('.response-body');
 
+    let isUpdatingUI = false;
     let currentRequestId = null; 
     let formChanged = false; // Флаг для отслеживания изменений в форме
     const updateBtn = document.querySelector('.update-btn');
@@ -779,23 +780,28 @@ updateBtn.addEventListener('click', async function() {
         }, 3000);
     }
 
-    // Загрузка сохраненных запросов и отображение в списке
+
+
+
+
+
+
+        // Загрузка сохраненных запросов и отображение в списке
     async function loadSavedRequests(forceRefresh = false) {
         try {
-             // временная метка для обхода кеша, если надо (????? спорное решение)
-             // ??? в последствии стоит обход кэширования прибрать, но пока оставлю
+            // временная метка для обхода кеша, если надо
             const url = forceRefresh 
-            ? `/api/request-list-html?_t=${Date.now()}`
-            : '/api/request-list-html';
+                ? `/api/request-list-html?_t=${Date.now()}&currentId=${currentRequestId || ''}`
+                : `/api/request-list-html?currentId=${currentRequestId || ''}`;
 
             // Запрашиваем HTML (с новым URL если forceRefresh=true)
-             const response = await fetch(url);
+            const response = await fetch(url);
 
             if (!response.ok) {
                 throw new Error(`Error! status: ${response.status}`);
             }
 
-             // Получаем HTML и вставляем его в контейнер
+            // Получаем HTML и вставляем его в контейнер
             const html = await response.text();
             const historyList = document.querySelector('.history-list');
             historyList.innerHTML = html;
@@ -803,8 +809,7 @@ updateBtn.addEventListener('click', async function() {
             // Добавляем обработчики событий для элементов списка
             document.querySelectorAll('.history-item').forEach(item => {
                 item.addEventListener('click', async function(e) {
-                  
-                        // Игнорируем клики по кнопке удаления
+                    // Игнорируем клики по кнопке удаления
                     if (e.target.classList.contains('delete-btn')) {
                         return;
                     }
@@ -812,16 +817,17 @@ updateBtn.addEventListener('click', async function() {
                     // Получаем ID запроса из атрибута data-id
                     const requestId = parseInt(this.getAttribute('data-id'));
                     
-                    // Загружаем полный список запросов
-                    const response = await fetch('/api/saved-requests');
-                    if (response.ok) {
+                    // Загружаем запрос по ID
+                    try {
+                        const response = await fetch('/api/saved-requests');
                         const requests = await response.json();
-                        // Находим нужный запрос по ID
                         const request = requests.find(r => r.id === requestId);
+                        
                         if (request) {
-                            // Загружаем запрос в форму
-                            loadSavedRequest(request);
+                            loadSavedRequest(request);  // Загружаем запрос в форму
                         }
+                    } catch (error) {
+                        console.error('Ошибка загрузки запроса:', error);
                     }
                 });
             });
@@ -854,18 +860,33 @@ updateBtn.addEventListener('click', async function() {
                     }
                 });
             });
-
-               
+            
         } catch (error) {
             console.error('Ошибка загрузки сохраненных запросов:', error);
         }
     }
 
+
+
+
+
+
+
+
+
     // заполняет данными форму сохраненного запроса
     function loadSavedRequest(request) {
          // Сохраняем ID загруженного запроса и активируем кнопку обновления
         currentRequestId = request.id;
+
+        // Предотвращаем циклические вызовы
+        if (!isUpdatingUI) {
+            isUpdatingUI = true;
+            loadSavedRequests(true); // обновляем список для отображения активного запроса
+            isUpdatingUI = false;
+        }
         // updateBtn.disabled = false;
+        loadSavedRequests(true); // обновляем список чтобы отобразить активный запрос
         formChanged = false; // Сбрасываем флаг изменений при загрузке
         updateBtn.disabled = true; // Кнопка неактивна, пока нет изменений
         methodSelect.value = request.method;

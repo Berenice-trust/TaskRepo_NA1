@@ -33,6 +33,9 @@ const hbs = exphbs.create({
   helpers: { // для toLowerCase
     toLowerCase: function(str) {
       return str.toLowerCase();
+    },
+    isEqual: function(a, b) { // для сравнения
+      return a === b;
     }
   }
 });
@@ -350,11 +353,15 @@ app.get('/api/request-list-html', (req, res) => {
     //   'Expires': '0'
     // }); 
       
-      // Рендерим шаблон для handlebars
+    // Получаем ID текущего запроса
+    const currentId = parseInt(req.query.currentId) || null;
+      // Рендерим шаблон для handlebars, передаем currentId
       res.render('partials/request-list', { 
         requests: requests,
+        currentId: currentId,
         layout: false
       });
+
   } catch (error) {
     console.error('Ошибка получения списка запросов:', error);
     res.status(500).send('<div class="error">Ошибка загрузки списка запросов</div>');

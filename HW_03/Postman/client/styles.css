@@ -527,3 +527,9 @@ h4 {
   .btn-secondary:hover {
     background-color: #5a6268;
   }
+
+  .history-item.active-request {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-left: 4px solid var(--color-send);
+        margin-left: -4px;  /* Компенсация бордера */
+  }
