@@ -648,6 +648,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                         // нажатие кнопки СОХРАНИТЬ
 
     saveBtn.addEventListener('click', async function() {
+            // Запоминаем, был ли это новый запрос или редактирование существующего
+        const isNewRequest = !currentRequestId;
+
         // данные запроса
         const requestData = {
             method: methodSelect.value,
@@ -686,7 +689,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             if (response.ok) {
+                const result = await response.json(); // Получаем ID сохраненного запроса
+                
                 showToast('Запрос сохранен', 'success');
+                 // Если это был новый запрос, устанавливаем его как текущий
+                if (isNewRequest && result.id) {
+                    currentRequestId = result.id;
+                }
+
                 // Обновляем список запросов
                 loadSavedRequests(true);
             } else {

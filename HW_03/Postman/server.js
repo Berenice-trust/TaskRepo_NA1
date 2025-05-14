@@ -106,7 +106,7 @@ function saveRequest(requestData) {
             console.error('Ошибка записи сохраненных запросов:', err);
             return reject(err);
           }
-          resolve();
+          resolve(newRequest);
         });
       });
     });
@@ -389,11 +389,15 @@ app.get('/api/saved-requests', (req, res) => {
 // API для сохранения запроса по кнопке
 app.post('/api/save-request', async (req, res) => {
   try {
-    await saveRequest(req.body);
-    res.json({ success: true });
+    const requestData = req.body;
+
+    const newRequest = await saveRequest(req.body); // сохраняем результат
+    
+    // Теперь переменная newRequest определена
+    res.json({ success: true, id: newRequest.id });
   } catch (error) {
     console.error('Ошибка сохранения запроса:', error);
-    res.status(500).json({ error: 'Не удалось сохранить запрос' });
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
