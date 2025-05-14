@@ -651,6 +651,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Запоминаем, был ли это новый запрос или редактирование существующего
         const isNewRequest = !currentRequestId;
 
+            // Проверяем URL перед сохранением
+        const result = validators.validateUrl(urlInput.value);
+        if (!result.valid) {
+            showError(urlInput, result.message);
+            return; // Прерываем сохранение
+        }
+
         // данные запроса
         const requestData = {
             method: methodSelect.value,
