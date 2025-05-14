@@ -691,11 +691,17 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 const result = await response.json(); // Получаем ID сохраненного запроса
                 
-                showToast('Запрос сохранен', 'success');
-                 // Если это был новый запрос, устанавливаем его как текущий
-                if (isNewRequest && result.id) {
+                 // Устанавливаем новый ID как текущий!
+                if (result.id) {
                     currentRequestId = result.id;
                 }
+
+                formChanged = false; // Сбрасываем флаг изменений после успешного сохранения
+                showToast('Запрос сохранен', 'success');
+                 // Если это был новый запрос, устанавливаем его как текущий
+                // if (isNewRequest && result.id) {
+                //     currentRequestId = result.id;
+                // }
 
                 // Обновляем список запросов
                 loadSavedRequests(true);
