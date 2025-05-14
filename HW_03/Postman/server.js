@@ -393,7 +393,6 @@ app.post('/api/save-request', async (req, res) => {
 
     const newRequest = await saveRequest(req.body); // сохраняем результат
     
-    // Теперь переменная newRequest определена
     res.json({ success: true, id: newRequest.id });
   } catch (error) {
     console.error('Ошибка сохранения запроса:', error);
