@@ -166,6 +166,7 @@ async function compressFile(sourcePath, destPath) {
 
 // Основная функция программы
 async function autoCompress(dirPath) {
+  console.time('Время сжатия');
   try {
     // Проверяем валидность директории
     await validateDirectory(dirPath);
@@ -218,6 +219,7 @@ async function autoCompress(dirPath) {
     console.error(`Ошибка: ${error.message}`);
     process.exit(1);
   }
+  console.timeEnd('Время сжатия');
 }
 
 
