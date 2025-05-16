@@ -39,3 +39,4 @@ form-submissions.json
 # Игнорировать папку data и её содержимое
 /HW_03/Postman/data/
 /HW_03/Postman/data/saved_requests.json
+HW_04/AutoCompressor/folder/subfolder/subsubfolder/huge.dat
