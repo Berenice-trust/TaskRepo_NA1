@@ -6,6 +6,7 @@ const { promisify } = require('util'); // функция, чтобы проми�
 const { pipeline } = require('stream'); // функция для работы с потоками
 const { createReadStream, createWriteStream } = require('fs'); // функции для создания потоков
 const async = require('async'); // добавляем модуль async
+const chalk = require('chalk');
 
 
 // промисифицируем pipeline в версию с Promises
@@ -139,7 +140,7 @@ async function needsCompression(originalPath, gzipPath) {
 async function compressFile(sourcePath, destPath) {
   const fileName = path.basename(sourcePath);
   //console.log(`Начинаю сжатие ${sourcePath}`);
-  console.log(`Начинаю сжатие ${fileName}`);
+  console.log(chalk.yellow(`Начинаю сжатие ${fileName}`));
   
   try {
     // Создаем потоки для чтения, сжатия и записи
@@ -151,10 +152,10 @@ async function compressFile(sourcePath, destPath) {
     await pipelinePromise(readStream, gzipStream, writeStream);
     
     //console.log(`Сжатие завершено: ${destPath}`);
-    console.log(`Сжатие завершено: ${fileName} в ${destPath}`);
+    console.log(chalk.green(`Сжатие завершено: ${fileName} в ${destPath}`));
 
   } catch (error) {
-    console.error(`Ошибка при сжатии ${sourcePath}: ${error.message}`);
+    console.error(chalk.red(`Ошибка при сжатии ${sourcePath}: ${error.message}`));
     throw error;
   }
 }
@@ -297,10 +298,10 @@ async function clearGzipFiles(dirPath) {
     for (const gzFile of gzFiles) {
       try {
         await fs.unlink(gzFile); // fs.promises.unlink удаляет файл
-        console.log(`Удален файл: ${gzFile}`);
+        console.log(chalk.magenta(`Удален файл: ${gzFile}`));
         deletedCount++;
       } catch (error) {
-        console.error(`Ошибка при удалении файла ${gzFile}: ${error.message}`);
+        console.error(chalk.red(`Ошибка при удалении файла ${gzFile}: ${error.message}`));
       }
     }
     
@@ -402,7 +403,7 @@ async function smartParallelProcessing(fileItems, processFileFn, parallelThreads
         const processedCount = fileItems.length - queue.length();
         
          // Информация о запуске задачи (используем taskId вместо queue.running())
-        console.log(`[Поток ${taskId}] Старт: ${fileName} (${processedCount}/${fileItems.length})`);
+        console.log(chalk.cyan(`[Поток ${taskId}] Старт: ${fileName} (${processedCount}/${fileItems.length})`));
         
         // с async/await не вышло, ругается на callback... переделала на then/catch
         processFileFn(fileInfo)
@@ -412,7 +413,7 @@ async function smartParallelProcessing(fileItems, processFileFn, parallelThreads
 
                   // Вычисляем время обработки и количество оставшихся файлов
             const processingTime = ((Date.now() - startTime) / 1000).toFixed(2);
-            console.log(`[Поток ${taskId}] Готово: ${fileName} за ${processingTime}с (осталось: ${queue.length()})`);
+            console.log(chalk.green(`[Поток ${taskId}] Готово: ${fileName} за ${processingTime}с (осталось: ${queue.length()})`));
           
            // Сообщаем очереди, что задача завершена
             callback(); // освобождаем потом, функция async.queue сама следит за количеством потоков
@@ -420,7 +421,7 @@ async function smartParallelProcessing(fileItems, processFileFn, parallelThreads
           .catch (error => {
             // В случае ошибки добавляем информацию об ошибке
           results.push({ success: false, path: fileInfo.source, error: error.message });
-          console.error(`[Поток] Ошибка: ${path.basename(fileInfo.source)} - ${error.message}`);
+          console.error(chalk.red.bold(`[Поток ${taskId}] Ошибка: ${fileName} - ${error.message}`));
 
              // Сообщаем очереди, что задача завершена (даже с ошибкой)
           callback();
@@ -440,7 +441,8 @@ async function smartParallelProcessing(fileItems, processFileFn, parallelThreads
       });
 
     // Вывод информации о начале обработки
-      console.log(`Запускаю ${parallelThreads} параллельных ${getStreamsWord(parallelThreads)}...`);
+      console.log(chalk.bgBlue(`Запускаю ${parallelThreads} параллельных ${getStreamsWord(parallelThreads)}...`));
+      //console.log(chalk.bold.blue(`Запускаю ${parallelThreads} параллельных ${getStreamsWord(parallelThreads)}...`));
         
         // Добавляем все файлы в очередь
         // после настройки очереди
