@@ -158,12 +158,6 @@ async function compressFile(sourcePath, destPath) {
 
 
 
-
-
-
-
-
-
 // Основная функция программы
 async function autoCompress(dirPath) {
   console.time('Время сжатия');

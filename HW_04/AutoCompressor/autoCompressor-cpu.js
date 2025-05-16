@@ -160,12 +160,6 @@ async function compressFile(sourcePath, destPath) {
 }
 
 
-
-
-
-
-
-
                             //Собственно автокомпрессор
 
 /**
@@ -265,10 +259,6 @@ async function autoCompress(dirPath) {
 
 
 
-
-
-
-
     console.log(`Сканирование завершено ${os.EOL}`); // os.EOL, хоть должно работать и \n
   } catch (error) {
     console.error(`Ошибка: ${error.message}`);
@@ -276,10 +266,6 @@ async function autoCompress(dirPath) {
   }
   console.timeEnd('Время сжатия');
 }
-
-
-
-
 
 
 
