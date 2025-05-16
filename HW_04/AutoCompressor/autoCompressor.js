@@ -148,9 +148,10 @@ async function compressFile(sourcePath, destPath) {
     // Связываем потоки 
     await pipelinePromise(readStream, gzipStream, writeStream);
     
-    console.log(`Сжатие завершено: ${destPath}`);
+    return { success: true, path: sourcePath, destPath };
+    //console.log(`Сжатие завершено: ${destPath}`);
   } catch (error) {
-    console.error(`Ошибка при сжатии ${sourcePath}: ${error.message}`);
+    console.error(`Ошибка при сжатии ${path.basename(sourcePath)}: ${error.message}`);
     throw error;
   }
 }

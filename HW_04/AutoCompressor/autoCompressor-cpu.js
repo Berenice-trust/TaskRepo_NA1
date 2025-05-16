@@ -239,7 +239,7 @@ async function autoCompress(dirPath) {
       async function processFile(fileInfo) {
         try {
           await compressFile(fileInfo.source, fileInfo.dest); // путь к исходному файлу и путь к архиву
-          return { success: true, path: fileInfo.source };
+          return { success: true, path: fileInfo.source, destPath: fileInfo.dest };
         } catch (error) {
           console.error(`Ошибка при обработке файла ${fileInfo.source}: ${error.message}`);
           return { success: false, path: fileInfo.source, error: error.message };
@@ -247,7 +247,9 @@ async function autoCompress(dirPath) {
       }
       
       // Обрабатываем файлы параллельно пакетами
-      const results = await processBatches(filesToProcess, processFile, parallelCount);
+      //const results = await processBatches(filesToProcess, processFile, parallelCount);
+      // Обрабатываем файлы с умным распределением нагрузки
+      const results = await smartParallelProcessing(filesToProcess, processFile, parallelCount);
       
       // Подсчитываем статистику
       const successCount = results.filter(r => r.success).length;
@@ -368,33 +370,110 @@ function getOptimalParallelCount() {
 }
 
 
+// /**
+//  * Обрабатывает массив элементов параллельно
+//  * @param {Array} items - элементы для обработки
+//  * @param {Function} processFn - функция обработки одного элемента
+//  * @param {number} parallelCount - сколько обрабатывать параллельно
+//  * @returns {Promise<Array>} - результаты обработки
+//  */
+// async function processBatches(items, processFn, parallelCount) {
+//   const results = [];
+  
+//   // Обрабатываем пакетами по parallelCount элементов
+//   for (let i = 0; i < items.length; i += parallelCount) {
+//     // вырезаем нужный кусок массива для обработки
+//     const batch = items.slice(i, i + parallelCount);
+//     console.log(`Обрабатываю пакет из ${batch.length} ${getFilesWord(batch.length)}...`);
+    
+//     // Запускаем обработку выделенных элементов параллельно
+//     const batchResults = await Promise.all(batch.map(processFn)); // сжимаем файлы параллельно
+//     // принимает массив промисов и ждет результат всех
+
+//     // Добавляем результаты в общий массив
+//     results.push(...batchResults);
+//   }
+  
+//   return results;
+// }
+
 /**
- * Обрабатывает массив элементов параллельно
- * @param {Array} items - элементы для обработки
- * @param {Function} processFn - функция обработки одного элемента
- * @param {number} parallelCount - сколько обрабатывать параллельно
+ * обрабатывает массив параллельно, запуская новую задачу сразу после завершения любой задачи
+ * @param {Array} fileItems - файлы для обработки
+ * @param {Function} processFileFn - функция обработки одного файла
+ * @param {number} parallelThreads - сколько потоков обрабатывать параллельно
  * @returns {Promise<Array>} - результаты обработки
  */
-async function processBatches(items, processFn, parallelCount) {
+async function smartParallelProcessing(fileItems, processFileFn, parallelThreads) {
+
   const results = [];
   
-  // Обрабатываем пакетами по parallelCount элементов
-  for (let i = 0; i < items.length; i += parallelCount) {
-    // вырезаем нужный кусок массива для обработки
-    const batch = items.slice(i, i + parallelCount);
-    console.log(`Обрабатываю пакет из ${batch.length} ${getFilesWord(batch.length)}...`);
-    
-    // Запускаем обработку выделенных элементов параллельно
-    const batchResults = await Promise.all(batch.map(processFn)); // сжимаем файлы параллельно
-    // принимает массив промисов и ждет результат всех
-
-    // Добавляем результаты в общий массив
-    results.push(...batchResults);
-  }
+  // Если нет файлов для обработки, возвращаем пустой массив
+  if (fileItems.length === 0) return results;
   
-  return results;
+  // копия массива для работы, чтобы не испортить оригинал
+  const remainingFiles = [...fileItems];
+  
+  // Создаем промис, который разрешится, когда все задачи завершатся
+  return new Promise(resolve => {
+    
+    let activeTasksCount = 0; // Счетчик активных задач
+    
+    // Функция для обработки одного файла
+    async function processNextFile() {
+      // Если все файлы обработаны - выходим
+      if (remainingFiles.length === 0) return;
+      
+      // Берем следующий файл из списка
+      const fileInfo = remainingFiles.shift(); // берем первый элемент и удаляем его из массива
+      const fileName = path.basename(fileInfo.source);
+      const threadId = activeTasksCount + 1; // номер потока
+      
+      // Увеличиваем счетчик активных задач
+      activeTasksCount++;
+      
+      try {
+        // Обрабатываем файл
+        const startTime = Date.now(); // время начала обработки
+        console.log(`[Поток ${threadId}] Старт: ${fileName} (${fileItems.length - remainingFiles.length}/${fileItems.length})`);
+        const result = await processFileFn(fileInfo);
+        
+        // Добавляем результат в общий массив
+        results.push(result);
+        //console.log(`Завершена обработка файла: ${fileName}`);
+        const processingTime = ((Date.now() - startTime) / 1000).toFixed(2);
+        console.log(`[Поток ${threadId}] Готово: ${fileName} за ${processingTime}с (осталось: ${remainingFiles.length})`);
+      } catch (error) {
+        // В случае ошибки добавляем информацию об ошибке
+        results.push({ success: false, path: fileInfo.source, error: error.message });
+        console.error(`[Поток ${threadId}] Ошибка: ${fileName} - ${error.message}`);
+      }
+      
+      // Уменьшаем счетчик активных задач
+      activeTasksCount--;
+      
+      // Проверяем, не завершились ли все задачи
+      if (activeTasksCount === 0 && remainingFiles.length === 0) {
+        // Все задачи завершены, возвращаем результаты
+        resolve(results);
+        return;
+      }
+      
+      // Запускаем следующую задачу
+      processNextFile();
+    }
+    
+    // Определяем, сколько задач запустить изначально
+    const startCount = Math.min(parallelThreads, fileItems.length);
+    
+    console.log(`Запускаю ${startCount} параллельных ${getStreamsWord(startCount)}...`);
+    
+    // Запускаем начальные задачи по количеству потоков
+    for (let i = 0; i < startCount; i++) {
+      processNextFile();
+    }
+  });
 }
-
 
 
                 // Запуски
@@ -406,6 +485,3 @@ if (shouldClear) {
   // Иначе выполняем обычное сжатие
   autoCompress(directoryPath);
 }
-
-// Запуск программы
-//autoCompress(directoryPath);
