@@ -287,6 +287,9 @@ function getFilesWord(count) {
 }
 
 
+
+                // Запуски
+
 if (shouldClear) {
   // Если указан флаг --clear, удаляем .gz файлы
   clearGzipFiles(directoryPath);
