@@ -1,6 +1,9 @@
 require('dotenv').config(); // для работы с переменными окружения
 const express = require('express');
 const mysql = require('mysql2');
+const Handlebars = require('handlebars'); //шаблоны
+const fs = require('fs'); 
+const path = require('path'); 
 
 
 // Подключение к MariaDB
@@ -37,12 +40,43 @@ const app = express();
 const PORT = 3004;
 
 app.use(express.static('client'));
-app.use(express.json()); //json в js объекты
+app.use(express.json({ limit: '50mb' })); // увеличиваем лимит на размер JSON
+//app.use(express.urlencoded({ limit: '50mb', extended: true })); 
 
 // Тест
-app.get('/test', (req, res) => {
-  res.json({ message: 'Сервер работает!' });
+// app.get('/test', (req, res) => {
+//   res.json({ message: 'Сервер работает!' });
+// });
+
+// Загружаем шаблон 
+const templatePath = path.join(__dirname, 'templates', 'results.handlebars');
+const templateSource = fs.readFileSync(templatePath, 'utf8');
+const resultsTemplate = Handlebars.compile(templateSource);
+
+
+// API для получения шаблона для результатов
+app.post('/api/render-results', (req, res) => {
+  const { results, totalCount, isLimited } = req.body;
+  
+   if (Array.isArray(results) && results.length > 0) {
+    const columns = Object.keys(results[0]);
+    
+    const data = {
+      results: results,
+      columns: columns,
+      totalCount: totalCount || results.length,
+      isLimited: isLimited || false
+    };
+    
+    const html = resultsTemplate(data);
+    res.json({ html });
+  } else {
+    res.json({ html: '<p class="success-message">Запрос выполнен успешно!</p>' });
+  }
 });
+
+
+
 
 
 // для SQL запросов
@@ -60,9 +94,25 @@ app.post('/api/execute-sql', (req, res) => {
     if (err) {
       return res.json({ error: err.message });
     }
-    
-    // Если успех 
+
     res.json({ results });
+    
+
+//   // Ограничу результат, а то когда слишком большой не грузится
+//     if (Array.isArray(results) && results.length > 10000) {
+//       const limitedResults = results.slice(0, 10000);
+      
+//       res.json({ 
+//         results: limitedResults,
+//         totalCount: results.length,
+//         isLimited: true
+//       });
+//     } else {
+//       res.json({ results });
+//     }
+
+
+   
   });
 });
 

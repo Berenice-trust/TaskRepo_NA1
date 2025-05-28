@@ -68,24 +68,17 @@ body {
     margin-bottom: 15px;
 }
 
-/* Таблица результатов */
 .results-table {
     border-collapse: collapse;
     width: 100%;
     border: 1px solid #ddd;
     margin-top: 10px;
+    color: #333;  
 }
+
 
 .table-header {
     background-color: #f8f9fa;
-}
-
-.header-cell {
-    padding: 12px 8px;
-    border: 1px solid #ddd;
-    background-color: #e9ecef;
-    font-weight: bold;
-    text-align: left;
 }
 
 .table-row:nth-child(even) {
@@ -103,13 +96,6 @@ body {
     color: #333;
 }
 
-.results-table {
-    border-collapse: collapse;
-    width: 100%;
-    border: 1px solid #ddd;
-    margin-top: 10px;
-    color: #333;  
-}
 
 .header-cell {
     padding: 12px 8px;

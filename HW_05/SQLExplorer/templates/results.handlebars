@@ -1,0 +1,22 @@
+<div class="results-container">
+  <h3 class="results-title">
+    Результаты запроса: {{totalCount}} записей
+    {{#if isLimited}} (показано первых 100){{/if}}
+  </h3>
+  <table class="results-table">
+    <thead><tr class="table-header">
+      {{#each columns}}
+        <th class="header-cell">{{this}}</th>
+      {{/each}}
+    </tr></thead>
+    <tbody>
+      {{#each results}}
+        <tr class="table-row">
+          {{#each ../columns}}
+            <td class="data-cell">{{lookup ../this this}}</td>
+          {{/each}}
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>

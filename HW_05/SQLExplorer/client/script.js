@@ -16,7 +16,7 @@ executeBtn.addEventListener('click', async () => {
     resultSection.innerHTML = '<p class="loading-message">Выполняется запрос...</p>';
     
     try {
-        // Отправляем запрос на сервер
+        // запрос на сервер
         const response = await fetch('/api/execute-sql', {
             method: 'POST',
             headers: {
@@ -27,7 +27,7 @@ executeBtn.addEventListener('click', async () => {
         
         const data = await response.json();
         
-        // Показываем результат
+        // результат
         displayResult(data);
         
     } catch (error) {
@@ -36,48 +36,66 @@ executeBtn.addEventListener('click', async () => {
 });
 
 // Функция отображения результата
-function displayResult(data) {
+async function displayResult(data) {
     if (data.error) {
-        // Показываем ошибку
         resultSection.innerHTML = '<p class="error-message">Ошибка: ' + data.error + '</p>';
     } else {
-        // Показываем успешный результат
-        const results = data.results;
         
-        if (Array.isArray(results) && results.length > 0) {
-            // Создаём HTML таблицу
-            let tableHTML = '<div class="results-container">';
-            tableHTML += '<h3 class="results-title">Результаты запроса:</h3>';
-            tableHTML += '<table class="results-table">';
-            
-            // Заголовки таблицы (названия столбцов)
-            tableHTML += '<thead><tr class="table-header">';
-            const columns = Object.keys(results[0]);
-            columns.forEach(column => {
-                tableHTML += `<th class="header-cell">${column}</th>`;
-            });
-            tableHTML += '</tr></thead>';
-            
-            // Строки с данными
-            tableHTML += '<tbody>';
-            results.forEach(row => {
-                tableHTML += '<tr class="table-row">';
-                columns.forEach(column => {
-                    tableHTML += `<td class="data-cell">${row[column] || ''}</td>`;
-                });
-                tableHTML += '</tr>';
-            });
-            tableHTML += '</tbody>';
-            
-            tableHTML += '</table></div>';
-            resultSection.innerHTML = tableHTML;
-            
-        } else {
-            // Для INSERT/UPDATE/DELETE запросов
-            resultSection.innerHTML = '<p class="success-message">Запрос выполнен успешно!</p>';
-        }
+        const renderResponse = await fetch('/api/render-results', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ results: data.results })
+        });
+        
+        const renderData = await renderResponse.json();
+        resultSection.innerHTML = renderData.html;
     }
 }
+
+
+
+// Функция отображения результата по простому.... без шаблонов
+// function displayResult(data) {
+//     if (data.error) {
+//         // ошибка
+//         resultSection.innerHTML = '<p class="error-message">Ошибка: ' + data.error + '</p>';
+//     } else {
+//         // успешный результат
+//         const results = data.results;
+        
+//         if (Array.isArray(results) && results.length > 0) {
+//             // HTML таблица
+//             let tableHTML = '<div class="results-container">';
+//             tableHTML += '<h3 class="results-title">Результаты запроса:</h3>';
+//             tableHTML += '<table class="results-table">';
+            
+//             // Заголовки таблицы (названия столбцов)
+//             tableHTML += '<thead><tr class="table-header">';
+//             const columns = Object.keys(results[0]);
+//             columns.forEach(column => {
+//                 tableHTML += `<th class="header-cell">${column}</th>`;
+//             });
+//             tableHTML += '</tr></thead>';
+            
+//             // Строки с данными
+//             tableHTML += '<tbody>';
+//             results.forEach(row => {
+//                 tableHTML += '<tr class="table-row">';
+//                 columns.forEach(column => {
+//                     tableHTML += `<td class="data-cell">${row[column] || ''}</td>`;
+//                 });
+//                 tableHTML += '</tr>';
+//             });
+//             tableHTML += '</tbody>';
+            
+//             tableHTML += '</table></div>';
+//             resultSection.innerHTML = tableHTML;
+            
+//         } else {
+//             resultSection.innerHTML = '<p class="success-message">Запрос выполнен успешно!</p>';
+//         }
+//     }
+// }
 
 function setQuery(query) {
     sqlInput.value = query;
