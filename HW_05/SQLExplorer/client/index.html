@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQLExplorer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>SQLExplorer</h1>
+        <p>Введите SQL запрос и нажмите "Выполнить"</p>
+        
+        <div class="query-section">
+            <textarea class="sql-input" placeholder="SELECT * FROM persons;"></textarea>
+
+             <div class="examples">
+                <h4>Примеры готовых запросов:</h4>
+                <button onclick="setQuery('SELECT * FROM persons;')">Все записи</button>
+                <button onclick="setQuery('DESCRIBE persons;')">Структура таблицы</button>
+                <button onclick="setQuery('SHOW TABLES;')">Список таблиц</button>
+                <button onclick="setQuery('INSERT INTO persons (fam, im, otch) VALUES (\'Тестов\', \'Тест\', \'Тестович\');')">Добавить запись</button>
+            </div>
+
+            <button class="execute-btn">Выполнить запрос</button>
+        </div>
+        
+        <div class="result-section">
+            <!-- для результатов -->
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

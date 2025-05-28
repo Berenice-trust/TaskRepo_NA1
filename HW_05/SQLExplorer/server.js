@@ -11,13 +11,22 @@ const connection = mysql.createConnection({
   database: 'learning_db'
 });
 
+// Обработка разрыва соединения
+connection.on('error', (err) => {
+  console.log('Ошибка соединения с БД:', err);
+  if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+    console.log('Переподключение к БД...');
+    connection.connect(); // переподключение
+  }
+});
+
 // Проверка подключения
 connection.connect((err) => {
   if (err) {
-    console.error('Ошибка подключения к базе данных:', err);
+    console.error('Ошибка подключения к MariaDB:', err);
     return;
   }
-  console.log('Подключение к MariaDB успешно!');
+  console.log('Подключились к MariaDB!');
 });
 
 
@@ -34,6 +43,33 @@ app.use(express.json()); //json в js объекты
 app.get('/test', (req, res) => {
   res.json({ message: 'Сервер работает!' });
 });
+
+
+// для SQL запросов
+app.post('/api/execute-sql', (req, res) => {
+  const { query } = req.body; 
+    // короткая запись для const query = req.body.query;
+  
+  // если запрос пустой - ошибка
+  if (!query) {
+    return res.status(400).json({ error: 'SQL запрос не может быть пустым' });
+  }
+  
+  //  SQL запрос
+  connection.query(query, (err, results) => {
+    if (err) {
+      return res.json({ error: err.message });
+    }
+    
+    // Если успех 
+    res.json({ results });
+  });
+});
+
+
+
+
+
 
 // Запуск сервера
 app.listen(PORT, () => {
