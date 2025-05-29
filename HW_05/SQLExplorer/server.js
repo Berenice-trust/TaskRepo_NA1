@@ -7,30 +7,35 @@ const path = require('path');
 
 
 // Подключение к MariaDB
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: process.env.DB_PASSWORD, // Пароль из переменной окружения
-  database: 'learning_db'
+  database: 'learning_db',
+  connectionLimit: 10,
+  queueLimit: 0,
+//   acquireTimeout: 60000,
+  waitForConnections: true,
+  
 });
 
 // Обработка разрыва соединения
-connection.on('error', (err) => {
-  console.log('Ошибка соединения с БД:', err);
-  if(err.code === 'PROTOCOL_CONNECTION_LOST') {
-    console.log('Переподключение к БД...');
-    connection.connect(); // переподключение
-  }
-});
+// connection.on('error', (err) => {
+//   console.log('Ошибка соединения с БД:', err);
+//   if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+//     console.log('Переподключение к БД...');
+//     connection.connect(); // переподключение
+//   }
+// });
 
 // Проверка подключения
-connection.connect((err) => {
-  if (err) {
-    console.error('Ошибка подключения к MariaDB:', err);
-    return;
-  }
-  console.log('Подключились к MariaDB!');
-});
+// connection.connect((err) => {
+//   if (err) {
+//     console.error('Ошибка подключения к MariaDB:', err);
+//     return;
+//   }
+//   console.log('Подключились к MariaDB!');
+// });
 
 
 
