@@ -1,7 +1,7 @@
 require('dotenv').config(); // для работы с переменными окружения
 const express = require('express');
 const mysql = require('mysql2');
-const Handlebars = require('handlebars'); //шаблоны
+// const Handlebars = require('handlebars'); //шаблоны
 const fs = require('fs'); 
 const path = require('path'); 
 
@@ -49,33 +49,44 @@ app.use(express.json({ limit: '50mb' })); // увеличиваем лимит �
 // });
 
 // Загружаем шаблон 
-const templatePath = path.join(__dirname, 'templates', 'results.handlebars');
-const templateSource = fs.readFileSync(templatePath, 'utf8');
-const resultsTemplate = Handlebars.compile(templateSource);
+// const templatePath = path.join(__dirname, 'templates', 'results.handlebars');
+// const templateSource = fs.readFileSync(templatePath, 'utf8');
+// const resultsTemplate = Handlebars.compile(templateSource);
 
 
 // API для получения шаблона для результатов
-app.post('/api/render-results', (req, res) => {
-  const { results, totalCount, isLimited } = req.body;
+// app.post('/api/render-results', (req, res) => {
+//   const { results, totalCount, isLimited } = req.body;
   
-   if (Array.isArray(results) && results.length > 0) {
-    const columns = Object.keys(results[0]);
+//    if (Array.isArray(results) && results.length > 0) {
+//     const columns = Object.keys(results[0]);
     
-    const data = {
-      results: results,
-      columns: columns,
-      totalCount: totalCount || results.length,
-      isLimited: isLimited || false
-    };
+//     const data = {
+//       results: results,
+//       columns: columns,
+//       totalCount: totalCount || results.length,
+//       isLimited: isLimited || false
+//     };
     
-    const html = resultsTemplate(data);
-    res.json({ html });
-  } else {
-    res.json({ html: '<p class="success-message">Запрос выполнен успешно!</p>' });
+//     const html = resultsTemplate(data);
+//     res.json({ html });
+//   } else {
+//     res.json({ html: '<p class="success-message">Запрос выполнен успешно!</p>' });
+//   }
+// });
+
+
+
+// API для получения шаблона
+app.get('/api/template/results', (req, res) => {
+  try {
+    const templatePath = path.join(__dirname, 'templates', 'results.handlebars');
+    const templateSource = fs.readFileSync(templatePath, 'utf8');
+    res.json({ template: templateSource });
+  } catch (error) {
+    res.status(500).json({ error: 'Не удалось загрузить шаблон' });
   }
 });
-
-
 
 
 

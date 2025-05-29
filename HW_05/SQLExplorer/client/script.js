@@ -2,6 +2,29 @@ const sqlInput = document.querySelector('.sql-input');
 const executeBtn = document.querySelector('.execute-btn');
 const resultSection = document.querySelector('.result-section');
 
+
+// для шаблона
+let resultsTemplate = null;
+
+// Загрузка шаблона Handlebars
+async function loadTemplate() {
+  try {
+    const response = await fetch('/api/template/results');
+    const data = await response.json();
+    resultsTemplate = Handlebars.compile(data.template);
+    console.log('Шаблон загружен!');
+  } catch (error) {
+    console.error('Ошибка загрузки шаблона:', error);
+  }
+}
+
+loadTemplate();
+
+
+
+
+
+
 // Обработчик кнопки Выполнить
 executeBtn.addEventListener('click', async () => {
     const query = sqlInput.value.trim();
@@ -39,18 +62,38 @@ executeBtn.addEventListener('click', async () => {
 async function displayResult(data) {
     if (data.error) {
         resultSection.innerHTML = '<p class="error-message">Ошибка: ' + data.error + '</p>';
+        return;
+    } 
+    
+    const results = data.results;
+    
+    if (Array.isArray(results) && results.length > 0) {
+        if (!resultsTemplate) {
+            resultSection.innerHTML = '<p class="error-message">Шаблон не загружен</p>';
+            return;
+        }
+        
+        // Подготавливаем данные для шаблона
+        const columns = Object.keys(results[0]);
+        const templateData = {
+            results: results,
+            columns: columns,
+            totalCount: results.length,
+            isLimited: false
+        };
+        
+        // Рендерим HTML через Handlebars
+        const html = resultsTemplate(templateData);
+        resultSection.innerHTML = html;
+        
     } else {
-        
-        const renderResponse = await fetch('/api/render-results', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ results: data.results })
-        });
-        
-        const renderData = await renderResponse.json();
-        resultSection.innerHTML = renderData.html;
+        resultSection.innerHTML = '<p class="success-message">Запрос выполнен успешно!</p>';
     }
+    
+    
 }
+
+
 
 
 
