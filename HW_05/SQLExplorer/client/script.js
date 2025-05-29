@@ -1,6 +1,7 @@
 const sqlInput = document.querySelector('.sql-input');
 const executeBtn = document.querySelector('.execute-btn');
 const resultSection = document.querySelector('.result-section');
+const databaseSelect = document.querySelector('.database-select'); 
 
 
 // для шаблона
@@ -18,7 +19,39 @@ async function loadTemplate() {
   }
 }
 
-loadTemplate();
+// Загружаем список баз данных
+async function loadDatabases() {
+  try {
+    const response = await fetch('/api/databases');
+    const data = await response.json();
+    
+    if (data.databases) {
+      // Очищаем select 
+      databaseSelect.innerHTML = '<option value="">Выберите базу данных...</option>';
+      
+      // Добавляем базы данных
+      data.databases.forEach(db => {
+        const option = document.createElement('option');
+        option.value = db;
+        option.textContent = db;
+        databaseSelect.appendChild(option);
+      });
+      
+      // Выбираем learning_db по умолчанию
+      if (data.databases.includes('learning_db')) {
+        databaseSelect.value = 'learning_db';
+      }
+      
+      console.log('Базы данных загружены:', data.databases);
+    }
+  } catch (error) {
+    console.error('Ошибка загрузки баз данных:', error);
+  }
+}
+
+
+
+
 
 
 
@@ -28,6 +61,7 @@ loadTemplate();
 // Обработчик кнопки Выполнить
 executeBtn.addEventListener('click', async () => {
     const query = sqlInput.value.trim();
+    const database = databaseSelect.value; 
     
     // Проверяем что запрос не пустой
     if (!query) {
@@ -35,6 +69,12 @@ executeBtn.addEventListener('click', async () => {
         return;
     }
     
+    if (!database) {
+        resultSection.innerHTML = '<p class="error-message">Выберите базу данных!</p>';
+        return;
+    }
+
+
     // Загрузка...
     resultSection.innerHTML = '<p class="loading-message">Выполняется запрос...</p>';
     
@@ -45,7 +85,7 @@ executeBtn.addEventListener('click', async () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ query })
+            body: JSON.stringify({ query, database }) // запрос и базу данных
         });
         
         const data = await response.json();
@@ -144,3 +184,6 @@ function setQuery(query) {
     sqlInput.value = query;
     sqlInput.focus(); 
 }
+
+loadTemplate();
+loadDatabases();

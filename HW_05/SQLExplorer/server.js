@@ -8,14 +8,15 @@ const path = require('path');
 
 // Подключение к MariaDB
 const connection = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: process.env.DB_PASSWORD, // Пароль из переменной окружения
-  database: 'learning_db',
-  connectionLimit: 10,
-  queueLimit: 0,
+    host: 'localhost',
+    user: 'root',
+    password: process.env.DB_PASSWORD, // Пароль из переменной окружения
+    //   database: 'learning_db',
+    connectionLimit: 10,
+    queueLimit: 0,
 //   acquireTimeout: 60000,
-  waitForConnections: true,
+    multipleStatements: true,
+    waitForConnections: true,
   
 });
 
@@ -93,25 +94,53 @@ app.get('/api/template/results', (req, res) => {
   }
 });
 
-
+// API для получения списка баз данных
+app.get('/api/databases', (req, res) => {
+  connection.query('SHOW DATABASES', (err, results) => {
+    if (err) {
+      return res.json({ error: err.message });
+    }
+    
+    // Фильтруем системные базы данных
+    const databases = results
+      .map(row => row.Database)
+      .filter(db => !['information_schema', 'performance_schema', 'mysql', 'sys'].includes(db));
+    
+    res.json({ databases });
+  });
+});
 
 // для SQL запросов
 app.post('/api/execute-sql', (req, res) => {
-  const { query } = req.body; 
+  const { query, database } = req.body; 
     // короткая запись для const query = req.body.query;
   
   // если запрос пустой - ошибка
   if (!query) {
     return res.status(400).json({ error: 'SQL запрос не может быть пустым' });
   }
+
+  if (!database) {
+    return res.status(400).json({ error: 'Выберите базу данных' });
+  }
   
+
+  // Переключаемся на выбранную базу перед выполнением запроса
+  const fullQuery = `USE \`${database}\`; ${query}`;
+  
+
   //  SQL запрос
-  connection.query(query, (err, results) => {
+  connection.query(fullQuery, (err, results) => {
     if (err) {
       return res.json({ error: err.message });
     }
 
-    res.json({ results });
+      // Если несколько запросов -> результат последнего
+    const finalResult = Array.isArray(results) && results.length > 1 
+      ? results[results.length - 1] 
+      : results;
+
+    res.json({ results: finalResult });
     
 
 //   // Ограничу результат, а то когда слишком большой не грузится

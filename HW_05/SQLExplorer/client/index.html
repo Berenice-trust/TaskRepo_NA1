@@ -12,14 +12,28 @@
         <p>Введите SQL запрос и нажмите "Выполнить"</p>
         
         <div class="query-section">
+
+                <!-- Выбор базы -->
+            <div class="database-section">
+                <label for="database-select">База данных:</label>
+                <select class="database-select" id="database-select">
+                    <option value="">Выберите базу данных...</option>
+                </select>
+            </div>
+
+
+
             <textarea class="sql-input" placeholder="SELECT * FROM persons;"></textarea>
 
              <div class="examples">
                 <h4>Примеры готовых запросов:</h4>
-                <button onclick="setQuery('SELECT * FROM persons;')">Все записи</button>
-                <button onclick="setQuery('DESCRIBE persons;')">Структура таблицы</button>
+                <button onclick="setQuery('SHOW DATABASES;')">Все базы данных</button>
+                <!-- <button onclick="setQuery('SELECT DATABASE();')">Текущая база</button> -->
                 <button onclick="setQuery('SHOW TABLES;')">Список таблиц</button>
-                <button onclick="setQuery('INSERT INTO persons (fam, im, otch) VALUES (\'Тестов\', \'Тест\', \'Тестович\');')">Добавить запись</button>
+                <button onclick="setQuery('SHOW TABLE STATUS;')">Размеры таблиц</button>
+                <button onclick="setQuery('SELECT VERSION();')">Версия MySQL</button>
+                 <button onclick="setQuery('SHOW CHARACTER SET;')">Кодировки</button>
+                  <button onclick="setQuery('SELECT NOW();')">Текущее время</button>
             </div>
 
             <button class="execute-btn">Выполнить запрос</button>
