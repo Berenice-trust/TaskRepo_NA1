@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FileStorage</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>FileStorage</h1>
+        
+        <div class="upload-section">
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="fileInput">Выберите файл:</label>
+                    <input type="file" id="fileInput" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="commentInput">Комментарий:</label>
+                    <input type="text" id="commentInput" placeholder="Описание файла">
+                </div>
+                
+                <button type="submit">Загрузить файл</button>
+            </form>
+        </div>
+        
+        <div class="files-section">
+            <h2>Загруженные файлы</h2>
+            <div id="filesList" class="files-list">
+                <p>Список файлов </p>
+            </div>
+
+             <template id="fileItemTemplate">
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-name">📁 Имя файла</div>
+                        <div class="file-size">💾 Размер: 0 KB</div>
+                        <div class="file-date">📅 Дата загрузки</div>
+                         <div class="file-comment">💬 Комментарий</div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="download-btn">Скачать</button>
+                        <button class="delete-btn">Удалить</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+     <script src="script.js"></script>
+</body>
+</html>

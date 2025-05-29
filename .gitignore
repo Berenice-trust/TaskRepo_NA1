@@ -40,3 +40,7 @@ form-submissions.json
 /HW_03/Postman/data/
 /HW_03/Postman/data/saved_requests.json
 HW_04/AutoCompressor/folder/subfolder/subsubfolder/huge.dat
+
+# FileStorage - загруженные файлы и метаданные
+HW_05/FileStorage/uploads/
+HW_05/FileStorage/files-metadata.json
