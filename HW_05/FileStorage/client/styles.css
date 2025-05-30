@@ -121,7 +121,6 @@ button:hover {
     line-height: 20px;
     color: #000;
     font-size: 12px;
-<<<<<<< HEAD
 }
 
 .file-item {
@@ -196,6 +195,4 @@ button:hover {
 
 .delete-btn:hover {
     background-color: #c82333;
-=======
->>>>>>> 70935e07bd6d7577670728d25fd0cfce24f20a83
 }

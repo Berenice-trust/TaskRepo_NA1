@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // console.log('Страница загружена!');
 
     const form = document.getElementById('uploadForm');
-<<<<<<< HEAD
     loadFilesList();
 
 
@@ -88,8 +87,6 @@ document.addEventListener('DOMContentLoaded', function() {
         window.open('/api/download/' + fileId, '_blank');
     };
 
-=======
->>>>>>> 70935e07bd6d7577670728d25fd0cfce24f20a83
 
     // Обработчик отправки формы
     form.addEventListener('submit', async function(e) {
@@ -137,11 +134,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Очищаем форму
                 fileInput.value = '';
                 commentInput.value = '';
-<<<<<<< HEAD
 
                 loadFilesList();
-=======
->>>>>>> 70935e07bd6d7577670728d25fd0cfce24f20a83
             } else {
                 alert('Ошибка: ' + result.message);
             }

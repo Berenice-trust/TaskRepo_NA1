@@ -2,10 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-<<<<<<< HEAD
 const progress = require('progress-stream'); 
-=======
->>>>>>> 70935e07bd6d7577670728d25fd0cfce24f20a83
 
 const app = express();
 const PORT = 3005;
@@ -13,7 +10,6 @@ const PORT = 3005;
 app.use(express.static('client'));
 
 
-<<<<<<< HEAD
 // Файл для хранения комментариев и данных
 const METADATA_FILE = 'files-metadata.json';
 
@@ -142,43 +138,6 @@ app.get('/api/files', (req, res) => {
             });
 
             // ответ
-=======
-// Настройка Multer 
-const upload = multer({
-    dest: 'uploads/'  // ← сюда сохраняем файлы
-});
-
-
-// Загрузка файла
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    console.log('Получили файл:', req.file);
-    
-    res.json({
-        success: true,
-        message: 'Файл загружен!',
-        filename: req.file.filename
-    });
-});
-
-// API для списка файлов
-app.get('/api/files', (req, res) => {
-    try {
-        // Читаем папку uploads
-        const files = fs.readdirSync('uploads/')
-            .filter(filename => filename !== '.gitkeep') // Исключаем служебные файлы
-            .map(filename => {
-                const filePath = path.join('uploads', filename);
-                const stats = fs.statSync(filePath);
-                
-                return {
-                    id: filename,
-                    name: filename, // системное имя
-                    size: stats.size,
-                    uploadDate: stats.birthtime.toISOString()
-                };
-            });
-
->>>>>>> 70935e07bd6d7577670728d25fd0cfce24f20a83
         res.json({ 
             success: true, 
             files: files 
@@ -193,7 +152,6 @@ app.get('/api/files', (req, res) => {
     }
 });
 
-<<<<<<< HEAD
 
 // API для скачивания файла
 app.get('/api/download/:fileId', (req, res) => {
@@ -283,8 +241,6 @@ app.delete('/api/files/:fileId', (req, res) => {
 
 
 // чтобы на сервете показал правильный адрес
-=======
->>>>>>> 70935e07bd6d7577670728d25fd0cfce24f20a83
 const isProduction = process.platform === 'linux'; 
 const HOST = isProduction ? '5.187.3.57' : 'localhost';
 
