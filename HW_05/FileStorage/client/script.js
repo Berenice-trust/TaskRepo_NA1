@@ -2,22 +2,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // console.log('Страница загружена!');
 
     const form = document.getElementById('uploadForm');
-    loadFilesList();
 
 
-        async function loadFilesList() {
-            console.log('Загружаем список файлов...');
+    loadFilesList(); 
+
+    // загрузка списка файлов с сервера
+    async function loadFilesList() {
+        console.log('Загружаем список файлов...');
             
-            const response = await fetch('/api/files');
-            const result = await response.json();
+        const response = await fetch('/api/files');
+        const result = await response.json();
             
-            console.log('Список файлов с сервера:', result);
+        console.log('Список файлов с сервера:', result);
 
-            if (result.success) {
+        if (result.success) {
             displayFiles(result.files);
         }
-        }
+    }
 
+
+    // отображение списка файлов
     function displayFiles(files) {
         const filesList = document.getElementById('filesList');
          const template = document.getElementById('fileItemTemplate');
@@ -53,39 +57,56 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Функция удаления файла
     async function deleteFile(fileId, fileName) {
-    // Подтверждение удаления
-    if (!confirm(`Удалить файл "${fileName}"?`)) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`/api/files/${fileId}`, {
-            method: 'DELETE'
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            alert(`Файл "${result.deletedFile}" удалён!`);
-            // Обновляем список файлов
-            loadFilesList();
-        } else {
-            alert('Ошибка: ' + result.error);
+        if (!confirm(`Удалить файл "${fileName}"?`)) {
+            return;
         }
         
-    } catch (error) {
-        console.error('Ошибка удаления:', error);
-        alert('Ошибка удаления файла');
+        try {
+            const response = await fetch(`/api/files/${fileId}`, {
+                method: 'DELETE'
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showMessage(`Файл "${result.deletedFile}" удалён!`);
+                // Обновляем список файлов
+                loadFilesList();
+            } else {
+                showMessage('Ошибка: ' + result.error);
+            }
+            
+        } catch (error) {
+            console.error('Ошибка удаления:', error);
+            showMessage('Ошибка удаления файла');
+        }
     }
-}
 
+    // Функция скачивания файла
    window.downloadFile = function(fileId) {
         console.log('Скачиваем файл:', fileId);
         
         // Открываем ссылку для скачивания
         window.open('/api/download/' + fileId, '_blank');
     };
+
+    // функция для показа уведомлений
+    function showMessage(message, isError = false) {
+        const notificationArea = document.getElementById('notification-area');
+        
+        const notification = document.createElement('div');
+        notification.className = isError ? 'message error' : 'message success';
+        notification.textContent = message;
+        
+        notificationArea.prepend(notification);
+        
+        // Автоматически удаляем через 5 секунд
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
 
 
     // Обработчик отправки формы
@@ -105,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Комментарий:', comment);
         
         if (!file) {
-            alert('Выберите файл!');
+            showMessage('Выберите файл!');
             return;
         }
         
@@ -129,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Ответ сервера:', result);
             
             if (result.success) {
-                alert('Файл загружен! ID: ' + result.filename);
+                showMessage('Файл загружен! ID: ' + result.filename);
                 
                 // Очищаем форму
                 fileInput.value = '';
@@ -137,12 +158,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 loadFilesList();
             } else {
-                alert('Ошибка: ' + result.message);
+                showMessage('Ошибка: ' + result.message);
             }
             
         } catch (error) {
             console.error('Ошибка отправки:', error);
-            alert('Ошибка соединения с сервером');
+            showMessage('Ошибка соединения с сервером');
         }
 
 

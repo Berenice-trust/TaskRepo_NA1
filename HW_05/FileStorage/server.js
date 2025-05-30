@@ -195,7 +195,7 @@ app.get('/api/download/:fileId', (req, res) => {
 
 
 // API для удаления файла
-app.delete('/api/files/:fileId', (req, res) => {
+app.delete('/api/files/:fileId', async (req, res) => {
     try {
         const fileId = req.params.fileId;
         const filePath = path.join('uploads', fileId);
@@ -214,7 +214,7 @@ app.delete('/api/files/:fileId', (req, res) => {
         const originalName = meta.originalName || fileId;
         
         // Удаляем файл с диска
-        fs.unlinkSync(filePath);
+        await fs.promises.unlink(filePath);
         
         // Удаляем метаданные
         delete metadata[fileId];
@@ -240,11 +240,11 @@ app.delete('/api/files/:fileId', (req, res) => {
 
 
 
+
+// Запуск  сервера
 // чтобы на сервете показал правильный адрес
 const isProduction = process.platform === 'linux'; 
 const HOST = isProduction ? '5.187.3.57' : 'localhost';
-
-// Запуск 
 app.listen(PORT, () => {
     // console.log(`FileStorage сервер запущен: http://5.187.3.57:${PORT}`);
     console.log(`FileStorage сервер запущен: http://${HOST}:${PORT}`);

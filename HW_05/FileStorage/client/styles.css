@@ -196,3 +196,33 @@ button:hover {
 .delete-btn:hover {
     background-color: #c82333;
 }
+
+
+
+.notification-area {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    width: 300px;
+    z-index: 1000;
+}
+
+.message {
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.message.success {
+    background-color: #4CAF50;
+    border: yellow 1px solid;
+    color: white;
+}
+
+.message.error {
+    background-color: #F44336;
+     color: white;
+}
