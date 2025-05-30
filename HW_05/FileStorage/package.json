@@ -9,16 +9,23 @@
     "ws": "node server-websocket.js",
     "dev-ws": "nodemon server-websocket.js"
   },
-  "keywords": ["file", "upload", "websocket", "storage"],
+  "keywords": [
+    "file",
+    "upload",
+    "websocket",
+    "storage"
+  ],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "express": "^5.1.0",
     "multer": "^2.0.0",
-    "socket.io": "^4.8.1"
+    "progress-stream": "^2.0.0",
+    "socket.io": "^4.8.1",
+    "ws": "^8.18.2"
   },
   "devDependencies": {
-     "nodemon": "^3.0.0"
+    "nodemon": "^3.0.0"
   }
 }

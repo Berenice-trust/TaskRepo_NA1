@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const progress = require('progress-stream'); 
 
 const app = express();
 const PORT = 3005;
@@ -15,7 +16,7 @@ const METADATA_FILE = 'files-metadata.json';
 // Функция для чтения метаданных
 function readMetadata() {
     try {
-        if (fs.existsSync(METADATA_FILE)) {
+        if (fs.existsSync(METADATA_FILE)) { // Проверяем существует ли файл
             const data = fs.readFileSync(METADATA_FILE, 'utf8');
             return JSON.parse(data);
         }
@@ -37,61 +38,94 @@ function saveMetadata(metadata) {
 
 // Настройка Multer 
 const upload = multer({
-    dest: 'uploads/'  // ← сюда сохраняем файлы
+    dest: 'uploads/'  // ← сюда сохраняем
 });
 
 
-// Загрузка файла
-app.post('/api/upload', upload.single('file'), (req, res) => {
-     console.log('Получили файл:', req.file);
-    console.log('Оригинальное имя (raw):', req.file.originalname);
-    console.log('Комментарий:', req.body.comment);
+// API Загрузка файла
+app.post('/api/upload', (req, res) => {
+    console.log('Начинаем загрузку файла...');
     
-    let originalName;
-    try {
-        // Пробуем исправить кодировку
-        originalName = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
-        console.log('Исправленное имя:', originalName);
-    } catch (error) {
-        console.log('Не удалось исправить кодировку, используем как есть');
-        originalName = req.file.originalname;
-    }
 
-
-
-
-
-
-
-    // Сохраняем метаданные
-    const metadata = readMetadata();
-    metadata[req.file.filename] = {
-        originalName: originalName,  
-        comment: req.body.comment || '',
-        uploadDate: new Date().toISOString(),
-        size: req.file.size
-    };
-    saveMetadata(metadata);
+     // создаем отслеживание прогресса
+    let lastSentPercent = 0; //для отслеживания последнего отправленного процента, чтобы не отправлять слишком часто
+    const fileProgress = progress();
+    const totalSize = +req.headers['content-length'];
     
-     res.json({
-        success: true,
-        message: 'Файл загружен!',
-        filename: req.file.filename,
-        comment: req.body.comment || '',
-        originalName: originalName  
+    console.log(`Общий размер запроса: ${totalSize} байт`);
+    
+    // Перенаправляем данные через progress-stream
+    req.pipe(fileProgress);
+    fileProgress.headers = req.headers; // копируем заголовки запроса
+    
+    // подписываемся на событие прогресса (у каждого пользователя будет свой прогресс)
+    fileProgress.on('progress', (progressData) => {
+        const percent = Math.round((progressData.transferred / totalSize) * 100); 
+        console.log(`Загружено: ${percent}% (${progressData.transferred}/${totalSize} байт)`);
+
+        // чтобы реже отправлять прогресс (только когда процент меняется или на определенных этапах)
+    // if (percent !== lastSentPercent || percent === 100 || 
+    //     percent === 1 || percent % 10 === 0) {
+    //     lastSentPercent = percent;  
+    //    
+    //     }
+
     });
+
+    // multer для сохранения файла, программный вызов, поскольку мы используем progress-stream
+    // возвращает midleвар для обработки прогресса 
+    const singleFileMiddleware = upload.single('file'); //'file' - это имя поля в форме
+    // fileProgress, res, callback(c информацией о файле) - передаем модифицированный поток и ответ
+    singleFileMiddleware(fileProgress, res, (err) => {
+        if (err) {
+            console.error('Ошибка загрузки:', err);
+            return res.status(500).json({ success: false, error: 'Ошибка загрузки файла' });
+        }
+    
+   
+        let originalName;
+        try {
+            // для русских символов
+            originalName = Buffer.from(fileProgress.file.originalname, 'latin1').toString('utf8');
+            console.log('Исправленное имя:', originalName);
+        } catch (error) {
+            console.log('Не удалось исправить кодировку, используем как есть');
+            originalName = fileProgress.file.originalname;
+        }
+
+        // Сохраняем метаданные
+        const metadata = readMetadata();
+        metadata[fileProgress.file.filename] = {
+            originalName: originalName,  
+            comment: fileProgress.body.comment || '',
+            uploadDate: new Date().toISOString(),
+            size: fileProgress.file.size
+        };
+        saveMetadata(metadata);
+        
+        // отправляем ответ клиенту
+        res.json({
+            success: true,
+            message: 'Файл загружен!',
+            filename: fileProgress.file.filename,
+            comment: fileProgress.body.comment || '',
+            originalName: originalName  
+        });
+    });
+
 });
+
 
 // API для списка файлов
 app.get('/api/files', (req, res) => {
     try {
         const metadata = readMetadata();
         
-        const files = fs.readdirSync('uploads/')
-            .filter(filename => filename !== '.gitkeep')
+        const files = fs.readdirSync('uploads/') // читаем файлы в папке uploads
+            .filter(filename => filename !== '.gitkeep') // исключаем служебный файл .gitkeep
             .map(filename => {
                 const filePath = path.join('uploads', filename);
-                const stats = fs.statSync(filePath);
+                const stats = fs.statSync(filePath); // получаем информацию о файле
                 const meta = metadata[filename] || {};
                 
                 return {
@@ -103,6 +137,7 @@ app.get('/api/files', (req, res) => {
                 };
             });
 
+            // ответ
         res.json({ 
             success: true, 
             files: files 
@@ -118,9 +153,10 @@ app.get('/api/files', (req, res) => {
 });
 
 
+// API для скачивания файла
 app.get('/api/download/:fileId', (req, res) => {
     try {
-        const fileId = req.params.fileId;
+        const fileId = req.params.fileId; // Получаем ID файла из параметров запроса
         const filePath = path.join('uploads', fileId);
         
         // Проверяем что файл существует
@@ -136,13 +172,13 @@ app.get('/api/download/:fileId', (req, res) => {
         const meta = metadata[fileId] || {};
         const originalName = meta.originalName || fileId;
 
-         console.log(`Скачивается файл: ${originalName} (${fileId})`);
+        console.log(`Скачивается файл: ${originalName} (${fileId})`);
 
        
          // Устанавливаем заголовки
         const encodedName = encodeURIComponent(originalName);
-        res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodedName}`);
-        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodedName}`); // Указываем браузеру скачать
+        res.setHeader('Content-Type', 'application/octet-stream'); // универсальный тип данных
         
         
         // Отправляем файл
@@ -157,6 +193,8 @@ app.get('/api/download/:fileId', (req, res) => {
     }
 });
 
+
+// API для удаления файла
 app.delete('/api/files/:fileId', (req, res) => {
     try {
         const fileId = req.params.fileId;
@@ -202,7 +240,7 @@ app.delete('/api/files/:fileId', (req, res) => {
 
 
 
-
+// чтобы на сервете показал правильный адрес
 const isProduction = process.platform === 'linux'; 
 const HOST = isProduction ? '5.187.3.57' : 'localhost';
 
