@@ -5,9 +5,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "dev": "nodemon server.js",
+     "dev": "nodemon --ignore 'uploads/*' --ignore 'files-metadata.json' server.js",
     "ws": "node server-websocket.js",
     "dev-ws": "nodemon server-websocket.js"
+    
   },
   "keywords": [
     "file",
