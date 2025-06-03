@@ -270,6 +270,7 @@ app.delete("/api/files/:fileId", async (req, res) => {
 
 // Создаем WebSocket сервер на втором порту
 const wss = new WebSocket.Server({
+  host: '0.0.0.0',  // все порты
   port: WS_PORT,
   clientTracking: true, // Включаем отслеживание клиентов
 
@@ -388,7 +389,7 @@ function sendUploadProgress(clientId, filename, percent) {
 // чтобы на сервете показал правильный адрес
 const isProduction = process.platform === "linux";
 const HOST = isProduction ? "5.187.3.57" : "localhost";
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   // console.log(`FileStorage сервер запущен: http://5.187.3.57:${PORT}`);
   console.log(`FileStorage сервер запущен: http://${HOST}:${PORT}`);
 });
