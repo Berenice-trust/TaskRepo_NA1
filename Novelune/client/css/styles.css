@@ -105,3 +105,99 @@ footer {
   padding: 20px 0;
   margin-top: 40px;
 }
+
+
+
+/* Стили для форм авторизации */
+.auth-section {
+  max-width: 500px;
+  margin: 40px auto;
+  text-align: center;
+}
+
+.auth-form {
+  background-color: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin: 20px auto;
+  text-align: left;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.error-text {
+  color: #c62828;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+.form-actions {
+  margin-top: 25px;
+}
+
+.form-actions .button {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #5C6BC0;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-actions .button:hover {
+  background-color: #3949AB;
+}
+
+.auth-links {
+  margin-top: 20px;
+  font-size: 14px;
+}
+
+.auth-links a {
+  color: #5C6BC0;
+  text-decoration: none;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+}
+
+/* Стили для статусных сообщений */
+.status {
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 4px;
+}
+
+.status.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.status.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}

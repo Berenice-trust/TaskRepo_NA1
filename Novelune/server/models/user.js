@@ -1,11 +1,17 @@
 const { query } = require('../config/database');
 const bcrypt = require('bcrypt');
 const { validateUser } = require('../../shared/validation');
+const crypto = require('crypto');
 
 // Хеширование пароля
 async function hashPassword(password) {
   const saltRounds = 10; //означает 2^10 итераций алгоритма хеширования (1024 итерации)
   return await bcrypt.hash(password, saltRounds);
+}
+
+// Функция для генерации случайного токена
+function generateToken() {
+  return crypto.randomBytes(32).toString('hex');
 }
 
 // Создание таблицы пользователей
@@ -17,6 +23,8 @@ async function createUsersTable() {
       email VARCHAR(100) UNIQUE NOT NULL,
       password VARCHAR(255) NOT NULL,
       role ENUM('user', 'admin') DEFAULT 'user',
+      is_active BOOLEAN DEFAULT FALSE, 
+      verification_token VARCHAR(100),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `;
@@ -35,15 +43,24 @@ async function createUser(userData) {
 
   // Хешируем пароль
   const hashedPassword = await hashPassword(password);
+
+    // Генерируем токен для верификации email
+  const verificationToken = generateToken();
   
   const sql = `
-    INSERT INTO users (username, email, password, role)
-    VALUES (?, ?, ?, ?)
-  `;
+  INSERT INTO users (username, email, password, role, verification_token)
+  VALUES (?, ?, ?, ?, ?)
+`;
   
-  try {
-    const result = await query(sql, [username, email, hashedPassword, role]);
-    return { id: result.insertId, username, email, role };
+   try {
+    const result = await query(sql, [username, email, hashedPassword, role, verificationToken]);
+    return { 
+      id: result.insertId, 
+      username, 
+      email, 
+      role,
+      verificationToken // Возвращаем токен для использования в email
+    };
   } catch (error) {
     // если пользователь уже существует
     if (error.code === 'ER_DUP_ENTRY') {
@@ -52,6 +69,7 @@ async function createUser(userData) {
     throw error;
   }
 }
+
 
 // Поиск пользователя по имени пользователя
 async function findUserByUsername(username) {
@@ -74,11 +92,34 @@ async function validatePassword(plainPassword, hashedPassword) {
   return await bcrypt.compare(plainPassword, hashedPassword);
 }
 
+// Активация пользователя по токену верификации
+async function activateUser(token) {
+  const sql = `
+    UPDATE users
+    SET is_active = TRUE, verification_token = NULL
+    WHERE verification_token = ?
+  `;
+  
+  try {
+    const result = await query(sql, [token]);
+    
+    if (result.affectedRows === 0) {
+      throw new Error('Недействительный токен активации');
+    }
+    
+    return true;
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   createUsersTable,
   hashPassword,
   createUser,
   findUserByUsername,
   findUserByEmail,
-  validatePassword
+  validatePassword,
+  activateUser,
+  generateToken // для тестов
 };

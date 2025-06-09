@@ -1,6 +1,12 @@
 module.exports = {
   testEnvironment: 'node',
+  testMatch: ['**/*.test.js'],
   verbose: true,
-  modulePathIgnorePatterns: ['node_modules'],
-  testTimeout: 10000 // Увеличиваем время ожидания для тестов базы данных
+  // Эти файлы не будут покрыты тестами
+  collectCoverageFrom: [
+    'server/**/*.js',
+    '!node_modules/**'
+  ],
+  // Правильная инициализация/очистка сервера для тестов
+  setupFilesAfterEnv: ['./tests/setup.js']
 };

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет - Novelune</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Novelune</h1>
+      <p>Платформа для публикации и чтения литературных произведений</p>
+    </div>
+  </header>
+  
+  <main>
+    <div class="container">
+      <section class="welcome">
+        <h2>Личный кабинет</h2>
+        <p>Добро пожаловать, <span id="username">пользователь</span>!</p>
+        
+        <div class="dashboard-actions">
+          <button id="logoutBtn" class="button secondary">Выйти</button>
+        </div>
+      </section>
+    </div>
+  </main>
+  
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Novelune</p>
+    </div>
+  </footer>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Проверка авторизации
+      const token = localStorage.getItem('authToken');
+      const username = localStorage.getItem('username');
+      
+      if (!token) {
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      // Отображаем имя пользователя
+      const usernameElement = document.getElementById('username');
+      if (usernameElement && username) {
+        usernameElement.textContent = username;
+      }
+      
+      // Обработка выхода
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('username');
+          localStorage.removeItem('userRole');
+          window.location.href = '/';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
