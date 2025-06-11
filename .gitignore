@@ -50,3 +50,6 @@ HW_05/FileStorage/files-metadata.json
 # Novelune - загруженные файлы и данные
 novelune/uploads/*
 !novelune/uploads/.gitkeep
+
+# Папка с примерами курса
+NodeArch-V2/ 
