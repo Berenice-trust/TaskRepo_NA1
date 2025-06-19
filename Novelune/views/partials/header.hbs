@@ -1,0 +1,17 @@
+<header>
+  <div class="container">
+    <h1><a href="/">Novelune</a></h1>
+    <p>Платформа для публикации и чтения литературных произведений</p>
+    
+    <div class="auth-nav">
+      {{#if user}}
+        <span>{{user.username}}</span>
+        <a href="/dashboard" class="button">Личный кабинет</a>
+        <button id="logoutBtn" class="button secondary">Выйти</button>
+      {{else}}
+        <a href="/login" class="button">Войти</a>
+        <a href="/register" class="button secondary">Регистрация</a>
+      {{/if}}
+    </div>
+  </div>
+</header>

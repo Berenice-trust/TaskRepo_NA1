@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
           
           // Перенаправляем на страницу дашборда через 1 секунду
           setTimeout(() => {
-            window.location.href = '/dashboard.html';
+            window.location.href = '/dashboard';
           }, 1000);
         } else {
           // Показываем ошибку

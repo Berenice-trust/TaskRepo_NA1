@@ -1,0 +1,20 @@
+<footer>
+  <div class="container">
+    <p>&copy; {{currentYear}} Novelune</p>
+  </div>
+</footer>
+
+<script>
+  // Скрипт для кнопки выхода
+  document.addEventListener('DOMContentLoaded', () => {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userRole');
+        window.location.href = '/';
+      });
+    }
+  });
+</script>

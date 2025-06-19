@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{#if title}}{{title}} - {{/if}}Novelune</title>
+  <meta name="description" content="{{metaDescription}}">
+  <meta name="keywords" content="{{metaKeywords}}">
+  <link rel="stylesheet" href="/css/styles.css">
+  {{{_sections.head}}}
+</head>
+<body>
+  {{> header}}
+  
+  <main>
+    <div class="container">
+      {{{body}}}
+    </div>
+  </main>
+  
+  {{> footer}}
+  
+  {{{_sections.scripts}}}
+</body>
+</html>

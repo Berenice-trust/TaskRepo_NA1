@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const { query } = require('./server/config/database');
 const User = require('./server/models/user');
 const authRoutes = require('./server/routes/auth');
+const exphbs = require('express-handlebars');
+const cookieParser = require('cookie-parser');
 
 // Переопределение JSON.stringify для обработки BigInt
 BigInt.prototype.toJSON = function() {
@@ -21,13 +23,61 @@ const app = express();
 const HOST = process.env.HOST || 'localhost';
 const PORT = process.env.PORT || 3007;
 
+
+
+
+// Настраиваем Handlebars
+const hbs = exphbs.create({
+  defaultLayout: 'main',
+  extname: '.hbs',
+  helpers: {
+    // Форматирование даты
+    formatDate: function(date) {
+      return date ? new Date(date).toLocaleDateString('ru-RU') : '';
+    },
+    // Сравнение значений
+    eq: function(a, b) {
+      return a === b;
+    },
+    // Функция для создания секций в шаблонах
+    section: function(name, options) {
+      if (!this._sections) this._sections = {};
+      this._sections[name] = options.fn(this);
+      return null;
+    },
+    // Текущий год для футера
+    currentYear: function() {
+      return new Date().getFullYear();
+    }
+  }
+});
+
+
+// Регистрируем Handlebars в Express
+app.engine('hbs', hbs.engine);
+app.set('view engine', 'hbs');
+app.set('views', path.join(__dirname, 'views'));
+
+
 // Настраиваем middleware
+app.use(cookieParser()); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'client')));
 app.use('/shared', express.static(path.join(__dirname, 'shared')));
 
 app.use('/api/auth', authRoutes);
+
+const pagesRoutes = require('./server/routes/pages');
+app.use('/', pagesRoutes);
+
+// Обработка 404 ошибки для неизвестных маршрутов (добавить перед тестом БД)
+app.use((req, res) => {
+  res.status(404).render('pages/404', {
+    title: '404 - Страница не найдена'
+  });
+});
+
 
 // Проверка подключения к базе
 app.get('/api/test-db', async (req, res) => {

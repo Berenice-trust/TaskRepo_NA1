@@ -1,0 +1,20 @@
+<section class="welcome">
+  <h2>Добро пожаловать</h2>
+  <p>Здесь вы можете публиковать свои книги и рассказы, а также читать произведения других авторов.</p>
+  
+  <div class="db-test">
+    <button id="testDbBtn" class="button">Проверить подключение к базе данных</button>
+    <div id="dbStatus" class="status"></div>
+  </div>
+  
+  {{#unless user}}
+    <div class="auth-buttons">
+      <a href="/login" class="button">Войти</a>
+      <a href="/register" class="button secondary">Регистрация</a>
+    </div>
+  {{/unless}}
+</section>
+
+{{#section 'scripts'}}
+<script src="/js/main.js"></script>
+{{/section}}
