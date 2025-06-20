@@ -2,6 +2,9 @@ const mariadb = require('mariadb');
 const dotenv = require('dotenv');
 const path = require('path');
 
+// Переменная для отслеживания, было ли уже подключение
+let connectionEstablished = false;
+
 // Загружаем .env или .env.test в зависимости от окружения
 if (process.env.NODE_ENV === 'test') {
   console.log('Загрузка тестовых настроек базы данных');
@@ -42,8 +45,14 @@ function createPool() {
     };
   }
 
-  pool.on('connection', (connection) => {
-    console.log('DB Connection established');
+  // pool.on('connection', (connection) => {
+  //   console.log('DB Connection established');
+  // });
+   pool.on('connection', (connection) => {
+    if (!connectionEstablished) {
+      console.log('DB Connection established');
+      connectionEstablished = true;
+    }
   });
 
   pool.on('error', (err) => {
