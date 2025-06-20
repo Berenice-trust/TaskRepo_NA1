@@ -60,9 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
         
         if (data.success) {
-          // Сохраняем токен и данные пользователя в localStorage
+          // Сохраняем токен и данные пользователя 
           if (data.token) {
-            localStorage.setItem('authToken', data.token);
             localStorage.setItem('username', data.user.username);
             localStorage.setItem('userRole', data.user.role || 'user');
           }

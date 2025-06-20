@@ -62,10 +62,10 @@ describe('Database Connection', () => {
   });
   
   // Тест закрывает подключение к базе данных после выполнения всех тестов
-  afterAll(async () => {
-    // Завершаем тесты, закрывая пул соединений
-    // создали функцию closePool в database.js
-    const { closePool } = require('../../server/config/database');
-    await closePool();
-  });
+  // afterAll(async () => {
+  //   // Завершаем тесты, закрывая пул соединений
+  //   // создали функцию closePool в database.js
+  //   const { closePool } = require('../../server/config/database');
+  //   await closePool();
+  // });
 });

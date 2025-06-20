@@ -2,6 +2,7 @@ const { query } = require('../config/database');
 const bcrypt = require('bcrypt');
 const { validateUser } = require('../../shared/validation');
 const crypto = require('crypto');
+const { convertBigIntToNumber } = require('../utils/data-helpers');
 
 // Хеширование пароля
 async function hashPassword(password) {
@@ -54,13 +55,13 @@ async function createUser(userData) {
   
    try {
     const result = await query(sql, [username, email, hashedPassword, role, verificationToken]);
-    return { 
+    return convertBigIntToNumber({ 
       id: result.insertId, 
       username, 
       email, 
       role,
-      verificationToken // Возвращаем токен для использования в email
-    };
+      verificationToken
+    });
   } catch (error) {
     // если пользователь уже существует
     if (error.code === 'ER_DUP_ENTRY') {
@@ -76,7 +77,8 @@ async function findUserByUsername(username) {
   const sql = `SELECT * FROM users WHERE username = ?`;
   const results = await query(sql, [username]);
   
-  return results.length > 0 ? results[0] : null;
+ return results.length > 0 ? convertBigIntToNumber(results[0]) : null;
+
 }
 
 // Поиск пользователя по email
@@ -84,7 +86,7 @@ async function findUserByEmail(email) {
   const sql = `SELECT * FROM users WHERE email = ?`;
   const results = await query(sql, [email]);
   
-  return results.length > 0 ? results[0] : null;
+   return results.length > 0 ? convertBigIntToNumber(results[0]) : null;
 }
 
 // Проверка пароля

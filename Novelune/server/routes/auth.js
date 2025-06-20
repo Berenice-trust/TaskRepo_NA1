@@ -144,6 +144,14 @@ router.post('/login', async (req, res) => {
       process.env.SESSION_SECRET || 'default-secret',
       { expiresIn: '24h' }
     );
+
+    // Установить HTTP-only cookie с токеном (добавить эти строки)
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', 
+      maxAge: 24 * 60 * 60 * 1000, // 24 часа
+      sameSite: 'lax'
+    });
     
     // Отправляем ответ
     res.json({

@@ -3,6 +3,9 @@ const path = require('path');
 const User = require('../server/models/user');
 const { query, closePool } = require('../server/config/database'); // Добавить импорт closePool
 
+// Преобразование BigInt для корректной сериализации в тестах
+BigInt.prototype.toJSON = function() { return Number(this); };
+
 // Загружаем переменные окружения из .env.test, если мы в тестовом режиме
 if (process.env.NODE_ENV === 'test') {
   dotenv.config({ path: path.resolve(__dirname, '../.env.test') });
@@ -36,7 +39,19 @@ afterAll(async () => {
     
     try {
       // Удаляем всех пользователей
+      await query('SET FOREIGN_KEY_CHECKS = 0'); 
       await query('DELETE FROM users WHERE 1=1');
+
+      // Добавить эти строки для очистки книг
+      await query('DELETE FROM books WHERE 1=1');
+      await query('ALTER TABLE books AUTO_INCREMENT = 1');
+      
+      // Добавить эти строки для очистки глав
+      await query('DELETE FROM chapters WHERE 1=1');
+      await query('ALTER TABLE chapters AUTO_INCREMENT = 1');
+      
+      await query('SET FOREIGN_KEY_CHECKS = 1');
+      
       // Сбрасываем автоинкремент
       await query('ALTER TABLE users AUTO_INCREMENT = 1');
       console.log('База данных успешно очищена');

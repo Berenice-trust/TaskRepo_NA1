@@ -68,15 +68,9 @@ app.use('/shared', express.static(path.join(__dirname, 'shared')));
 
 app.use('/api/auth', authRoutes);
 
-const pagesRoutes = require('./server/routes/pages');
-app.use('/', pagesRoutes);
 
-// Обработка 404 ошибки для неизвестных маршрутов (добавить перед тестом БД)
-app.use((req, res) => {
-  res.status(404).render('pages/404', {
-    title: '404 - Страница не найдена'
-  });
-});
+
+
 
 
 // Проверка подключения к базе
@@ -105,12 +99,32 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
+const pagesRoutes = require('./server/routes/pages');
+app.use('/', pagesRoutes);
+
+// Обработка 404 ошибки для неизвестных маршрутов (добавить перед тестом БД)
+app.use((req, res) => {
+  res.status(404).render('pages/404', {
+    title: '404 - Страница не найдена'
+  });
+});
+
 // Инициализация базы данных при запуске
 (async () => {
   try {
     console.log('Инициализация базы данных...');
     await User.createUsersTable();
     console.log('Таблица пользователей проверена/создана');
+
+    // инициализация таблицы книг
+    const Book = require('./server/models/book');
+    await Book.createBooksTable();
+    console.log('Таблица книг проверена/создана');
+    
+    // инициализация таблицы глав
+    const Chapter = require('./server/models/chapter');
+    await Chapter.createChaptersTable();
+    console.log('Таблица глав проверена/создана');
   } catch (error) {
     console.error('Ошибка при инициализации БД:', error);
   }

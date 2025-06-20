@@ -96,11 +96,18 @@ async function closePool() {
     if (pool && !pool._closed) {
       await pool.end();
       console.log('Connection pool closed');
+    }  else {
+      console.log('Pool already closed or does not exist');
     }
   } catch (err) {
     console.error('Error closing connection pool', err);
   }
 }
 
-// экспорт
-module.exports = { query, closePool, createPool };
+// Функция для получения текущего пула
+function getPool() {
+  return pool;
+}
+
+// Изменить экспорт на:
+module.exports = { query, closePool, createPool, getPool };
