@@ -1,4 +1,4 @@
-@ -0,0 +1,52 @@
+
 const { query } = require('../../server/config/database');
 
 describe('Books Table Structure', () => {
