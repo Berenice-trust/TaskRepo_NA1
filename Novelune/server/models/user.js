@@ -3,6 +3,9 @@ const bcrypt = require('bcrypt');
 const { validateUser } = require('../../shared/validation');
 const crypto = require('crypto');
 const { convertBigIntToNumber } = require('../utils/data-helpers');
+const fs = require('fs');
+const path = require('path');
+const { getAvatarPaths } = require('../services/image.service');
 
 // Хеширование пароля
 async function hashPassword(password) {
@@ -26,6 +29,7 @@ async function createUsersTable() {
       role ENUM('user', 'admin', 'editor') DEFAULT 'user',
       is_active BOOLEAN DEFAULT FALSE, 
       verification_token VARCHAR(100),
+      avatar_url VARCHAR(255), 
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `;
@@ -115,6 +119,31 @@ async function activateUser(token) {
   }
 }
 
+async function findUserById(id) {
+  const sql = 'SELECT * FROM users WHERE id = ?';
+  const rows = await query(sql, [id]);
+  return rows[0] || null;
+}
+
+async function updateAvatarUrl(userId, avatarUrl) {
+  const sql = 'UPDATE users SET avatar_url = ? WHERE id = ?';
+  await query(sql, [avatarUrl, userId]);
+}
+
+async function deleteUser(userId) {
+  // Удаляем аватар пользователя (thumb и оригинал)
+  const { original, thumb } = getAvatarPaths(userId);
+  [original, thumb].forEach(f => {
+    if (fs.existsSync(f)) {
+      try { fs.unlinkSync(f); } catch (e) { console.error('Ошибка удаления файла:', f, e); }
+    }
+  });
+
+  // Удаляем пользователя из базы
+  const sql = 'DELETE FROM users WHERE id = ?';
+  await query(sql, [userId]);
+}
+
 module.exports = {
   createUsersTable,
   hashPassword,
@@ -123,5 +152,8 @@ module.exports = {
   findUserByEmail,
   validatePassword,
   activateUser,
+  findUserById,
+  updateAvatarUrl,
+  deleteUser,
   generateToken // для тестов
 };

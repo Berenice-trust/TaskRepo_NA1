@@ -6,11 +6,11 @@
     <div class="auth-nav">
       {{#if user}}
         <span>{{user.username}}</span>
-        <a href="/dashboard" class="button">Личный кабинет</a>
-        <button id="logoutBtn" class="button secondary">Выйти</button>
+        <a href="/dashboard" class="button header-cabinet-btn">Личный кабинет</a>
+        <button id="logoutBtn" class="button third">Выйти</button>
       {{else}}
         <a href="/login" class="button">Войти</a>
-        <a href="/register" class="button secondary">Регистрация</a>
+        <a href="/register" class="button third">Регистрация</a>
       {{/if}}
     </div>
   </div>

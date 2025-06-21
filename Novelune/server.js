@@ -6,6 +6,8 @@ const User = require('./server/models/user');
 const authRoutes = require('./server/routes/auth');
 const exphbs = require('express-handlebars');
 const cookieParser = require('cookie-parser');
+const avatarRoutes = require('./server/routes/avatar');
+const userRoutes = require('./server/routes/user');
 
 // Переопределение JSON.stringify для обработки BigInt
 BigInt.prototype.toJSON = function() {
@@ -67,6 +69,10 @@ app.use(express.static(path.join(__dirname, 'client')));
 app.use('/shared', express.static(path.join(__dirname, 'shared')));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/avatar', avatarRoutes);
+app.use('/api/user', userRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'client/uploads')));
+app.use('/images', express.static(path.join(__dirname, 'client/images')));
 
 
 

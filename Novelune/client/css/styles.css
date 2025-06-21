@@ -57,7 +57,21 @@ main {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   padding: 30px;
-  text-align: center;
+  /* text-align: center;  */
+  position: relative; 
+}
+
+.welcome-flex {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.welcome-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 h2 {
@@ -110,11 +124,39 @@ h2 {
 }
 
 .button.secondary {
-  background-color: #95a5a6;
+  background-color: #5ec3df; 
 }
 
 .button.secondary:hover {
+  background-color: #48b0cb;
+}
+
+.button.third {
+  background-color:  #95a5a6; 
+  color: #fff;
+}
+
+.button.third:hover {
   background-color: #7f8c8d;
+  color: #fff;
+}
+
+.button.danger {
+  background-color: #e74c3c; 
+}
+
+.button.danger:hover {
+  background-color: #c0392b;
+}
+
+.header-cabinet-btn {
+  background: #5ec3df;  
+  color: #111;   
+
+  transition: background 0.2s;
+}
+.header-cabinet-btn:hover {
+ background: #48b0cb;
 }
 
 footer {
@@ -219,4 +261,108 @@ footer {
   background-color: #e8f5e9;
   color: #2e7d32;
   border: 1px solid #c8e6c9;
+}
+
+/* Стили для панели управления */
+.dashboard-avatar-block {
+  /* position: absolute; */
+  /* top: 24px; */
+  /* left: 24px; */
+  /* z-index: 10; */
+  margin-bottom: 0;
+  display: flex;
+  justify-content: flex-start;
+}
+.avatar-rect {
+  width: 160px;
+  height: 200px;
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.avatar-rect:hover {
+  border-color: #007bff;
+}
+.avatar-img {
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 8px;
+  background: #f5f5f5;
+}
+.avatar-text {
+  color: #888;
+  font-size: 11px;
+  text-align: center;
+}
+
+.edit-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: opacity 0.2s;
+  opacity: 0.7;
+}
+.edit-icon:hover {
+  opacity: 1;
+}
+
+.edit-icon svg {
+  width: 30px;
+  height: 30px;
+  display: block;
+}
+
+.delete-account-btn {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  background-color: #95a5a6; 
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1em;
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+.delete-account-btn:hover {
+  background-color: #e74c3c; /* красная при наведении */
+  color: #fff;
+}
+
+/* Модальное окно удаления */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(44,62,80,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 32px 28px 24px 28px;
+  box-shadow: 0 8px 32px rgba(44,62,80,0.15);
+  min-width: 320px;
+  max-width: 90vw;
+  text-align: center;
+}
+.modal-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
 }

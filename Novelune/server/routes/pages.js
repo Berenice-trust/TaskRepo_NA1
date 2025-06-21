@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const User = require('../models/user');
 
 // Middleware для проверки авторизации
 const auth = require('../middleware/auth');
@@ -47,12 +48,16 @@ router.get('/test', (req, res) => {
 });
 
 // Страница личного кабинета
-router.get('/dashboard', auth, (req, res) => {
-  res.render('pages/dashboard', {
-    title: 'Личный кабинет',
-    user: req.user
+// router.get('/dashboard', auth, (req, res) => {
+//   res.render('pages/dashboard', {
+//     title: 'Личный кабинет',
+//     user: req.user
+//   });
+// });
+router.get('/dashboard', auth, async (req, res) => {
+  const user = await User.findUserById(req.user.id); // Получаем пользователя из БД
+  res.render('pages/dashboard', { user });
   });
-});
 
 // Страница активации
 router.get('/activate', (req, res) => {

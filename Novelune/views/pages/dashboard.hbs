@@ -1,8 +1,57 @@
 <section class="welcome">
-  <h2>Личный кабинет</h2>
-  <p>Добро пожаловать, <span id="username">{{user.username}}</span>!</p>
-  
-  <div class="dashboard-actions">
-    <button id="logoutBtn" class="button secondary">Выйти</button>
+  <button id="deleteAccountBtn" class="delete-account-btn">Удалить аккаунт</button>
+  <div class="welcome-flex">
+    <div class="dashboard-avatar-block">
+      
+      <form id="avatarUploadForm" enctype="multipart/form-data" method="POST" action="/api/avatar/upload">
+        <div class="avatar-rect" style="position:relative;">
+          <img id="avatarPreview" src="{{user.avatar_url}}" alt="Аватар" class="avatar-img" onerror="this.src='/images/default-avatar.png'">
+          <span class="avatar-text">Кликните, чтобы загрузить аватар</span>
+          <input
+            type="file"
+            id="avatarInput"
+            name="image"
+            accept="image/*"
+            required
+            style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;z-index:2;cursor:pointer;"
+          >
+        </div>
+      </form>
+
+
+
+
+    </div>
+    <div class="welcome-info">
+      <h2>Личный кабинет 
+        <span class="edit-icon" title="Редактировать">
+          <svg  viewBox="0 0 20 20" fill="none">
+            <path d="M14.7 2.29a1 1 0 0 1 1.42 0l1.59 1.59a1 1 0 0 1 0 1.42l-9.17 9.17-2.83.71.71-2.83 9.17-9.17z" fill="#2c3e50"/>
+            <path d="M3 17h14v2H3v-2z" fill="#007bff" opacity="0.2"/>
+          </svg>
+        </span>
+      <p>Добро пожаловать, <span id="username">{{user.username}}</span>!</p>
+      {{!-- Здесь другие данные о пользователе --}}
+    </div>
+     {{!-- <div class="dashboard-actions">
+    <button id="EditBtn" class="button secondary">Изменить</button>
+    </div> --}}
   </div>
 </section>
+
+{{!-- Модальное окно для удаления аккаунта: --}}
+<div id="modalOverlay" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <h3>Удалить аккаунт?</h3>
+    <p>Вы уверены, что хотите удалить аккаунт? Это действие необратимо!</p>
+    <div class="modal-actions">
+      <button id="modalCancel" class="button secondary">Отмена</button>
+      <button id="modalConfirm" class="button danger">Удалить</button>
+    </div>
+  </div>
+</div>
+
+{{#section 'scripts'}}
+<script src="/js/avatar-upload.js"></script>
+<script src="/js/account.js"></script>
+{{/section}}
