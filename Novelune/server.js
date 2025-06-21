@@ -125,6 +125,10 @@ app.use((req, res) => {
     const Chapter = require('./server/models/chapter');
     await Chapter.createChaptersTable();
     console.log('Таблица глав проверена/создана');
+
+    const Image = require('./server/models/image');
+    await Image.createImagesTable();
+    console.log('Таблица изображений проверена/создана');
   } catch (error) {
     console.error('Ошибка при инициализации БД:', error);
   }
