@@ -67,6 +67,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'client')));
 app.use('/shared', express.static(path.join(__dirname, 'shared')));
+app.use('/js', express.static(path.join(__dirname, 'client/js')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/avatar', avatarRoutes);

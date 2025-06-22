@@ -63,13 +63,7 @@
 
 
 
-
-
-
-
-
-
-      {{!-- Здесь другие данные о пользователе --}}
+      {{!-- другие данные о пользователе --}}
     </div>
      {{!-- <div class="dashboard-actions">
     <button id="EditBtn" class="button secondary">Изменить</button>
@@ -78,60 +72,11 @@
 </section>
 
 {{!-- Модальное окно для удаления аккаунта: --}}
-<div id="modalOverlay" class="modal-overlay" style="display:none;">
-  <div class="modal">
-    <h3>Удалить аккаунт?</h3>
-    <p>Вы уверены, что хотите удалить аккаунт? Это действие необратимо!</p>
-    <div class="modal-actions">
-      <button id="modalCancel" class="button secondary">Отмена</button>
-      <button id="modalConfirm" class="button danger">Удалить</button>
-    </div>
-  </div>
-</div>
+{{> components/deleteAccountModal}}
 
+{{!-- Модальное окно для редактирования профиля: --}}
+{{> components/editProfileModal}}
 
-
-
-<div id="editProfileModal" class="modal-overlay" style="display:none;">
-  <div class="modal">
-     <button type="button" class="modal-close" id="closeEditProfile" aria-label="Закрыть">&times;</button>
-   
-    <h3>Редактировать профиль</h3>
-    <form id="editProfileForm">
-     <div class="form-group">
-  <label for="displayNameInput">Псевдоним:</label>
-  <input type="text" id="displayNameInput" name="display_name" value="{{user.display_name}}">
-  <span class="error-text" id="errorDisplayName"></span>
-</div>
-<div class="form-group">
-  <label for="emailInput">Email:</label>
-  <input type="email" id="emailInput" name="email" value="{{user.email}}">
-  <span class="profile-note"><em>Изменение потребует подтверждения</em></span>
-  <span class="error-text" id="errorEmail"></span>
-</div>
-<div class="form-group">
-  <label for="bioInput">О себе:</label>
-  <textarea id="bioInput" name="bio" rows="4">{{user.bio}}</textarea>
-  <span class="error-text" id="errorBio"></span>
-</div>
-<hr style="margin:18px 0;">
-<div class="form-group">
-  <label for="newPasswordInput">Новый пароль:</label>
-  <input type="password" id="newPasswordInput" name="new_password" autocomplete="new-password">
-  <span class="error-text" id="errorNewPassword"></span>
-</div>
-<div class="form-group">
-  <label for="repeatPasswordInput">Повторите новый пароль:</label>
-  <input type="password" id="repeatPasswordInput" name="repeat_password" autocomplete="new-password">
-  <span class="error-text" id="errorRepeatPassword"></span>
-</div>
-      <div class="modal-actions">
-        <button type="button" id="cancelEditProfile" class="button secondary">Отмена</button>
-        <button type="submit" class="button">Сохранить</button>
-      </div>
-    </form>
-  </div>
-</div>
 
 {{#section 'scripts'}}
 <script src="/js/avatar-upload.js"></script>
