@@ -46,11 +46,41 @@ function validateUser(userData) {
   return Object.keys(errors).length > 0 ? errors : null;
 }
 
+// валидация пароля и почты
+function validateProfileUpdate(data) {
+  const errors = {};
+
+  // Псевдоним (можно добавить правила по желанию)
+  if (data.display_name && data.display_name.length > 100) {
+    errors.display_name = 'Псевдоним слишком длинный';
+  }
+
+  // Email
+  const emailError = validators.email.validate(data.email);
+  if (emailError) errors.email = emailError;
+
+  // Пароль (если указан)
+  if (data.new_password || data.repeat_password) {
+    if (data.new_password !== data.repeat_password) {
+      errors.new_password = 'Пароли не совпадают';
+      errors.repeat_password = 'Пароли не совпадают';
+    } else {
+      const passwordError = validators.password.validate(data.new_password);
+      if (passwordError) errors.new_password = passwordError;
+    }
+  }
+
+  return Object.keys(errors).length > 0 ? errors : null;
+}
+
+
+
+
 // Экспорт для разных окружений
 if (typeof module !== 'undefined' && module.exports) {
   // Для Node.js
-  module.exports = { validators, validateUser };
+  module.exports = { validators, validateUser, validateProfileUpdate };
 } else {
   // Для браузера
-  window.validation = { validators, validateUser };
+  window.validation = { validators, validateUser, validateProfileUpdate };
 }

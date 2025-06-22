@@ -79,6 +79,15 @@ h2 {
   margin-bottom: 20px;
 }
 
+.welcome-title {
+  text-align: center;
+  color: #1e3953;
+  margin-bottom: 20px;
+  font-size: 1.6rem;
+}
+
+
+
 .db-test {
   margin: 30px 0;
   padding: 20px;
@@ -317,8 +326,8 @@ footer {
 }
 
 .edit-icon svg {
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   display: block;
 }
 
@@ -365,4 +374,87 @@ footer {
   display: flex;
   justify-content: center;
   gap: 18px;
+}
+
+/* данные о пользователе */
+.profile-fields {
+  margin-bottom: 18px;
+}
+.profile-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.profile-label {
+  min-width: 90px;
+  font-weight: 500;
+  color: #555;
+  font-size: 1.2rem;
+}
+.profile-note {
+  color: #aaa;
+  font-style: italic;
+}
+
+.profile-value {
+  /* font-weight: bold; */
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1em;
+  background: #f8fafc;
+}
+.profile-note {
+  display: block;
+  font-size: 0.9em;
+  color: #888;
+  margin-top: 2px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 32px 32px 24px 32px;
+  box-shadow: 0 8px 32px rgba(44,62,80,0.15);
+  min-width: 400px;
+  max-width: 95vw;
+  width: 420px;
+  position: relative;
+  text-align: left;
+}
+.modal h3 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 1.35em;
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: #888;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+.modal-close:hover {
+  color: #e74c3c;
 }

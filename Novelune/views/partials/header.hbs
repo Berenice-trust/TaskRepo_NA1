@@ -5,7 +5,13 @@
     
     <div class="auth-nav">
       {{#if user}}
-        <span>{{user.username}}</span>
+        <span>
+          {{#if user.display_name}}
+            {{user.display_name}}
+          {{else}}
+            {{user.username}}
+          {{/if}}
+        </span>
         <a href="/dashboard" class="button header-cabinet-btn">Личный кабинет</a>
         <button id="logoutBtn" class="button third">Выйти</button>
       {{else}}

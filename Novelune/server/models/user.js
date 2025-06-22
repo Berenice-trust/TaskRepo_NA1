@@ -30,6 +30,8 @@ async function createUsersTable() {
       is_active BOOLEAN DEFAULT FALSE, 
       verification_token VARCHAR(100),
       avatar_url VARCHAR(255), 
+      bio TEXT,
+      display_name VARCHAR(100),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `;
@@ -144,6 +146,25 @@ async function deleteUser(userId) {
   await query(sql, [userId]);
 }
 
+async function updateProfile(userId, display_name, email, bio, new_password) {
+  let sql, params;
+  if (new_password) {
+    const hashedPassword = await hashPassword(new_password);
+    sql = 'UPDATE users SET display_name = ?, email = ?, bio = ?, password = ? WHERE id = ?';
+    params = [display_name, email, bio, hashedPassword, userId];
+  } else {
+    sql = 'UPDATE users SET display_name = ?, email = ?, bio = ? WHERE id = ?';
+    params = [display_name, email, bio, userId];
+  }
+  await query(sql, params);
+}
+
+async function isEmailTaken(email, excludeUserId) {
+  const sql = 'SELECT id FROM users WHERE email = ? AND id != ?';
+  const rows = await query(sql, [email, excludeUserId]);
+  return rows.length > 0;
+}
+
 module.exports = {
   createUsersTable,
   hashPassword,
@@ -155,5 +176,7 @@ module.exports = {
   findUserById,
   updateAvatarUrl,
   deleteUser,
+  updateProfile,
+  isEmailTaken,
   generateToken // для тестов
 };
