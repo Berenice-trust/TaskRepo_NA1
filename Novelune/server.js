@@ -8,6 +8,7 @@ const exphbs = require('express-handlebars');
 const cookieParser = require('cookie-parser');
 const avatarRoutes = require('./server/routes/avatar');
 const userRoutes = require('./server/routes/user');
+const { createGenresTable, seedGenres } = require('./server/models/genre');
 
 // Переопределение JSON.stringify для обработки BigInt
 BigInt.prototype.toJSON = function() {
@@ -133,9 +134,16 @@ app.use((req, res) => {
     await Chapter.createChaptersTable();
     console.log('Таблица глав проверена/создана');
 
+    // инициализация таблицы изображений
     const Image = require('./server/models/image');
     await Image.createImagesTable();
     console.log('Таблица изображений проверена/создана');
+
+    // инициализация таблицы жанров
+    await createGenresTable();
+    await seedGenres();
+    console.log('Таблица жанров проверена/создана и заполнена');
+   
   } catch (error) {
     console.error('Ошибка при инициализации БД:', error);
   }

@@ -158,13 +158,26 @@ h2 {
   background-color: #c0392b;
 }
 
-.header-cabinet-btn {
+.auth-nav {
+  font-size: 1.1em;
+}
+
+.header-cabinet-btn,
+.add-book-btn {
   background: #5ec3df;  
   color: #111;   
-
   transition: background 0.2s;
+  font-size: 1.1rem;
+  padding: 8px 20px;
+  border-radius: 5px;
+  line-height: 1.2;
+  margin-top: 10px;
 }
-.header-cabinet-btn:hover {
+
+.header-cabinet-btn:hover,
+.add-book-btn:hover {
+  background: #48b0cb; 
+  color: #fff;
  background: #48b0cb;
 }
 

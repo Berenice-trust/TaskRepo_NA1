@@ -5,7 +5,7 @@ const { query } = require('../config/database');
 //Создание таблицы книг, если она не существует
 async function createBooksTable() {
   const sql = `
-    CREATE TABLE IF NOT EXISTS books (
+     CREATE TABLE IF NOT EXISTS books (
       id INT AUTO_INCREMENT PRIMARY KEY,
       title VARCHAR(255) NOT NULL,
       description TEXT,
@@ -14,12 +14,16 @@ async function createBooksTable() {
       meta_keywords VARCHAR(200),
       cover_image VARCHAR(255),
       author_id INT NOT NULL,
+      genre_id INT,
+      subgenre_id INT,
       status ENUM('draft', 'published', 'completed') DEFAULT 'draft',
       views INT DEFAULT 0,
       likes INT DEFAULT 0,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+      FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE SET NULL,
+      FOREIGN KEY (subgenre_id) REFERENCES genres(id) ON DELETE SET NULL
     )
   `;
   return await query(sql);
