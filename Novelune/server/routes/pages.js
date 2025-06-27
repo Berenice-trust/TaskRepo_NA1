@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const Genre = require('../models/genre'); 
+const Book = require('../models/book');
+const multer = require('multer');
+// const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: 'client/uploads/covers/' }); 
 
 // Middleware для проверки авторизации
 const auth = require('../middleware/auth');
@@ -64,6 +69,44 @@ router.get('/activate', (req, res) => {
   res.render('pages/activate', {
     title: 'Активация аккаунта'
   });
+});
+
+// Форма создания книги
+router.get('/books/new', async (req, res) => {
+  const genres = await Genre.getAllGenres();
+  console.log('genres:', genres); // Проверяем, что в genres  
+  res.render('pages/book-new', {
+    title: 'Создать книгу',
+    genres,
+    genresJson: JSON.stringify(genres || []) 
+  });
+});
+
+// Обработка создания книги
+router.post('/books/new', auth, upload.single('cover_image'), async (req, res) => {
+  try {
+    const { title, genre_id, subgenre_id, description, status } = req.body;
+    const cover_image = req.file ? req.file.filename : null;
+    const author_id = req.user.id; 
+
+    await Book.createBook({
+      title,
+      genre_id: genre_id || null,
+      subgenre_id: subgenre_id || null,
+      description,
+      status,
+      cover_image,
+      author_id
+    });
+
+    res.redirect('/dashboard'); // или на страницу книги
+  } catch (err) {
+    console.error(err);
+    res.render('pages/book-new', {
+      title: 'Создать книгу',
+      error: 'Ошибка при создании книги. Попробуйте ещё раз.'
+    });
+  }
 });
 
 module.exports = router;

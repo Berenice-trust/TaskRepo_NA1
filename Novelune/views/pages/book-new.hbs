@@ -1,0 +1,62 @@
+<h2 class="welcome-title">Создать книгу</h2>
+<div class="welcome-flex">
+  <form id="createBookForm" method="POST" action="/books/new" enctype="multipart/form-data">
+    <div class="book-cover-rect" style="position:relative;">
+      <img id="coverPreview" src="/images/default-cover.png" alt="Обложка" class="book-cover-img">
+      {{!-- <span class="book-cover-text">Кликните, чтобы выбрать файл ниже</span> --}}
+    </div>
+    <input
+      type="file"
+      id="coverInput"
+      name="cover_image"
+      accept="image/*"
+      style="margin-bottom:16px;"
+    >
+    <div class="welcome-info">
+      <div class="form-group">
+        <label for="title">Название</label>
+        <input type="text" id="title" name="title" required>
+      </div>
+      <div class="form-group genre-row" style="display:flex;gap:10px;align-items:center;">
+        <label for="genre_id">Жанр</label>
+        <select id="genre_id" name="genre_id" required>
+          <option value="">Выберите жанр</option>
+          {{#each genres}}
+            {{#unless this.parent_id}}
+              <option value="{{this.id}}">{{this.name}}</option>
+            {{/unless}}
+          {{/each}}
+        </select>
+        <label for="subgenre_id" style="margin-left:10px;">Поджанр</label>
+        <select id="subgenre_id" name="subgenre_id">
+          <option value="">Выберите поджанр</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="description">Аннотация</label>
+        <textarea id="description" name="description" rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="status">Статус</label>
+        <select id="status" name="status">
+          <option value="draft">Черновик</option>
+          <option value="in_progress">В процессе</option>
+          <option value="completed">Завершена</option>
+        </select>
+      </div>
+      <div class="chapter-section">
+        <button type="button" id="addChapterBtn" class="button">Добавить главу</button>
+        <ul id="chaptersList" class="chapters-list"></ul>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="button" id="saveBookBtn">Сохранить книгу</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+   window.genresData = {{{genresJson}}};
+</script>
+<script src="/js/book-genre.js"></script>
+<script src="/js/book-cover-upload.js"></script>

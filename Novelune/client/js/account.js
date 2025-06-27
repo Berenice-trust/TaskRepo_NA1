@@ -127,4 +127,15 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Ошибка сохранения профиля');
     }
   });
+
+
+
+  
+   const createBookBtn = document.getElementById('createBookBtn');
+  if (createBookBtn) {
+    createBookBtn.addEventListener('click', () => {
+      window.location.href = '/books/new';
+    });
+  }
 });
+

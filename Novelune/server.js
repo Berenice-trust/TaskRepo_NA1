@@ -141,7 +141,7 @@ app.use((req, res) => {
 
     // инициализация таблицы жанров
     await createGenresTable();
-    await seedGenres();
+    // await seedGenres();
     console.log('Таблица жанров проверена/создана и заполнена');
    
   } catch (error) {

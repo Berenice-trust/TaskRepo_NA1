@@ -12,6 +12,8 @@ async function createGenresTable() {
   return await query(sql);
 }
 
+
+
 async function seedGenres() {
   const genres = [
     { name: 'Фантастика', parent_id: null },
@@ -30,4 +32,9 @@ async function seedGenres() {
   }
 }
 
-module.exports = { createGenresTable, seedGenres };
+async function getAllGenres() {
+  const sql = 'SELECT * FROM genres';
+  return await query(sql);
+}
+
+module.exports = { createGenresTable, seedGenres, getAllGenres };

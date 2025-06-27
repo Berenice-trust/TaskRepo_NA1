@@ -16,7 +16,7 @@ async function createBooksTable() {
       author_id INT NOT NULL,
       genre_id INT,
       subgenre_id INT,
-      status ENUM('draft', 'published', 'completed') DEFAULT 'draft',
+      status ENUM('draft', 'in_progress', 'completed') DEFAULT 'draft',
       views INT DEFAULT 0,
       likes INT DEFAULT 0,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
