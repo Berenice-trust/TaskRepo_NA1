@@ -181,6 +181,35 @@ async function incrementChapterViews(id) {
   }
 }
 
+async function shiftChapterNumbers(bookId, fromNumber) {
+  const sql = `
+    UPDATE chapters
+    SET chapter_number = chapter_number + 1
+    WHERE book_id = ? AND chapter_number >= ?
+  `;
+  await query(sql, [bookId, fromNumber]);
+}
+
+// Сдвигает главы вниз (на -1) между oldNumber+1 и newNumber
+async function shiftChapterNumbersDown(bookId, from, to) {
+  const sql = `
+    UPDATE chapters
+    SET chapter_number = chapter_number - 1
+    WHERE book_id = ? AND chapter_number > ? AND chapter_number <= ?
+  `;
+  await query(sql, [bookId, from, to]);
+}
+
+// Сдвигает главы вверх (на +1) между newNumber и oldNumber-1
+async function shiftChapterNumbersUp(bookId, from, to) {
+  const sql = `
+    UPDATE chapters
+    SET chapter_number = chapter_number + 1
+    WHERE book_id = ? AND chapter_number >= ? AND chapter_number < ?
+  `;
+  await query(sql, [bookId, from, to]);
+}
+
 module.exports = {
   createChaptersTable,
   createChapter,
@@ -188,5 +217,8 @@ module.exports = {
   getBookChapters,
   updateChapter,
   deleteChapter,
-  incrementChapterViews
+  incrementChapterViews,
+  shiftChapterNumbers,
+  shiftChapterNumbersDown,
+  shiftChapterNumbersUp
 };

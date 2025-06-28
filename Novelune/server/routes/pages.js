@@ -155,6 +155,11 @@ router.post('/books/:bookId/chapters/new', auth, async (req, res) => {
   try {
     const { bookId } = req.params;
     const { title, chapter_number, content } = req.body;
+
+      // Сдвигаем все главы с таким или большим номером на +1
+    await Chapter.shiftChapterNumbers(bookId, chapter_number);
+
+    // Добавляем новую главу
     await Chapter.createChapter({
       book_id: bookId,
       title,
@@ -205,17 +210,24 @@ router.post('/books/:bookId/chapters/:chapterId/edit', auth, async (req, res) =>
   const { bookId, chapterId } = req.params;
   const { title, chapter_number, content } = req.body;
   try {
-    await Chapter.updateChapter(chapterId, { title, chapter_number, content });
+    const chapter = await Chapter.getChapterById(chapterId);
+    const oldNumber = chapter.chapter_number;
+    const newNumber = Number(chapter_number);
+
+    if (newNumber !== oldNumber) {
+      if (newNumber > oldNumber) {
+        // Сдвигаем главы между oldNumber+1 и newNumber на -1
+        await Chapter.shiftChapterNumbersDown(bookId, oldNumber, newNumber);
+      } else {
+        // Сдвигаем главы между newNumber и oldNumber-1 на +1
+        await Chapter.shiftChapterNumbersUp(bookId, newNumber, oldNumber);
+      }
+    }
+
+    await Chapter.updateChapter(chapterId, { title, chapter_number: newNumber, content });
     res.redirect(`/books/${bookId}`);
   } catch (err) {
-    console.error(err);
-    res.render('pages/chapter-edit', {
-      title: 'Редактировать главу',
-      bookId,
-      chapter: { id: chapterId, title, chapter_number, content },
-      user: req.user,
-      error: 'Ошибка при сохранении главы. Попробуйте ещё раз.'
-    });
+    // ...
   }
 });
 
