@@ -1,0 +1,91 @@
+<h2 class="welcome-title">{{book.title}}</h2>
+<div class="welcome-flex">
+  <div>
+    <div class="book-cover-rect" style="position:relative;">
+      <img
+        src="{{#if book.cover_image}}/uploads/covers/{{book.cover_image}}{{else}}/images/default-cover.png{{/if}}"
+        alt="Обложка"
+        class="book-cover-img"
+        onerror="this.src='/images/default-cover.png'"
+      />
+    </div>
+  </div>
+  <div class="welcome-info">
+    {{!-- <div class="form-group">
+      <label>Название:</label>
+      <div class="profile-value">{{book.title}}</div>
+    </div> --}}
+   <div class="form-group">
+  <label>Жанр:</label>
+  <div class="profile-value">{{book.genre_name}}</div>
+</div>
+{{#if book.subgenre_name}}
+<div class="form-group">
+  <label>Поджанр:</label>
+  <div class="profile-value">{{book.subgenre_name}}</div>
+</div>
+{{/if}}
+<div class="form-group">
+  <label>Аннотация:</label>
+  <div class="profile-value">{{book.description}}</div>
+</div>
+<div class="form-group">
+  <label>Статус:</label>
+  <div class="profile-value">
+    {{#if (eq book.status "draft")}}Черновик{{/if}}
+    {{#if (eq book.status "in_progress")}}В процессе{{/if}}
+    {{#if (eq book.status "completed")}}Завершена{{/if}}
+  </div>
+</div>
+
+  </div>
+</div>
+
+
+
+
+<div class="chapters-block">
+  <h3>Главы</h3>
+ <ul class="chapters-list">
+  {{#each chapters}}
+    <li>
+      <span>Глава {{chapter_number}}: {{title}}</span>
+      <div class="chapter-actions">
+        <a href="/books/{{../book.id}}/chapters/{{id}}/edit" class="button edit-chapter-btn">Редактировать</a>
+        <button
+          type="button"
+          class="button danger delete-chapter-btn"
+          data-chapter-id="{{id}}"
+          data-book-id="{{../book.id}}"
+        >Удалить</button>
+      </div>
+    </li>
+  {{else}}
+    <li>Глав пока нет</li>
+  {{/each}}
+</ul>
+  <div style="margin-top: 16px;">
+    <a href="/books/{{book.id}}/chapters/new" class="button add-book-btn">Добавить главу</a>
+  </div>
+</div>
+
+<div style="margin-top: 16px; text-align: center;">
+  <a href="/dashboard" class="button form-actions">В личный кабинет</a>
+</div>
+
+
+  {{!-- Модальное окно для удаления главы --}}
+<div id="deleteChapterModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <h3>Удалить главу?</h3>
+    <p>Вы уверены, что хотите удалить эту главу? Это действие необратимо!</p>
+    <form id="deleteChapterForm" method="POST">
+      <div class="modal-actions">
+        <button type="button" id="cancelDeleteChapter" class="button secondary">Отмена</button>
+        <button type="submit" class="button danger">Удалить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/chapter-actions.js"></script>

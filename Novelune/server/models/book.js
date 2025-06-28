@@ -31,11 +31,11 @@ async function createBooksTable() {
 
  //Создание новой книги
 async function createBook(bookData) {
-  const { title, description, meta_title, meta_description, meta_keywords, cover_image, author_id, status = 'draft' } = bookData;
-  
+ const { title, description, meta_title, meta_description, meta_keywords, cover_image, author_id, status = 'draft', genre_id, subgenre_id } = bookData;
+ 
   const sql = `
-    INSERT INTO books (title, description, meta_title, meta_description, meta_keywords, cover_image, author_id, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO books (title, description, meta_title, meta_description, meta_keywords, cover_image, author_id, status, genre_id, subgenre_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   try {
@@ -47,7 +47,9 @@ async function createBook(bookData) {
       meta_keywords, 
       cover_image, 
       author_id, 
-      status
+      status,
+      genre_id || null,
+      subgenre_id || null
     ]);
     
    return { 
@@ -65,13 +67,15 @@ async function createBook(bookData) {
  * @returns {Promise<Object|null>} - Книга или null, если не найдена
  */
 async function getBookById(id) {
-  const sql = `
-    SELECT b.*, u.username as author_name 
+   const sql = `
+    SELECT b.*, 
+           g.name AS genre_name, 
+           sg.name AS subgenre_name
     FROM books b
-    JOIN users u ON b.author_id = u.id
+    LEFT JOIN genres g ON b.genre_id = g.id
+    LEFT JOIN genres sg ON b.subgenre_id = sg.id
     WHERE b.id = ?
   `;
-  
   const result = await query(sql, [id]);
  return result.length > 0 ? convertBigIntToNumber(result[0]) : null;
 

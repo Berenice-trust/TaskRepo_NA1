@@ -484,7 +484,7 @@ footer {
   background: #fafafa;
   /* cursor: pointer; */
   transition: border-color 0.2s;
-  margin-bottom: 10px;
+  margin-bottom: 10px; /* ?0px */
 }
 .book-cover-rect:hover {
   border-color: #007bff;
@@ -501,4 +501,116 @@ footer {
   color: #888;
   font-size: 1em;
   text-align: center;
+}
+
+.createBookForm {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.book-detail-actions {
+  width: auto;
+  min-width: 120px;
+  padding: 10px 20px;
+  font-size: 1rem;
+}
+
+
+
+
+
+/* список глав на странице книги */
+.chapters-block {
+  background: #2c3e50; /* светлый фиолетовый, как welcome-flex */
+  border-radius: 10px;
+  padding: 18px 24px;
+  margin-top: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(92,107,192,0.07);
+  color: #fff;
+}
+.chapters-block h3 {
+  margin-top: 0;
+}
+.chapters-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.chapters-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chapters-list li:last-child {
+  border-bottom: none;
+}
+.edit-chapter-link {
+  color: #5C6BC0;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.95em;
+  margin-left: 12px;
+}
+
+.edit-chapter-btn {
+  background: #5ec3df;
+  color: #111;
+  margin-right: 8px;
+  padding: 6px 16px;
+  font-size: 1em;
+}
+.edit-chapter-btn:hover {
+  background: #48b0cb;
+  color: #fff;
+}
+.button.danger {
+  background: #e74c3c;
+  color: #fff;
+}
+.button.danger:hover {
+  background: #c0392b;
+}
+
+.chapter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.books-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px 0;
+}
+.book-item {
+  background: #fff; /* Было: #f3f2fa */
+  border-radius: 10px;
+  margin-bottom: 16px;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 16px rgba(44,62,80,0.08); /* чуть сильнее тень */
+  border: 1px solid #e0e4ea; /* лёгкая рамка */
+}
+.book-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.book-title {
+  font-weight: 600;
+  font-size: 1.15em;
+  color: #2c3e50;
+}
+.book-status {
+  font-size: 0.98em;
+  color: #5C6BC0;
+}
+.book-actions {
+  display: flex;
+  gap: 10px;
 }

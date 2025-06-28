@@ -130,12 +130,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-  
+  // обработчик кнопки добавления Книги и главы
    const createBookBtn = document.getElementById('createBookBtn');
   if (createBookBtn) {
     createBookBtn.addEventListener('click', () => {
       window.location.href = '/books/new';
     });
   }
+
+  const addChapterBtn = document.getElementById('addChapterBtn');
+if (addChapterBtn) {
+  addChapterBtn.addEventListener('click', () => {
+    // Здесь должен быть bookId, если он есть на странице
+    const bookId = window.currentBookId; // или получи другим способом
+    if (bookId) {
+      window.location.href = `/books/${bookId}/chapters/new`;
+    } else {
+      alert('Сначала сохраните книгу!');
+    }
+  });
+}
 });
 

@@ -73,6 +73,38 @@
   {{!-- </div> --}}
 </section>
 
+
+<h2>Мои книги</h2>
+<ul class="books-list">
+  {{#each books}}
+    <li class="book-item">
+      <div class="book-info">
+        <span class="book-title">{{title}}</span>
+        <span class="book-status">
+          {{#if (eq status "draft")}}Черновик{{/if}}
+          {{#if (eq status "in_progress")}}В процессе{{/if}}
+          {{#if (eq status "completed")}}Завершена{{/if}}
+        </span>
+      </div>
+      <div class="book-actions">
+        <a href="/books/{{id}}" class="button edit-chapter-btn">Открыть</a>
+        <form action="/books/{{id}}/delete" method="POST" style="display:inline;">
+            <button
+            type="button"
+            class="button danger delete-book-btn"
+            data-book-id="{{id}}"
+          >
+            Удалить
+          </button>
+        </form>
+      </div>
+    </li>
+  {{else}}
+    <li>У вас пока нет книг</li>
+  {{/each}}
+</ul>
+
+
 {{!-- Модальное окно для удаления аккаунта: --}}
 {{> components/deleteAccountModal}}
 
@@ -80,7 +112,21 @@
 {{> components/editProfileModal}}
 
 
+<div id="deleteBookModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <h3>Удалить книгу?</h3>
+    <p>Вы уверены, что хотите удалить эту книгу? Это действие необратимо!</p>
+    <form id="deleteBookForm" method="POST">
+      <div class="modal-actions">
+        <button type="button" id="cancelDeleteBook" class="button secondary">Отмена</button>
+        <button type="submit" class="button danger">Удалить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 {{#section 'scripts'}}
 <script src="/js/avatar-upload.js"></script>
 <script src="/js/account.js"></script>
+<script src="/js/book-actions.js"></script>
 {{/section}}

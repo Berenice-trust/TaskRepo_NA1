@@ -3,9 +3,14 @@ const router = express.Router();
 const User = require('../models/user');
 const Genre = require('../models/genre'); 
 const Book = require('../models/book');
+const Chapter = require('../models/chapter');
 const multer = require('multer');
 // const upload = multer({ dest: 'uploads/' });
 const upload = multer({ dest: 'client/uploads/covers/' }); 
+const imageUpload = multer({ dest: 'client/uploads/images/' });
+const path = require('path');
+const fs = require('fs');
+
 
 // Middleware для проверки авторизации
 const auth = require('../middleware/auth');
@@ -60,9 +65,11 @@ router.get('/test', (req, res) => {
 //   });
 // });
 router.get('/dashboard', auth, async (req, res) => {
-  const user = await User.findUserById(req.user.id); // Получаем пользователя из БД
-  res.render('pages/dashboard', { user });
-  });
+  const user = await User.findUserById(req.user.id);
+  // Получаем книги автора, сортировка по дате создания (новые сверху)
+  const books = await Book.getAllBooks({ authorId: req.user.id, limit: 100, offset: 0 });
+  res.render('pages/dashboard', { user, books });
+});
 
 // Страница активации
 router.get('/activate', (req, res) => {
@@ -72,13 +79,15 @@ router.get('/activate', (req, res) => {
 });
 
 // Форма создания книги
-router.get('/books/new', async (req, res) => {
+router.get('/books/new', auth, async (req, res) => {
   const genres = await Genre.getAllGenres();
-  console.log('genres:', genres); // Проверяем, что в genres  
+   const user = await User.findUserById(req.user.id); 
+  //console.log('genres:', genres); // Проверяем, что в genres  
   res.render('pages/book-new', {
     title: 'Создать книгу',
     genres,
-    genresJson: JSON.stringify(genres || []) 
+    genresJson: JSON.stringify(genres || []),
+    user
   });
 });
 
@@ -89,17 +98,18 @@ router.post('/books/new', auth, upload.single('cover_image'), async (req, res) =
     const cover_image = req.file ? req.file.filename : null;
     const author_id = req.user.id; 
 
-    await Book.createBook({
-      title,
-      genre_id: genre_id || null,
-      subgenre_id: subgenre_id || null,
-      description,
-      status,
-      cover_image,
-      author_id
-    });
+     // Получаем id новой книги
+const newBook = await Book.createBook({
+  title,
+  genre_id: genre_id || null,
+  subgenre_id: subgenre_id || null,
+  description,
+  status,
+  cover_image,
+  author_id
+});
 
-    res.redirect('/dashboard'); // или на страницу книги
+    res.redirect(`/books/${newBook.id}`); 
   } catch (err) {
     console.error(err);
     res.render('pages/book-new', {
@@ -107,6 +117,115 @@ router.post('/books/new', auth, upload.single('cover_image'), async (req, res) =
       error: 'Ошибка при создании книги. Попробуйте ещё раз.'
     });
   }
+});
+
+router.post('/books/:id/delete', auth, async (req, res) => {
+  try {
+    await Book.deleteBook(req.params.id, req.user.id);
+    res.redirect('/dashboard');
+  } catch (err) {
+    console.error(err);
+    res.redirect('/dashboard');
+  }
+});
+
+router.get('/books/:bookId/chapters/new', auth, async (req, res) => {
+  const { bookId } = req.params;
+  const user = await User.findUserById(req.user.id); // добавь эту строку
+  res.render('pages/chapter-new', {
+    title: 'Добавить главу',
+    bookId,
+    user 
+  });
+});
+
+router.get('/books/:id', auth, async (req, res) => {
+  const book = await Book.getBookById(req.params.id);
+ const chapters = await Chapter.getBookChapters(req.params.id);
+ const user = await User.findUserById(req.user.id);
+  res.render('pages/book-detail', {
+    title: book.title,
+    book,
+    chapters,
+    user
+  });
+});
+
+router.post('/books/:bookId/chapters/new', auth, async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const { title, chapter_number, content } = req.body;
+    await Chapter.createChapter({
+      book_id: bookId,
+      title,
+      chapter_number,
+      content,
+      status: 'draft'
+    });
+    // После добавления главы редиректим на страницу книги
+    res.redirect(`/books/${bookId}`);
+  } catch (err) {
+    console.error(err);
+    res.render('pages/chapter-new', {
+      title: 'Добавить главу',
+      bookId,
+      error: 'Ошибка при добавлении главы. Попробуйте ещё раз.'
+    });
+  }
+});
+
+router.post('/books/:bookId/chapters/:chapterId/delete', auth, async (req, res) => {
+  try {
+    await Chapter.deleteChapter(req.params.chapterId);
+    res.redirect(`/books/${req.params.bookId}`);
+  } catch (err) {
+    console.error(err);
+    res.redirect(`/books/${req.params.bookId}`);
+  }
+});
+
+// Страница редактирования главы
+router.get('/books/:bookId/chapters/:chapterId/edit', auth, async (req, res) => {
+  const { bookId, chapterId } = req.params;
+  const user = await User.findUserById(req.user.id);
+  const chapter = await Chapter.getChapterById(chapterId);
+  if (!chapter) {
+    return res.status(404).render('pages/404', { title: 'Глава не найдена', user });
+  }
+  res.render('pages/chapter-edit', {
+    title: 'Редактировать главу',
+    bookId,
+    chapter,
+    user
+  });
+});
+
+// Обработка редактирования главы
+router.post('/books/:bookId/chapters/:chapterId/edit', auth, async (req, res) => {
+  const { bookId, chapterId } = req.params;
+  const { title, chapter_number, content } = req.body;
+  try {
+    await Chapter.updateChapter(chapterId, { title, chapter_number, content });
+    res.redirect(`/books/${bookId}`);
+  } catch (err) {
+    console.error(err);
+    res.render('pages/chapter-edit', {
+      title: 'Редактировать главу',
+      bookId,
+      chapter: { id: chapterId, title, chapter_number, content },
+      user: req.user,
+      error: 'Ошибка при сохранении главы. Попробуйте ещё раз.'
+    });
+  }
+});
+
+router.post('/api/images/upload', auth, imageUpload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'Нет файла' });
+  }
+  // Вернём путь для вставки в редактор
+  const imageUrl = `/uploads/images/${req.file.filename}`;
+  res.json({ location: imageUrl });
 });
 
 module.exports = router;
