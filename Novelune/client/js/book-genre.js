@@ -1,21 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const genreSelect = document.getElementById('genre_id');
-  const subgenreSelect = document.getElementById('subgenre_id');
-  if (!genreSelect || !subgenreSelect) return;
+  function setupGenreSubgenre(genreSelectId, subgenreSelectId) {
+    const genreSelect = document.getElementById(genreSelectId);
+    const subgenreSelect = document.getElementById(subgenreSelectId);
+    if (!genreSelect || !subgenreSelect || !window.genresData) return;
 
-  // genresData должен быть передан сервером как window.genresData
-  const genres = window.genresData || [];
+    function updateSubgenres() {
+      const genreId = Number(genreSelect.value);
+      subgenreSelect.innerHTML = '<option value="">Выберите поджанр</option>';
+      window.genresData.forEach(g => {
+        if (g.parent_id === genreId) {
+          const opt = document.createElement('option');
+          opt.value = g.id;
+          opt.textContent = g.name;
+          subgenreSelect.appendChild(opt);
+        }
+      });
+    }
 
-  genreSelect.addEventListener('change', () => {
-    const selectedGenreId = genreSelect.value;
-    subgenreSelect.innerHTML = '<option value="">Выберите поджанр</option>';
-    genres.forEach(g => {
-      if (g.parent_id && String(g.parent_id) === selectedGenreId) {
-        const opt = document.createElement('option');
-        opt.value = g.id;
-        opt.textContent = g.name;
-        subgenreSelect.appendChild(opt);
-      }
-    });
-  });
+    genreSelect.addEventListener('change', updateSubgenres);
+
+    // При открытии формы сразу показать поджанры для выбранного жанра
+    updateSubgenres();
+  }
+
+  setupGenreSubgenre('genre_id', 'subgenre_id'); // для создания книги
+  setupGenreSubgenre('editGenre', 'editSubgenre'); // для модального окна редактирования
 });

@@ -42,6 +42,7 @@ const hbs = exphbs.create({
     eq: function(a, b) {
       return a === b;
     },
+     and: function(a, b) { return a && b; },
     // Функция для создания секций в шаблонах
     section: function(name, options) {
       if (!this._sections) this._sections = {};

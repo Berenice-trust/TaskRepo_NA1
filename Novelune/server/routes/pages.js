@@ -149,11 +149,14 @@ router.get('/books/:id', auth, async (req, res) => {
   const book = await Book.getBookById(req.params.id);
  const chapters = await Chapter.getBookChapters(req.params.id);
  const user = await User.findUserById(req.user.id);
+   const genres = await Genre.getAllGenres(); 
   res.render('pages/book-detail', {
     title: book.title,
     book,
     chapters,
-    user
+    user,
+    genres,
+    genresJson: JSON.stringify(genres || [])
   });
 });
 
@@ -244,6 +247,41 @@ router.post('/api/images/upload', auth, imageUpload.single('file'), (req, res) =
   // Вернём путь для вставки в редактор
   const imageUrl = `/uploads/images/${req.file.filename}`;
   res.json({ location: imageUrl });
+});
+
+// GET /books/:id/edit — страница редактирования
+// router.get('/books/:id/edit', auth, async (req, res) => {
+//   const book = await Book.getBookById(req.params.id);
+//   const genres = await Genre.getAllGenres();
+//   const user = await User.findUserById(req.user.id);
+//   if (!book) {
+//     return res.status(404).render('pages/404', { title: 'Книга не найдена', user });
+//   }
+//   res.render('pages/book-edit', {
+//     title: 'Редактировать книгу',
+//     book,
+//     genres,
+//     user
+//   });
+// });
+
+// POST /books/:id/edit — обработка формы
+router.post('/books/:id/edit', auth, async (req, res) => {
+  try {
+    const { title, genre_id, subgenre_id, description, status } = req.body;
+   await Book.updateBook(req.params.id, {
+  title,
+  genre_id: genre_id ? Number(genre_id) : null,
+  subgenre_id: subgenre_id ? Number(subgenre_id) : null,
+  description,
+  status
+});
+    res.redirect(`/books/${req.params.id}`);
+  } catch (err) {
+    console.error(err);
+    // Можно добавить повторный рендер с ошибкой
+    res.redirect(`/books/${req.params.id}`);
+  }
 });
 
 module.exports = router;

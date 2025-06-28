@@ -119,8 +119,18 @@ async function getAllBooks(options = {}) {
 
 // Обновление книги
 async function updateBook(id, bookData) {
-  const { title, description, meta_title, meta_description, meta_keywords, cover_image, status } = bookData;
-  
+  const {
+    title,
+    description,
+    meta_title,
+    meta_description,
+    meta_keywords,
+    cover_image,
+    status,
+    genre_id,     
+    subgenre_id    
+  } = bookData;
+
   // Строим динамический SQL-запрос на обновление только переданных полей
   let sql = 'UPDATE books SET ';
   const params = [];
@@ -159,6 +169,15 @@ async function updateBook(id, bookData) {
   if (status !== undefined) {
     updates.push('status = ?');
     params.push(status);
+  }
+
+    if (genre_id !== undefined) {
+    updates.push('genre_id = ?');
+    params.push(genre_id || null);
+  }
+  if (subgenre_id !== undefined) {
+    updates.push('subgenre_id = ?');
+    params.push(subgenre_id || null);
   }
   
   // Если нечего обновлять, возвращаем ошибку

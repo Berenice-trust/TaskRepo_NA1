@@ -1,4 +1,18 @@
-<h2 class="welcome-title">{{book.title}}</h2>
+<h2 class="welcome-title">{{book.title}}
+
+<span id="editBookBtn" class="edit-icon" title="Редактировать книгу" style="cursor:pointer;">
+  <svg viewBox="0 0 20 20" fill="none" width="28" height="28">
+    <path d="M14.7 2.29a1 1 0 0 1 1.42 0l1.59 1.59a1 1 0 0 1 0 1.42l-9.17 9.17-2.83.71.71-2.83 9.17-9.17z" fill="#2c3e50"/>
+    <path d="M3 17h14v2H3v-2z" fill="#007bff" opacity="0.2"/>
+  </svg>
+</span>
+
+
+</h2>
+
+{{> components/editBookModal}}
+
+
 <div class="welcome-flex">
   <div>
     <div class="book-cover-rect" style="position:relative;">
@@ -88,4 +102,12 @@
   </div>
 </div>
 
+
+
 <script src="/js/chapter-actions.js"></script>
+<script src="/js/book-edit-modal.js"></script>
+
+<script>
+  window.genresData = {{{genresJson}}};
+</script>
+<script src="/js/book-genre.js"></script>
