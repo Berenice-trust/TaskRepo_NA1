@@ -29,4 +29,22 @@ async function saveAvatar(userId, buffer) {
   return `/uploads/avatars/avatar_${userId}_thumb.jpg`;
 }
 
-module.exports = { saveAvatar, getAvatarPaths };
+async function saveImage({ buffer, destFolder, filename, resize = null, quality = 80 }) {
+  if (!fs.existsSync(destFolder)) fs.mkdirSync(destFolder, { recursive: true });
+  const filePath = path.join(destFolder, filename);
+
+  let img = sharp(buffer);
+  if (resize) img = img.resize(resize.width, resize.height, { fit: 'cover' });
+  await img.jpeg({ quality }).toFile(filePath);
+
+  return filePath;
+}
+
+async function deleteImage(filePath) {
+  if (fs.existsSync(filePath)) {
+    try { fs.unlinkSync(filePath); } catch (e) { console.error('Ошибка удаления файла:', filePath, e); }
+  }
+}
+
+
+module.exports = { saveAvatar, getAvatarPaths, saveImage, deleteImage };

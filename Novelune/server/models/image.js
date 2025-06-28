@@ -18,9 +18,11 @@ async function createImagesTable() {
   return await query(sql);
 }
 
+
+
 const Image = {
   createImagesTable,
-  async create({ file_path, original_name, book_id = null, user_id = null, chapter_id = null }) {
+  create: async function({ file_path, original_name, book_id = null, user_id = null, chapter_id = null }) {
     const result = await query(
       `INSERT INTO images (file_path, original_name, book_id, user_id, chapter_id)
        VALUES (?, ?, ?, ?, ?)`,
@@ -29,17 +31,84 @@ const Image = {
     return result.insertId;
   },
 
-  async getById(id) {
+  getById: async function(id) {
     const rows = await query('SELECT * FROM images WHERE id = ?', [id]);
     return rows[0] || null;
   },
 
-  async getByBook(book_id) {
+  getByBook: async function(book_id) {
     return await query('SELECT * FROM images WHERE book_id = ?', [book_id]);
   },
 
-  async getByUser(user_id) {
+  getByUser: async function(user_id) {
     return await query('SELECT * FROM images WHERE user_id = ?', [user_id]);
+  },
+
+  getByChapter: async function(chapter_id) {
+    return await query('SELECT * FROM images WHERE chapter_id = ?', [chapter_id]);
+  },
+
+  getOrphanedImages: async function(userId = null) {
+    let sql = 'SELECT * FROM images WHERE chapter_id IS NULL AND book_id IS NULL';
+    const params = [];
+    
+    if (userId) {
+      sql += ' AND user_id = ?';
+      params.push(userId);
+    }
+    
+    return await query(sql, params);
+  }
+};
+
+
+
+
+async function deleteById(id) {
+  await query('DELETE FROM images WHERE id = ?', [id]);
+}
+Image.deleteById = deleteById;
+
+// filepath: /Users/vzhytnik/Documents/Nika Projects FD/TaskRepo_NA1/Novelune/server/models/image.js
+Image.updateChapterIdByPath = async function(file_path, chapter_id, book_id) {
+  // Убираем параметры запроса (?t=...)
+  if (file_path.includes('?')) {
+    file_path = file_path.split('?')[0];
+  }
+  
+  // Обработка всех возможных форматов пути
+  let cleanPath = file_path;
+  
+  // 1. Если путь содержит домен - удаляем его
+  if (cleanPath.includes('://')) {
+    cleanPath = '/' + cleanPath.split('/').slice(3).join('/');
+  }
+  
+  // 2. Если путь не начинается с / - добавляем его
+  if (!cleanPath.startsWith('/')) {
+    cleanPath = '/' + cleanPath;
+  }
+  
+  console.log('Очищенный путь для поиска в БД:', cleanPath);
+  
+  // Пытаемся найти по полному пути
+  let result = await query(
+    'UPDATE images SET chapter_id = ?, book_id = ? WHERE file_path = ?',
+    [chapter_id, book_id, cleanPath]
+  );
+  
+  console.log('Результат обновления:', result.affectedRows, 'строк');
+  
+  // Если не нашли, пробуем найти по имени файла без расширения
+  if (result.affectedRows === 0) {
+    // Получаем имя файла без расширения и без параметров
+    const filename = cleanPath.split('/').pop().split('.')[0];
+    console.log('Поиск по имени файла (без расширения):', filename);
+    
+    await query(
+      'UPDATE images SET chapter_id = ?, book_id = ? WHERE file_path LIKE ?',
+      [chapter_id, book_id, '%' + filename + '%']
+    );
   }
 };
 

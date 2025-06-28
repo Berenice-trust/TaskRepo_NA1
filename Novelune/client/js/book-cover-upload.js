@@ -31,12 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
   if (coverInput && coverPreview) {
     coverInput.addEventListener('change', () => {
       const file = coverInput.files[0];
-      console.log('Выбран файл:', file);
       if (file) {
         const reader = new FileReader();
         reader.onload = e => {
           coverPreview.src = e.target.result;
-          console.log('Предпросмотр обновлён');
         };
         reader.readAsDataURL(file);
       }

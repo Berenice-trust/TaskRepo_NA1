@@ -17,12 +17,20 @@
   <div>
     <div class="book-cover-rect" style="position:relative;">
       <img
+        id="coverPreview"
         src="{{#if book.cover_image}}/uploads/covers/{{book.cover_image}}{{else}}/images/default-cover.png{{/if}}"
         alt="Обложка"
         class="book-cover-img"
         onerror="this.src='/images/default-cover.png'"
       />
+      
+      
     </div>
+     <form id="coverUploadForm" action="/books/{{book.id}}/cover" method="POST" enctype="multipart/form-data" class="cover-upload-form cover-upload-form-vertical">
+        <input type="file" name="cover_image" id="coverInput" accept="image/*" style="margin-bottom: 8px;">
+        <button type="submit" class="button">Заменить обложку</button>
+      </form>
+
   </div>
   <div class="welcome-info">
     {{!-- <div class="form-group">
@@ -51,7 +59,7 @@
     {{#if (eq book.status "completed")}}Завершена{{/if}}
   </div>
 </div>
-
+   
   </div>
 </div>
 

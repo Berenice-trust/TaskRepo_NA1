@@ -1,5 +1,8 @@
 const { query } = require('../config/database');
 const { convertBigIntToNumber } = require('../utils/data-helpers');
+const Image = require('./image');
+const { deleteImage } = require('../services/image.service');
+const path = require('path');
 
 
 /**
@@ -155,8 +158,16 @@ async function updateChapter(id, chapterData) {
  * @returns {Promise<boolean>} - Результат удаления
  */
 async function deleteChapter(id) {
+   // Получаем все изображения, связанные с главой
+  const images = await Image.getByChapter(id);
+  for (const img of images) {
+    await deleteImage(path.join(__dirname, '../../client', img.file_path));
+    // удалить запись из images
+    await Image.deleteById(img.id);
+  }
+
+  // Теперь удаляем главу
   const sql = `DELETE FROM chapters WHERE id = ?`;
-  
   try {
     const result = await query(sql, [id]);
     return result.affectedRows > 0;
@@ -210,6 +221,25 @@ async function shiftChapterNumbersUp(bookId, from, to) {
   await query(sql, [bookId, from, to]);
 }
 
+async function getMaxChapterId() {
+  const result = await query('SELECT MAX(id) as maxId FROM chapters');
+  return result[0]?.maxId || 0;
+}
+
+async function createChapterWithId(chapterData) {
+  const { id, book_id, title, content, chapter_number, status = 'draft' } = chapterData;
+  const sql = `
+    INSERT INTO chapters (id, book_id, title, content, chapter_number, status)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+  try {
+    const result = await query(sql, [id, book_id, title, content, chapter_number, status]);
+    return { id: Number(id), ...chapterData };
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   createChaptersTable,
   createChapter,
@@ -220,5 +250,7 @@ module.exports = {
   incrementChapterViews,
   shiftChapterNumbers,
   shiftChapterNumbersDown,
+  getMaxChapterId,
+  createChapterWithId,
   shiftChapterNumbersUp
 };

@@ -614,3 +614,65 @@ footer {
   display: flex;
   gap: 10px;
 }
+
+
+
+
+/* обложка */
+
+.cover-upload-form {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  margin-bottom: 18px;
+}
+
+.cover-upload-form input[type="file"] {
+  flex: 1 1 auto;
+  max-width: 220px;
+}
+
+.cover-upload-form .button {
+  flex: 0 0 auto;
+  padding: 8px 18px;
+  font-size: 1em;
+  margin-left: 0; 
+}
+
+
+
+
+
+.cover-upload-form-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 8px;
+}
+
+.cover-upload-form-vertical input[type="file"] {
+  margin-bottom: 8px;
+  max-width: 100%;
+}
+
+.cover-upload-form-vertical .button {
+  width: 100%;
+}
+
+/* .cover-upload-form-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.cover-upload-form-horizontal input[type="file"] {
+  max-width: 220px;
+}
+
+.cover-upload-form-horizontal .button {
+  padding: 8px 18px;
+  font-size: 1em;
+} */

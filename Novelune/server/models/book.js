@@ -1,6 +1,10 @@
 // Модуль для работы с книгами
 const { convertBigIntToNumber } = require('../utils/data-helpers');
 const { query } = require('../config/database');
+const Image = require('./image');
+const { deleteImage } = require('../services/image.service');
+const path = require('path');
+const Chapter = require('./chapter');
 
 //Создание таблицы книг, если она не существует
 async function createBooksTable() {
@@ -213,6 +217,29 @@ async function deleteBook(id, authorId) {
     const book = await getBookById(id);
     if (!book || book.author_id !== authorId) {
       throw new Error('Нет прав для удаления этой книги');
+    }
+  }
+
+   // Удаляем все главы этой книги (и их картинки)
+  const chapters = await Chapter.getBookChapters(id);
+  for (const chapter of chapters) {
+    await Chapter.deleteChapter(chapter.id);
+  }
+
+    // Удаляем связанные изображения
+  const images = await Image.getByBook(id);
+  for (const img of images) {
+    await deleteImage(path.join(__dirname, '../../client', img.file_path));
+    // удалить запись из images
+    await Image.deleteById(img.id);
+  }
+  
+  // Удаляем "потерянные" изображения пользователя
+  if (authorId) {
+    const orphanedImages = await Image.getOrphanedImages(authorId);
+    for (const img of orphanedImages) {
+      await deleteImage(path.join(__dirname, '../../client', img.file_path));
+      await Image.deleteById(img.id);
     }
   }
   
