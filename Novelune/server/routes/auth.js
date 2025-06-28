@@ -145,13 +145,14 @@ router.post('/login', async (req, res) => {
       { expiresIn: '24h' }
     );
 
-    // Установить HTTP-only cookie с токеном (добавить эти строки)
-    res.cookie('authToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', 
-      maxAge: 24 * 60 * 60 * 1000, // 24 часа
-      sameSite: 'lax'
-    });
+// Продакшен-безопасный вариант установки куки
+res.cookie('authToken', token, {
+  httpOnly: true,  // для безопасности!
+  secure: process.env.NODE_ENV === 'production', 
+  maxAge: 24 * 60 * 60 * 1000, 
+  sameSite: 'lax',
+  path: '/'
+});
     
     // Отправляем ответ
     res.json({
@@ -175,7 +176,22 @@ router.post('/login', async (req, res) => {
 });
 
 
+// router.post('/logout', (req, res) => {
+//   res.clearCookie('authToken', { path: '/' });
+//   res.json({ success: true });
+// });
 
+// Вот это точно сработает:
+router.post('/logout', (req, res) => {
+  res.cookie('authToken', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    expires: new Date(0)  // Этот параметр важен!
+  });
+  res.json({ success: true });
+});
 
 
 

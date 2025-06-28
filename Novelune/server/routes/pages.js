@@ -10,6 +10,7 @@ const upload = multer({ dest: 'client/uploads/covers/' });
 const imageUpload = multer({ dest: 'client/uploads/images/' });
 const path = require('path');
 const fs = require('fs');
+const optionalAuth = require('../middleware/optionalAuth');
 
 
 // Middleware для проверки авторизации
@@ -25,11 +26,16 @@ router.get('/activate.html', (req, res) => {
 });
 
 // Главная страница
-router.get('/', (req, res) => {
+router.get('/', optionalAuth, async (req, res) => {
+  let user = null;
+  if (req.user) {
+    user = await User.findUserById(req.user.id);
+  }
   res.render('pages/home', {
     title: 'Главная страница',
     metaDescription: 'Novelune - литературная платформа для публикации и чтения произведений',
-    metaKeywords: 'книги, чтение, публикация, авторы'
+    metaKeywords: 'книги, чтение, публикация, авторы',
+    user
   });
 });
 

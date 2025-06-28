@@ -150,5 +150,35 @@ if (addChapterBtn) {
     }
   });
 }
+
+const logoutBtn = document.getElementById('logoutBtn');
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async () => {
+    try {
+      const response = await fetch('/api/auth/logout', { 
+        method: 'POST',
+        credentials: 'include' // Важно для правильной работы с куками!
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка сервера: ${response.status}`);
+      }
+      
+      // Удаляем данные из localStorage
+      localStorage.removeItem('username');
+      localStorage.removeItem('userRole');
+      
+      // Перенаправляем на главную
+    // Добавь небольшую задержку перед редиректом
+    // чтобы браузер успел обработать удаление куки
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 200);
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+      alert('Не удалось выйти из системы. Попробуйте ещё раз или обновите страницу.');
+    }
+  });
+}
 });
 

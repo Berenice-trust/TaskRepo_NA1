@@ -4,22 +4,4 @@
   </div>
 </footer>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', () => {
-        // Удаляем куки authToken
-        document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        
-        // Удаляем данные из localStorage (текущий код)
-        localStorage.removeItem('username');
-        localStorage.removeItem('userRole');
-        // Если была такая строка - удалить её
-        localStorage.removeItem('authToken'); 
-        
-        window.location.href = '/';
-      });
-    }
-  });
-</script>
+
