@@ -9,6 +9,8 @@ const cookieParser = require('cookie-parser');
 const avatarRoutes = require('./server/routes/avatar');
 const userRoutes = require('./server/routes/user');
 const { createGenresTable, seedGenres } = require('./server/models/genre');
+//const csurf = require('csurf'); // CSRF защита TODO
+const helmet = require('helmet'); // Защита от XSS и других атак
 
 // Переопределение JSON.stringify для обработки BigInt
 BigInt.prototype.toJSON = function() {
@@ -59,11 +61,20 @@ const hbs = exphbs.create({
   }
 });
 
+// от limiter
+// Ограничение количества запросов для защиты от DDoS атак
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 1000 // максимум 100 запросов с одного IP
+});
+
 
 // Регистрируем Handlebars в Express
 app.engine('hbs', hbs.engine);
 app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
+
 
 
 // Настраиваем middleware
@@ -81,7 +92,19 @@ app.use('/uploads', express.static(path.join(__dirname, 'client/uploads')));
 app.use('/images', express.static(path.join(__dirname, 'client/images')));
 
 
+// app.use(csurf({ cookie: true })); // CSRF защита, TODO
+// app.use(helmet());
+app.use(limiter);
 
+// Настройка Helmet в зависимости от окружения
+if (process.env.NODE_ENV === 'development') {
+  app.use(helmet({
+    contentSecurityPolicy: false,  // Отключаем CSP 
+    strictTransportSecurity: false // Отключаем HSTS для разработки
+  }));
+} else {
+  app.use(helmet()); // В продакшене используем полную защиту
+}
 
 
 
