@@ -676,3 +676,55 @@ footer {
   padding: 8px 18px;
   font-size: 1em;
 } */
+
+
+.auth-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.auth-nav-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+}
+
+.auth-nav-books-btn {
+  margin-right: 30px;
+}
+
+.books-filter-form input[type="text"],
+.books-filter-form select {
+  font-size: 1.1rem;
+margin-bottom: 28px; 
+}
+
+.books-filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 28px;
+}
+
+.books-filter-form input[type="text"],
+.books-filter-form select {
+  font-size: 1.1rem;
+  margin-bottom: 0; /* Исправить! */
+}
+
+.add-book-btn,
+.books-filter-form .button {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.search-input {
+  font-size: 1.1rem;
+  padding: 10px 30px;
+  border: 1px solid #48b0cb;
+  border-radius: 5px;
+}

@@ -3,21 +3,28 @@
     <h1><a href="/">Novelune</a></h1>
     <p>Платформа для публикации и чтения литературных произведений</p>
     
-    <div class="auth-nav">
-      {{#if user}}
-        <span>
-          {{#if user.display_name}}
-            {{user.display_name}}
-          {{else}}
-            {{user.username}}
-          {{/if}}
-        </span>
-        <a href="/dashboard" class="button header-cabinet-btn">Личный кабинет</a>
-        <button id="logoutBtn" class="button third">Выйти</button>
-      {{else}}
-        <a href="/login" class="button">Войти</a>
-        <a href="/register" class="button third">Регистрация</a>
-      {{/if}}
-    </div>
+<div class="auth-nav">
+  <div class="auth-nav-main">
+    {{#if user}}
+      <span>
+        {{#if user.display_name}}
+          {{user.display_name}}
+        {{else}}
+          {{user.username}}
+        {{/if}}
+      </span>
+      <a href="/dashboard" class="button header-cabinet-btn">Личный кабинет</a>
+      <button id="logoutBtn" class="button third">Выйти</button>
+    {{else}}
+      <a href="/login" class="button">Войти</a>
+      <a href="/register" class="button third">Регистрация</a>
+    {{/if}}
+  </div>
+  <a href="/books" class="button header-cabinet-btn auth-nav-books-btn">Все книги</a>
+</div>
+
+
+
+
   </div>
 </header>

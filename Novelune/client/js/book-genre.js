@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSubgenres();
   }
 
+  setupGenreSubgenre('genreSelect', 'subgenreSelect');
   setupGenreSubgenre('genre_id', 'subgenre_id'); // для создания книги
   setupGenreSubgenre('editGenre', 'editSubgenre'); // для модального окна редактирования
 });

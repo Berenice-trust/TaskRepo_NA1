@@ -65,11 +65,7 @@ async function createBook(bookData) {
   }
 }
 
-/**
- * Получение книги по ID
- * @param {number} id - ID книги
- * @returns {Promise<Object|null>} - Книга или null, если не найдена
- */
+
 async function getBookById(id) {
    const sql = `
     SELECT b.*, 
@@ -266,6 +262,47 @@ async function incrementBookViews(id) {
   }
 }
 
+async function getAllBooksFiltered({ genre_id, subgenre_id, author, q, sort }) {
+  let sql = `
+    SELECT b.*, 
+           u.username as author_name, 
+           u.display_name as author_display_name,
+           g.name as genre_name, 
+           sg.name as subgenre_name
+    FROM books b
+    JOIN users u ON b.author_id = u.id
+    LEFT JOIN genres g ON b.genre_id = g.id
+    LEFT JOIN genres sg ON b.subgenre_id = sg.id
+    WHERE b.status IN ('in_progress', 'completed')
+  `;
+  const params = [];
+
+  if (genre_id) {
+    sql += ' AND b.genre_id = ?';
+    params.push(genre_id);
+  }
+  if (subgenre_id) {
+    sql += ' AND b.subgenre_id = ?';
+    params.push(subgenre_id);
+  }
+  if (author) {
+    sql += ' AND u.username LIKE ?';
+    params.push(`%${author}%`);
+  }
+  if (q) {
+    sql += ' AND (b.title LIKE ? OR u.username LIKE ?)';
+    params.push(`%${q}%`, `%${q}%`);
+  }
+
+  if (sort === 'date_asc') {
+    sql += ' ORDER BY b.created_at ASC';
+  } else {
+    sql += ' ORDER BY b.created_at DESC';
+  }
+
+  return convertBigIntToNumber(await query(sql, params));
+}
+
 module.exports = {
   createBooksTable,
   createBook,
@@ -273,5 +310,6 @@ module.exports = {
   getAllBooks,
   updateBook,
   deleteBook,
-  incrementBookViews
+  incrementBookViews,
+  getAllBooksFiltered
 };

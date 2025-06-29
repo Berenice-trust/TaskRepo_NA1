@@ -1,0 +1,57 @@
+<div class="welcome">
+  <div class="welcome-flex">
+    <div>
+      <div class="book-cover-rect">
+        <img
+          src="{{#if book.cover_image}}/uploads/covers/{{book.cover_image}}{{else}}/images/default-cover.png{{/if}}"
+          alt="Обложка"
+          class="book-cover-img"
+          onerror="this.src='/images/default-cover.png'"
+        />
+      </div>
+    </div>
+    <div class="welcome-info">
+      <div class="form-group">
+        <label>Название:</label>
+        <div class="profile-value">{{book.title}}</div>
+      </div>
+      <div class="form-group">
+        <label>Автор:</label>
+        <div class="profile-value">
+          {{#if book.author_display_name}}{{book.author_display_name}}{{else}}{{book.author_name}}{{/if}}
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Жанр:</label>
+        <div class="profile-value">{{book.genre_name}}{{#if book.subgenre_name}} / {{book.subgenre_name}}{{/if}}</div>
+      </div>
+      <div class="form-group">
+        <label>Аннотация:</label>
+        <div class="profile-value">{{book.description}}</div>
+      </div>
+      <div class="form-group">
+        <label>Статус:</label>
+        <div class="profile-value">
+          {{#if (eq book.status "in_progress")}}В процессе{{/if}}
+          {{#if (eq book.status "completed")}}Завершена{{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="chapters-block">
+  <h3>Главы</h3>
+  <ul class="chapters-list">
+    {{#each chapters}}
+      <li>
+        <span>Глава {{chapter_number}}: {{title}}</span>
+        <div class="chapter-actions">
+          <a href="/books/{{../book.id}}/chapters/{{id}}/read" class="button">Читать</a>
+        </div>
+      </li>
+    {{else}}
+      <li>Глав пока нет</li>
+    {{/each}}
+  </ul>
+</div>

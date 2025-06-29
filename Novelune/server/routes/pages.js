@@ -448,4 +448,65 @@ router.post('/books/:id/cover', auth, upload.single('cover_image'), async (req, 
   }
 });
 
+router.get('/books', optionalAuth, async (req, res) => {
+  const { genre_id, subgenre_id, author, q, sort = 'date_desc' } = req.query;
+  const genres = await Genre.getAllGenres();
+  const books = await Book.getAllBooksFiltered({ genre_id, subgenre_id, author, q, sort });
+
+   let user = null;
+  if (req.user) {
+    user = await User.findUserById(req.user.id);
+  }
+
+  res.render('pages/books-list', {
+    title: 'Все книги',
+    books,
+    genres,
+    filters: { genre_id, subgenre_id, author, q, sort },
+    user
+  });
+});
+
+router.get('/books/:id/view', optionalAuth, async (req, res) => {
+  const book = await Book.getBookById(req.params.id);
+  if (!book) {
+    return res.status(404).render('pages/404', { title: 'Книга не найдена' });
+  }
+  const chapters = await Chapter.getBookChapters(req.params.id);
+
+  let user = null;
+  if (req.user) {
+    user = await User.findUserById(req.user.id);
+  }
+
+  res.render('pages/book-detail-public', {
+    title: book.title,
+    book,
+    chapters,
+    user
+  });
+});
+
+
+router.get('/books/:bookId/chapters/:chapterId/read', optionalAuth, async (req, res) => {
+  const { bookId, chapterId } = req.params;
+  const book = await Book.getBookById(bookId);
+  const chapter = await Chapter.getChapterById(chapterId);
+  if (!book || !chapter) {
+    return res.status(404).render('pages/404', { title: 'Глава не найдена' });
+  }
+
+  let user = null;
+  if (req.user) {
+    user = await User.findUserById(req.user.id);
+  }
+
+  res.render('pages/chapter-read', {
+    title: `${book.title} — Глава ${chapter.chapter_number}`,
+    book,
+    chapter,
+    user
+  });
+});
+
 module.exports = router;

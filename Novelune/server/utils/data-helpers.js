@@ -1,8 +1,4 @@
-/**
- * Преобразует BigInt в Number во всех полях объекта или массива объектов
- * @param {Object|Array} data - Данные для преобразования
- * @returns {Object|Array} - Данные с преобразованными BigInt
- */
+
 function convertBigIntToNumber(data) {
   if (!data) return data;
   

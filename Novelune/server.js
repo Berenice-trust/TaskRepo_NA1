@@ -52,6 +52,9 @@ const hbs = exphbs.create({
     // Текущий год для футера
     currentYear: function() {
       return new Date().getFullYear();
+    },
+     json: function(context) {
+    return JSON.stringify(context);
     }
   }
 });
