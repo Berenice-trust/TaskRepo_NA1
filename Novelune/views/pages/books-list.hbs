@@ -1,0 +1,58 @@
+<h2>Все книги платформы</h2>
+
+<form id="booksFilterForm" class="books-filter-form" method="get">
+  <select name="genre_id" id="genreSelect">
+    <option value="">Жанр</option>
+    {{#each genres}}
+      {{#unless this.parent_id}}
+        <option value="{{id}}" {{#if (eq ../filters.genre_id id)}}selected{{/if}}>{{name}}</option>
+      {{/unless}}
+    {{/each}}
+  </select>
+<select name="subgenre_id" id="subgenreSelect">
+  <option value="">Поджанр</option>
+  {{#each genres}}
+    {{#if (and this.parent_id (eq this.parent_id ../filters.genre_id))}}
+      <option value="{{id}}" {{#if (eq ../filters.subgenre_id id)}}selected{{/if}}>{{name}}</option>
+    {{/if}}
+  {{/each}}
+</select>
+  <select name="sort">
+    <option value="date_desc" {{#if (eq filters.sort "date_desc")}}selected{{/if}}>Сначала новые</option>
+    <option value="date_asc" {{#if (eq filters.sort "date_asc")}}selected{{/if}}>Сначала старые</option>
+  </select>
+  <button type="submit" class="button add-book-btn">Фильтровать</button>
+  <a href="/books" class="button add-book-btn third" style="margin-left: 0;">Сбросить</a>
+</form>
+
+<!-- Поиск по названию/автору (только JS, без формы) -->
+<div class="books-search-form" style="margin-bottom: 18px;">
+    <label for="booksSearchInput" class="search-label">Поиск:</label>
+  <input type="text" id="booksSearchInput" placeholder="Название или автор" class="search-input">
+</div>
+
+<ul class="books-list">
+  {{#each books}}
+    <li class="book-item" data-book-id="{{id}}">
+      <div class="book-info">
+        <span class="book-title">{{title}}</span>
+        <span class="book-author">Автор: {{#if author_display_name}}{{author_display_name}}{{else}}{{author_name}}{{/if}}</span>
+        <span class="book-genre">Жанр: {{genre_name}}{{#if subgenre_name}} / {{subgenre_name}}{{/if}}</span>
+      </div>
+      <div class="book-actions">
+        <a href="/books/{{id}}/view" class="button edit-chapter-btn">Подробнее</a>
+      </div>
+    </li>
+  {{else}}
+    <li>Книг не найдено</li>
+  {{/each}}
+</ul>
+
+
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0"></script>
+<script src="/js/books-search.js"></script>
+<script>
+  window.genresData = {{{json genres}}};
+   window.booksData = {{{json books}}};
+</script>
+<script src="/js/book-genre.js"></script>

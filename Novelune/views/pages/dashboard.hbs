@@ -1,8 +1,132 @@
 <section class="welcome">
-  <h2>Личный кабинет</h2>
-  <p>Добро пожаловать, <span id="username">{{user.username}}</span>!</p>
-  
-  <div class="dashboard-actions">
-    <button id="logoutBtn" class="button secondary">Выйти</button>
-  </div>
+  <button id="deleteAccountBtn" class="delete-account-btn">Удалить аккаунт</button>
+  <div class="welcome-flex">
+    <div class="dashboard-avatar-block">
+      
+      <form id="avatarUploadForm" enctype="multipart/form-data" method="POST" action="/api/avatar/upload">
+        <div class="avatar-rect" style="position:relative;">
+          <img id="avatarPreview" src="{{user.avatar_url}}" alt="Аватар" class="avatar-img" onerror="this.src='/images/default-avatar.png'">
+          <span class="avatar-text">Кликните, чтобы загрузить аватар</span>
+          <input
+            type="file"
+            id="avatarInput"
+            name="image"
+            accept="image/*"
+            required
+            style="opacity:0;position:absolute;left:0;top:0;width:100%;height:100%;z-index:2;cursor:pointer;"
+          >
+        </div>
+      </form>
+
+
+
+
+    </div>
+    <div class="welcome-info">
+      <h2 class="welcome-title">Личный кабинет 
+        <span id="editProfileBtn" class="edit-icon" title="Редактировать">
+          <svg  viewBox="0 0 20 20" fill="none">
+            <path d="M14.7 2.29a1 1 0 0 1 1.42 0l1.59 1.59a1 1 0 0 1 0 1.42l-9.17 9.17-2.83.71.71-2.83 9.17-9.17z" fill="#2c3e50"/>
+            <path d="M3 17h14v2H3v-2z" fill="#007bff" opacity="0.2"/>
+          </svg>
+        </span>
+   
+
+
+
+
+<div class="profile-fields">
+<div class="profile-row">
+  <span class="profile-label">Логин:</span>
+  <span class="profile-value" data-field="username">{{user.username}}</span>
+</div>
+<div class="profile-row">
+  <span class="profile-label">Псевдоним:</span>
+  <span class="profile-value" data-field="display_name">
+    {{#if user.display_name}}
+      {{user.display_name}}
+    {{else}}
+      <span class="profile-note">Не указан</span>
+    {{/if}}
+  </span>
+</div>
+<div class="profile-row">
+  <span class="profile-label">Email:</span>
+  <span class="profile-value" data-field="email">{{user.email}}</span>
+</div>
+<div class="profile-row">
+  <span class="profile-label">О себе:</span>
+  <span class="profile-value" data-field="bio">{{user.bio}}</span>
+</div>
+</div>
+
+<div class="dashboard-actions">
+  <button id="createBookBtn" class="button add-book-btn">Создать книгу</button>
+</div>
+
+
+      {{!-- другие данные о пользователе --}}
+    {{!-- </div> --}}
+     {{!-- <div class="dashboard-actions">
+    <button id="EditBtn" class="button secondary">Изменить</button>
+    </div> --}}
+  {{!-- </div> --}}
 </section>
+
+
+<h2>Мои книги</h2>
+<ul class="books-list">
+  {{#each books}}
+    <li class="book-item">
+      <div class="book-info">
+        <span class="book-title">{{title}}</span>
+        <span class="book-status">
+          {{#if (eq status "draft")}}Черновик{{/if}}
+          {{#if (eq status "in_progress")}}В процессе{{/if}}
+          {{#if (eq status "completed")}}Завершена{{/if}}
+        </span>
+      </div>
+      <div class="book-actions">
+        <a href="/books/{{id}}" class="button edit-chapter-btn">Открыть</a>
+        <form action="/books/{{id}}/delete" method="POST" style="display:inline;">
+            <button
+            type="button"
+            class="button danger delete-book-btn"
+            data-book-id="{{id}}"
+          >
+            Удалить
+          </button>
+        </form>
+      </div>
+    </li>
+  {{else}}
+    <li>У вас пока нет книг</li>
+  {{/each}}
+</ul>
+
+
+{{!-- Модальное окно для удаления аккаунта: --}}
+{{> components/deleteAccountModal}}
+
+{{!-- Модальное окно для редактирования профиля: --}}
+{{> components/editProfileModal}}
+
+
+<div id="deleteBookModal" class="modal-overlay" style="display:none;">
+  <div class="modal">
+    <h3>Удалить книгу?</h3>
+    <p>Вы уверены, что хотите удалить эту книгу? Это действие необратимо!</p>
+    <form id="deleteBookForm" method="POST">
+      <div class="modal-actions">
+        <button type="button" id="cancelDeleteBook" class="button secondary">Отмена</button>
+        <button type="submit" class="button danger">Удалить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{{#section 'scripts'}}
+<script src="/js/avatar-upload.js"></script>
+<script src="/js/account.js"></script>
+<script src="/js/book-actions.js"></script>
+{{/section}}

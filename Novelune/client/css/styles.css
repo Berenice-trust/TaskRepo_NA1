@@ -57,13 +57,36 @@ main {
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   padding: 30px;
-  text-align: center;
+  /* text-align: center;  */
+  position: relative; 
+}
+
+.welcome-flex {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.welcome-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 h2 {
   color: #2c3e50;
   margin-bottom: 20px;
 }
+
+.welcome-title {
+  text-align: center;
+  color: #1e3953;
+  margin-bottom: 20px;
+  font-size: 1.6rem;
+}
+
+
 
 .db-test {
   margin: 30px 0;
@@ -110,11 +133,52 @@ h2 {
 }
 
 .button.secondary {
-  background-color: #95a5a6;
+  background-color: #5ec3df; 
 }
 
 .button.secondary:hover {
+  background-color: #48b0cb;
+}
+
+.button.third {
+  background-color:  #95a5a6; 
+  color: #fff;
+}
+
+.button.third:hover {
   background-color: #7f8c8d;
+  color: #fff;
+}
+
+.button.danger {
+  background-color: #e74c3c; 
+}
+
+.button.danger:hover {
+  background-color: #c0392b;
+}
+
+.auth-nav {
+  font-size: 1.1em;
+}
+
+.header-cabinet-btn,
+.add-book-btn {
+  background: #5ec3df;  
+  color: #111;   
+  transition: background 0.2s;
+  font-size: 1.1rem;
+  padding: 8px 20px;
+  border-radius: 5px;
+  line-height: 1.2;
+  margin-top: 10px;
+}
+
+.header-cabinet-btn:hover,
+.add-book-btn:hover {
+  background: #48b0cb; 
+  color: #fff;
+ background: #48b0cb;
 }
 
 footer {
@@ -219,4 +283,448 @@ footer {
   background-color: #e8f5e9;
   color: #2e7d32;
   border: 1px solid #c8e6c9;
+}
+
+/* Стили для панели управления */
+.dashboard-avatar-block {
+  /* position: absolute; */
+  /* top: 24px; */
+  /* left: 24px; */
+  /* z-index: 10; */
+  margin-bottom: 0;
+  display: flex;
+  justify-content: flex-start;
+}
+.avatar-rect {
+  width: 160px;
+  height: 200px;
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.avatar-rect:hover {
+  border-color: #007bff;
+}
+.avatar-img {
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 8px;
+  background: #f5f5f5;
+}
+.avatar-text {
+  color: #888;
+  font-size: 11px;
+  text-align: center;
+}
+
+.edit-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: opacity 0.2s;
+  opacity: 0.7;
+}
+.edit-icon:hover {
+  opacity: 1;
+}
+
+.edit-icon svg {
+  width: 36px;
+  height: 36px;
+  display: block;
+}
+
+.delete-account-btn {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  background-color: #95a5a6; 
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1em;
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+.delete-account-btn:hover {
+  background-color: #e74c3c; /* красная при наведении */
+  color: #fff;
+}
+
+/* Модальное окно удаления */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(44,62,80,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 32px 28px 24px 28px;
+  box-shadow: 0 8px 32px rgba(44,62,80,0.15);
+  min-width: 400px;
+  max-width: 98vw;
+  text-align: center;
+}
+.modal-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
+/* данные о пользователе */
+.profile-fields {
+  margin-bottom: 18px;
+}
+.profile-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.profile-label {
+  min-width: 90px;
+  font-weight: 500;
+  color: #555;
+  font-size: 1.2rem;
+}
+.profile-note {
+  color: #aaa;
+  font-style: italic;
+}
+
+.profile-value {
+  /* font-weight: bold; */
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+
+.form-group {
+  margin-bottom: 16px;
+  text-align: left;
+}
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1em;
+  background: #f8fafc;
+}
+.profile-note {
+  display: block;
+  font-size: 0.9em;
+  color: #888;
+  margin-top: 2px;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 32px 32px 24px 32px;
+  box-shadow: 0 8px 32px rgba(44,62,80,0.15);
+  min-width: 400px;
+  max-width: 95vw;
+  width: 420px;
+  position: relative;
+  text-align: left;
+}
+.modal h3 {
+  margin-top: 0;
+  margin-bottom: 24px;
+  font-size: 1.35em;
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 2em;
+  color: #888;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+.modal-close:hover {
+  color: #e74c3c;
+}
+
+.book-cover-rect {
+  width: 240px;         /* Примерно как лист А4 */
+  height: 340px;
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  /* cursor: pointer; */
+  transition: border-color 0.2s;
+  margin-bottom: 10px; /* ?0px */
+}
+.book-cover-rect:hover {
+  border-color: #007bff;
+}
+.book-cover-img {
+  width: 220px;
+  height: 320px;
+  border-radius: 8px;
+  object-fit: cover;
+  margin-bottom: 8px;
+  background: #f5f5f5;
+}
+.book-cover-text {
+  color: #888;
+  font-size: 1em;
+  text-align: center;
+}
+
+.createBookForm {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.book-detail-actions {
+  width: auto;
+  min-width: 120px;
+  padding: 10px 20px;
+  font-size: 1rem;
+}
+
+
+
+
+
+/* список глав на странице книги */
+.chapters-block {
+  background: #2c3e50; /* светлый фиолетовый, как welcome-flex */
+  border-radius: 10px;
+  padding: 18px 24px;
+  margin-top: 32px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(92,107,192,0.07);
+  color: #fff;
+}
+.chapters-block h3 {
+  margin-top: 0;
+}
+.chapters-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.chapters-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.chapters-list li:last-child {
+  border-bottom: none;
+}
+.edit-chapter-link {
+  color: #5C6BC0;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.95em;
+  margin-left: 12px;
+}
+
+.edit-chapter-btn {
+  background: #5ec3df;
+  color: #111;
+  margin-right: 8px;
+  padding: 6px 16px;
+  font-size: 1em;
+}
+.edit-chapter-btn:hover {
+  background: #48b0cb;
+  color: #fff;
+}
+.button.danger {
+  background: #e74c3c;
+  color: #fff;
+}
+.button.danger:hover {
+  background: #c0392b;
+}
+
+.chapter-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.books-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 32px 0;
+}
+.book-item {
+  background: #fff; /* Было: #f3f2fa */
+  border-radius: 10px;
+  margin-bottom: 16px;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 16px rgba(44,62,80,0.08); /* чуть сильнее тень */
+  border: 1px solid #e0e4ea; /* лёгкая рамка */
+}
+.book-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.book-title {
+  font-weight: 600;
+  font-size: 1.15em;
+  color: #2c3e50;
+}
+.book-status {
+  font-size: 0.98em;
+  color: #5C6BC0;
+}
+.book-actions {
+  display: flex;
+  gap: 10px;
+}
+
+
+
+
+/* обложка */
+
+.cover-upload-form {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  margin-bottom: 18px;
+}
+
+.cover-upload-form input[type="file"] {
+  flex: 1 1 auto;
+  max-width: 220px;
+}
+
+.cover-upload-form .button {
+  flex: 0 0 auto;
+  padding: 8px 18px;
+  font-size: 1em;
+  margin-left: 0; 
+}
+
+
+
+
+
+.cover-upload-form-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 8px;
+}
+
+.cover-upload-form-vertical input[type="file"] {
+  margin-bottom: 8px;
+  max-width: 100%;
+}
+
+.cover-upload-form-vertical .button {
+  width: 100%;
+}
+
+/* .cover-upload-form-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.cover-upload-form-horizontal input[type="file"] {
+  max-width: 220px;
+}
+
+.cover-upload-form-horizontal .button {
+  padding: 8px 18px;
+  font-size: 1em;
+} */
+
+
+.auth-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.auth-nav-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+}
+
+.auth-nav-books-btn {
+  margin-right: 30px;
+}
+
+.books-filter-form input[type="text"],
+.books-filter-form select {
+  font-size: 1.1rem;
+margin-bottom: 28px; 
+}
+
+.books-filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 28px;
+}
+
+.books-filter-form input[type="text"],
+.books-filter-form select {
+  font-size: 1.1rem;
+  margin-bottom: 0; /* Исправить! */
+}
+
+.add-book-btn,
+.books-filter-form .button {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.search-input {
+  font-size: 1.1rem;
+  padding: 10px 30px;
+  border: 1px solid #48b0cb;
+  border-radius: 5px;
 }

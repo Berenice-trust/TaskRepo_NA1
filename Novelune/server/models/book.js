@@ -1,11 +1,15 @@
 // Модуль для работы с книгами
 const { convertBigIntToNumber } = require('../utils/data-helpers');
 const { query } = require('../config/database');
+const Image = require('./image');
+const { deleteImage } = require('../services/image.service');
+const path = require('path');
+const Chapter = require('./chapter');
 
 //Создание таблицы книг, если она не существует
 async function createBooksTable() {
   const sql = `
-    CREATE TABLE IF NOT EXISTS books (
+     CREATE TABLE IF NOT EXISTS books (
       id INT AUTO_INCREMENT PRIMARY KEY,
       title VARCHAR(255) NOT NULL,
       description TEXT,
@@ -14,12 +18,16 @@ async function createBooksTable() {
       meta_keywords VARCHAR(200),
       cover_image VARCHAR(255),
       author_id INT NOT NULL,
-      status ENUM('draft', 'published', 'completed') DEFAULT 'draft',
+      genre_id INT,
+      subgenre_id INT,
+      status ENUM('draft', 'in_progress', 'completed') DEFAULT 'draft',
       views INT DEFAULT 0,
       likes INT DEFAULT 0,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+      FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE SET NULL,
+      FOREIGN KEY (subgenre_id) REFERENCES genres(id) ON DELETE SET NULL
     )
   `;
   return await query(sql);
@@ -27,11 +35,11 @@ async function createBooksTable() {
 
  //Создание новой книги
 async function createBook(bookData) {
-  const { title, description, meta_title, meta_description, meta_keywords, cover_image, author_id, status = 'draft' } = bookData;
-  
+ const { title, description, meta_title, meta_description, meta_keywords, cover_image, author_id, status = 'draft', genre_id, subgenre_id } = bookData;
+ 
   const sql = `
-    INSERT INTO books (title, description, meta_title, meta_description, meta_keywords, cover_image, author_id, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO books (title, description, meta_title, meta_description, meta_keywords, cover_image, author_id, status, genre_id, subgenre_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   try {
@@ -43,7 +51,9 @@ async function createBook(bookData) {
       meta_keywords, 
       cover_image, 
       author_id, 
-      status
+      status,
+      genre_id || null,
+      subgenre_id || null
     ]);
     
    return { 
@@ -55,19 +65,17 @@ async function createBook(bookData) {
   }
 }
 
-/**
- * Получение книги по ID
- * @param {number} id - ID книги
- * @returns {Promise<Object|null>} - Книга или null, если не найдена
- */
+
 async function getBookById(id) {
-  const sql = `
-    SELECT b.*, u.username as author_name 
+   const sql = `
+    SELECT b.*, 
+           g.name AS genre_name, 
+           sg.name AS subgenre_name
     FROM books b
-    JOIN users u ON b.author_id = u.id
+    LEFT JOIN genres g ON b.genre_id = g.id
+    LEFT JOIN genres sg ON b.subgenre_id = sg.id
     WHERE b.id = ?
   `;
-  
   const result = await query(sql, [id]);
  return result.length > 0 ? convertBigIntToNumber(result[0]) : null;
 
@@ -111,8 +119,18 @@ async function getAllBooks(options = {}) {
 
 // Обновление книги
 async function updateBook(id, bookData) {
-  const { title, description, meta_title, meta_description, meta_keywords, cover_image, status } = bookData;
-  
+  const {
+    title,
+    description,
+    meta_title,
+    meta_description,
+    meta_keywords,
+    cover_image,
+    status,
+    genre_id,     
+    subgenre_id    
+  } = bookData;
+
   // Строим динамический SQL-запрос на обновление только переданных полей
   let sql = 'UPDATE books SET ';
   const params = [];
@@ -152,6 +170,15 @@ async function updateBook(id, bookData) {
     updates.push('status = ?');
     params.push(status);
   }
+
+    if (genre_id !== undefined) {
+    updates.push('genre_id = ?');
+    params.push(genre_id || null);
+  }
+  if (subgenre_id !== undefined) {
+    updates.push('subgenre_id = ?');
+    params.push(subgenre_id || null);
+  }
   
   // Если нечего обновлять, возвращаем ошибку
   if (updates.length === 0) {
@@ -188,6 +215,29 @@ async function deleteBook(id, authorId) {
       throw new Error('Нет прав для удаления этой книги');
     }
   }
+
+   // Удаляем все главы этой книги (и их картинки)
+  const chapters = await Chapter.getBookChapters(id);
+  for (const chapter of chapters) {
+    await Chapter.deleteChapter(chapter.id);
+  }
+
+    // Удаляем связанные изображения
+  const images = await Image.getByBook(id);
+  for (const img of images) {
+    await deleteImage(path.join(__dirname, '../../client', img.file_path));
+    // удалить запись из images
+    await Image.deleteById(img.id);
+  }
+  
+  // Удаляем "потерянные" изображения пользователя
+  if (authorId) {
+    const orphanedImages = await Image.getOrphanedImages(authorId);
+    for (const img of orphanedImages) {
+      await deleteImage(path.join(__dirname, '../../client', img.file_path));
+      await Image.deleteById(img.id);
+    }
+  }
   
   const sql = `DELETE FROM books WHERE id = ?`;
   
@@ -212,6 +262,47 @@ async function incrementBookViews(id) {
   }
 }
 
+async function getAllBooksFiltered({ genre_id, subgenre_id, author, q, sort }) {
+  let sql = `
+    SELECT b.*, 
+           u.username as author_name, 
+           u.display_name as author_display_name,
+           g.name as genre_name, 
+           sg.name as subgenre_name
+    FROM books b
+    JOIN users u ON b.author_id = u.id
+    LEFT JOIN genres g ON b.genre_id = g.id
+    LEFT JOIN genres sg ON b.subgenre_id = sg.id
+    WHERE b.status IN ('in_progress', 'completed')
+  `;
+  const params = [];
+
+  if (genre_id) {
+    sql += ' AND b.genre_id = ?';
+    params.push(genre_id);
+  }
+  if (subgenre_id) {
+    sql += ' AND b.subgenre_id = ?';
+    params.push(subgenre_id);
+  }
+  if (author) {
+    sql += ' AND u.username LIKE ?';
+    params.push(`%${author}%`);
+  }
+  if (q) {
+    sql += ' AND (b.title LIKE ? OR u.username LIKE ?)';
+    params.push(`%${q}%`, `%${q}%`);
+  }
+
+  if (sort === 'date_asc') {
+    sql += ' ORDER BY b.created_at ASC';
+  } else {
+    sql += ' ORDER BY b.created_at DESC';
+  }
+
+  return convertBigIntToNumber(await query(sql, params));
+}
+
 module.exports = {
   createBooksTable,
   createBook,
@@ -219,5 +310,6 @@ module.exports = {
   getAllBooks,
   updateBook,
   deleteBook,
-  incrementBookViews
+  incrementBookViews,
+  getAllBooksFiltered
 };

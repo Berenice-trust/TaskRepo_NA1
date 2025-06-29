@@ -6,6 +6,11 @@ const User = require('./server/models/user');
 const authRoutes = require('./server/routes/auth');
 const exphbs = require('express-handlebars');
 const cookieParser = require('cookie-parser');
+const avatarRoutes = require('./server/routes/avatar');
+const userRoutes = require('./server/routes/user');
+const { createGenresTable, seedGenres } = require('./server/models/genre');
+//const csurf = require('csurf'); // CSRF защита TODO
+const helmet = require('helmet'); // Защита от XSS и других атак
 
 // Переопределение JSON.stringify для обработки BigInt
 BigInt.prototype.toJSON = function() {
@@ -39,6 +44,7 @@ const hbs = exphbs.create({
     eq: function(a, b) {
       return a === b;
     },
+     and: function(a, b) { return a && b; },
     // Функция для создания секций в шаблонах
     section: function(name, options) {
       if (!this._sections) this._sections = {};
@@ -48,8 +54,19 @@ const hbs = exphbs.create({
     // Текущий год для футера
     currentYear: function() {
       return new Date().getFullYear();
+    },
+     json: function(context) {
+    return JSON.stringify(context);
     }
   }
+});
+
+// от limiter
+// Ограничение количества запросов для защиты от DDoS атак
+const rateLimit = require('express-rate-limit');
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 минут
+  max: 1000 // максимум 100 запросов с одного IP
 });
 
 
@@ -59,17 +76,35 @@ app.set('view engine', 'hbs');
 app.set('views', path.join(__dirname, 'views'));
 
 
+
 // Настраиваем middleware
 app.use(cookieParser()); 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'client')));
 app.use('/shared', express.static(path.join(__dirname, 'shared')));
+app.use('/js', express.static(path.join(__dirname, 'client/js')));
 
 app.use('/api/auth', authRoutes);
+app.use('/api/avatar', avatarRoutes);
+app.use('/api/user', userRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'client/uploads')));
+app.use('/images', express.static(path.join(__dirname, 'client/images')));
 
 
+// app.use(csurf({ cookie: true })); // CSRF защита, TODO
+// app.use(helmet());
+app.use(limiter);
 
+// Настройка Helmet в зависимости от окружения
+if (process.env.NODE_ENV === 'development') {
+  app.use(helmet({
+    contentSecurityPolicy: false,  // Отключаем CSP 
+    strictTransportSecurity: false // Отключаем HSTS для разработки
+  }));
+} else {
+  app.use(helmet()); // В продакшене используем полную защиту
+}
 
 
 
@@ -126,9 +161,16 @@ app.use((req, res) => {
     await Chapter.createChaptersTable();
     console.log('Таблица глав проверена/создана');
 
+    // инициализация таблицы изображений
     const Image = require('./server/models/image');
     await Image.createImagesTable();
     console.log('Таблица изображений проверена/создана');
+
+    // инициализация таблицы жанров
+    await createGenresTable();
+    // await seedGenres();
+    console.log('Таблица жанров проверена/создана и заполнена');
+   
   } catch (error) {
     console.error('Ошибка при инициализации БД:', error);
   }

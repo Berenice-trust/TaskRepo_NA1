@@ -16,12 +16,17 @@
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "crypto": "^1.0.1",
+    "csurf": "^1.11.0",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "express-handlebars": "^8.0.1",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mariadb": "^3.4.2",
-    "nodemailer": "^7.0.3"
+    "multer": "^2.0.1",
+    "nodemailer": "^7.0.3",
+    "sharp": "^0.34.2"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

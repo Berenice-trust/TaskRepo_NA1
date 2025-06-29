@@ -1,0 +1,87 @@
+<h2>Редактировать главу</h2>
+<form method="POST" action="/books/{{bookId}}/chapters/{{chapter.id}}/edit">
+  <input type="hidden" id="chapterIdField" value="{{chapter.id}}">
+  <div class="form-group">
+    <label for="chapterTitle">Название главы</label>
+    <input type="text" id="chapterTitle" name="title" value="{{chapter.title}}" required>
+  </div>
+  <div class="form-group">
+    <label for="chapterNumber">Номер главы</label>
+    <input type="number" id="chapterNumber" name="chapter_number" min="1" value="{{chapter.chapter_number}}" required>
+  </div>
+  <div class="form-group">
+    <label for="chapterContent">Текст главы</label>
+    <textarea id="chapterContent" name="content" rows="10">{{chapter.content}}</textarea>
+  </div>
+  <button type="submit" class="button add-book-btn">Сохранить изменения</button>
+</form>
+{{!-- <div style="margin-top: 16px; text-align: center;">
+  <a href="/books/{{bookId}}" class="button">Вернуться к книге</a>
+</div> --}}
+
+<!-- WYSIWYG-редактор   -->
+<script src="https://cdn.tiny.cloud/1/vmj45dvfqjo1v2bff4hzp0prght7giiwd77rx1jzyklt31te/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+{{!-- Иницмализация редактора TinyMCE --}}
+<script>
+ tinymce.init({
+  image_dimensions: false,
+  image_advtab: true,
+  image_caption: true, 
+  selector: '#chapterContent',
+  plugins: 'image link lists code', // убрали imagetools
+  toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright | bullist numlist | image link | code',
+  images_upload_url: '/api/images/upload',
+  automatic_uploads: true,
+  images_upload_credentials: true,
+  height: 400,
+  
+  // Настройки URL необходимо выставить правильно
+  convert_urls: true,      // Оставляем URL как есть
+  relative_urls: false,     // Не преобразовывать в относительные
+  remove_script_host: true, // Убирать домен
+  document_base_url: '/',   // Базовый URL для документов
+  
+  // В обработчике загрузки удаляем форматирование
+  images_upload_handler: function (blobInfo) {
+    return new Promise(function (resolve, reject) {
+      const xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+      xhr.open('POST', '/api/images/upload');
+
+      xhr.onload = function () {
+        if (xhr.status !== 200) {
+          reject('HTTP Error: ' + xhr.status);
+          return;
+        }
+        
+        try {
+          const json = JSON.parse(xhr.responseText);
+          if (!json || typeof json.location != 'string') {
+            reject('Invalid JSON: ' + xhr.responseText);
+            return;
+          }
+          
+          // Добавляем случайный параметр для обхода кеширования
+          const nocache = '?t=' + new Date().getTime();
+
+
+        const this_path = window.location.origin; // Получаем домен
+          resolve(this_path + json.location + nocache);
+        } catch(e) {
+          reject('Invalid JSON: ' + xhr.responseText);
+        }
+      };
+
+      // В режиме редактирования добавляем chapter_id
+      const formData = new FormData();
+      formData.append('file', blobInfo.blob(), blobInfo.filename());
+      
+      // Только для chapter-edit.hbs - добавляем chapter_id
+      const chapterId = document.getElementById('chapterIdField')?.value;
+      if (chapterId) formData.append('chapter_id', chapterId);
+
+      xhr.send(formData);
+    });
+  }
+});
+</script>
