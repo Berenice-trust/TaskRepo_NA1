@@ -13,7 +13,7 @@ async function createGenresTable() {
 }
 
 
-
+// заполнение таблицы
 async function seedGenres() {
   const genres = [
     { name: 'Фантастика', parent_id: null },

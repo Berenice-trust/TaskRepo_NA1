@@ -118,5 +118,4 @@ function getPool() {
   return pool;
 }
 
-// Изменить экспорт на:
 module.exports = { query, closePool, createPool, getPool };

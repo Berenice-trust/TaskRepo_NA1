@@ -1,3 +1,6 @@
+// Позволяет определить пользователя, если он авторизован, 
+// но не требует авторизации обязательно
+
 const jwt = require('jsonwebtoken');
 
 module.exports = function(req, res, next) {

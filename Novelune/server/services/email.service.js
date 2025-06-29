@@ -11,13 +11,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-/**
- * Отправить email для верификации пользователя
- * @param {string} to - Email получателя
- * @param {string} username - Имя пользователя
- * @param {string} token - Токен верификации
- * @returns {Promise} - Результат отправки
- */
+
 async function sendVerificationEmail(to, username, token) {
 
      // Проверка тестового режима

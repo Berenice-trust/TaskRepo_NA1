@@ -1,3 +1,5 @@
+# Бэкап базы данных и загруженных файлов
+
 #!/bin/bash
 TIMESTAMP=$(date +"%F-%H-%M")
 BACKUP_DIR="/home/root/TaskRepo_NA1/Novelune/backups"

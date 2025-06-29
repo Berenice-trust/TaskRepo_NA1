@@ -300,7 +300,7 @@ router.post('/books/:bookId/chapters/:chapterId/edit', auth, async (req, res) =>
 
     res.redirect(`/books/${bookId}`);
   } catch (err) {
-    // ...
+    // TODO
   }
 });
 
@@ -369,14 +369,14 @@ router.post('/books/:id/edit', auth, upload.single('cover_image'), async (req, r
 
     // Если загружена новая обложка
     if (req.file) {
-      // 1. Удаляем старую обложку (и файл, и запись в images)
+      // Удаляем старую обложку (и файл, и запись в images)
       const oldImages = await Image.getByBook(req.params.id);
       for (const img of oldImages) {
         await deleteImage(path.join(__dirname, '../../client', img.file_path));
         await Image.deleteById(img.id); // если хочешь удалять запись из images
       }
 
-      // 2. Сохраняем новую обложку
+      //  Сохраняем новую обложку
       const buffer = fs.readFileSync(req.file.path);
       const ext = path.extname(req.file.originalname).toLowerCase();
       const filename = `cover_${Date.now()}${ext}`;
@@ -384,14 +384,14 @@ router.post('/books/:id/edit', auth, upload.single('cover_image'), async (req, r
       await saveImage({ buffer, destFolder, filename, resize: { width: 400, height: 600 }, quality: 80 });
       cover_image = filename;
 
-      // 3. Записываем новую обложку в images
+      // Записываем новую обложку в images
       await Image.create({
         file_path: `/uploads/covers/${cover_image}`,
         original_name: req.file.originalname,
         book_id: req.params.id
       });
 
-      // 4. Удаляем временный файл, если multer сохраняет его
+      // Удаляем временный файл, если multer сохраняет его
       fs.unlinkSync(req.file.path);
     }
 

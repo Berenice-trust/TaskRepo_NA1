@@ -593,8 +593,8 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 16px rgba(44,62,80,0.08); /* чуть сильнее тень */
-  border: 1px solid #e0e4ea; /* лёгкая рамка */
+  box-shadow: 0 4px 16px rgba(44,62,80,0.08); 
+  border: 1px solid #e0e4ea; 
 }
 .book-info {
   display: flex;
@@ -713,7 +713,7 @@ margin-bottom: 28px;
 .books-filter-form input[type="text"],
 .books-filter-form select {
   font-size: 1.1rem;
-  margin-bottom: 0; /* Исправить! */
+  margin-bottom: 0; 
 }
 
 .add-book-btn,

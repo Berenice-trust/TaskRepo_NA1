@@ -1,3 +1,5 @@
+// файл для автоматической подготовки и очистки тестовой базы данных при запуске Jest-тестов.
+
 const dotenv = require('dotenv');
 const path = require('path');
 const { query, closePool } = require('../server/config/database');
